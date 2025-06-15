@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>Practical Statistics</title>
+    <style>
+    .accordion {margin-bottom: 1em;}
+    .panel {display:none; padding: 1em; border: 1px solid #ccc;}
+    .active + .panel {display:block;}
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.accordion').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const panel = btn.nextElementSibling;
+                if (panel.style.display === 'block') {
+                    panel.style.display = 'none';
+                } else {
+                    panel.style.display = 'block';
+                }
+            });
+        });
+    });
+    </script>
+</head>
+<body>
+<h1>통계 학습 데모</h1>
+<img src="data:image/png;base64,{{ image }}" alt="통계 그래프">
+{% for book, sections in books.items() %}
+    <h2>{{ book }}</h2>
+    {% for sec in sections %}
+        <button class="accordion">{{ sec.title }}</button>
+        <div class="panel">{{ sec.content|safe }}</div>
+    {% endfor %}
+{% endfor %}
+</body>
+</html>
+
