@@ -28,3 +28,23 @@ def plot_statistics(data):
     buf.seek(0)
     return base64.b64encode(buf.read()).decode('utf8')
 
+
+def plot_iris_example(df=None):
+    """Iris 데이터셋을 활용한 기본 통계 그래프"""
+    if df is None:
+        df = data_processing.load_public_dataset()
+
+    fig, axs = plt.subplots(1, 2, figsize=(10, 4))
+    sns.histplot(df['sepal_length'], kde=True, ax=axs[0])
+    axs[0].set_title('꽃받침 길이 분포')
+
+    sns.scatterplot(x='sepal_length', y='petal_length', hue='species', data=df, ax=axs[1])
+    axs[1].set_title('꽃받침 길이와 꽃잎 길이')
+
+    buf = BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode('utf8')
+
