@@ -5,3 +5,5 @@ seaborn
 ipywidgets
 markdown
 
+numpy
+scikit-learn

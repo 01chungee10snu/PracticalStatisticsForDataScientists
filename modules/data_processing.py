@@ -24,6 +24,18 @@ def sample_public_dataset(size=50):
     return df.sample(n=size, random_state=42).reset_index(drop=True)
 
 
+def load_titanic_dataset():
+    """Seaborn의 타이타닉 데이터셋 로드"""
+    return sns.load_dataset('titanic')
+
+
+def sample_titanic_dataset(size=50):
+    """타이타닉 데이터셋에서 일부 행을 무작위로 샘플링"""
+    df = load_titanic_dataset()
+    size = min(size, len(df))
+    return df.sample(n=size, random_state=42).reset_index(drop=True)
+
+
 def prepare_scatter_datasets(df, x_col, y_col, color_map):
     """주어진 컬럼 쌍으로 차트용 데이터셋을 준비"""
     datasets = []
