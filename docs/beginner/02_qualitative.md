@@ -1,3 +1,7 @@
+### 핵심 포인트
+* 질적 연구는 현상을 서술하고 의미를 해석하는 접근입니다.
+* 다양한 데이터 출처를 활용해 풍부한 사례를 구성합니다.
+
     *   **세부 내용:**
         *   사례 연구는 자연스러운 맥락에서 다중 증거원을 사용하여 현대 현상을 경험적으로 조사하는 것을 의미한다고 설명합니다.
         *   프로그램, 사건, 인물, 과정, 기관, 사회 집단 등 광범위한 주제가 사례 연구로 다루어져 왔음을 보여줍니다.
@@ -28,14 +32,34 @@
 *   **제6장. 인터뷰를 통한 정보 수집 (Gathering Information from Interviews)**
     *   **내용 개요:** 인터뷰를 통해 풍부하고 개인화된 정보를 수집하는 방법을 설명합니다.
     *   **세부 내용:**
+        *   인터뷰 질문은 사전 검토를 통해 모호성을 줄이고 개방형으로 작성합니다.
+        *   녹음 장치 상태를 미리 점검하여 데이터 손실을 방지합니다.
+        *   인터뷰 종료 후 바로 전사(transcription)를 진행해 기억이 생생할 때 메모를 보완합니다.
 
+### 추가 학습 내용
+* 데이터 포화(data saturation) 시점을 결정하는 기준을 마련합니다.
+* 참여 관찰 시 발생할 수 있는 윤리적 갈등 상황을 논의합니다.
+* 필드 노트 작성법과 분석을 연계하는 방법을 체계화합니다.
+
+### 논문 수준 보충
+* 인터뷰 대본 설계 시 연구 질문과의 정렬 여부를 체크리스트로 만듭니다.
+* 질적 자료 코딩 과정에서 발생할 수 있는 신뢰도 이슈를 해결 전략과 함께 제시합니다.
+* 삼각측정(triangulation)을 활용해 연구 타당성을 확보하는 절차를 기술합니다.
+
+### 역사적 배경
+* 시카고학파 사회학자들이 1920~30년대 도시 연구에서 질적 연구 기법을 체계화한 것이 대표적입니다.
 ## 실습 코드 예시
 
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import json
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(10)
+records = df.to_dict(orient='records')
+print(json.dumps(records[:2], indent=2, ensure_ascii=False))
 ```
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

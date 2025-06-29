@@ -10,13 +10,34 @@
 2. 전문가 자문을 구해 해석의 타당성을 점검합니다.
 3. 최종 분석 결과를 정리해 재검토를 요청합니다.
 
+### 실무 노하우
+* 피드백을 받을 때 수정 내역을 기록해 변경 근거를 남깁니다.
+* 자료에 민감한 내용이 있다면 재검토 과정에서 익명성을 재차 강조합니다.
+
+### 추가 학습 내용
+* 삼각측정 트라이앵귤레이션 방법을 단계별로 문서화합니다.
+* 참여자 검토 후 나타난 의견 차이를 표로 정리합니다.
+* 데이터 보관 기간과 폐기 절차를 명시해 윤리 기준을 준수합니다.
+
+### 논문 수준 보충
+* 검증 절차에서 활용되는 신뢰도 계수(Cronbach's alpha) 계산 예시를 제공합니다.
+* 반대 사례 탐색을 통해 연구자의 편향을 줄이는 방법을 설명합니다.
+* 참여자 검토 과정의 메모와 피드백 기록을 체계화하는 템플릿을 제시합니다.
+
+### 역사적 배경
+* 교차 확인 절차는 1970년대 질적 연구자들이 신뢰성을 확보하고자 도입했습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import numpy as np
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(20)
+alpha = np.var(df['sepal_length']) / np.var(df.sum(axis=1))
+print('단순 신뢰도 지표:', round(alpha, 3))
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

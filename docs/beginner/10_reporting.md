@@ -10,13 +10,33 @@
 2. 내용 구조를 조정하고 표기법을 통일합니다.
 3. 최종본을 발표 형식과 논문 형식에 맞춰 편집합니다.
 
+### 실무 노하우
+* 주요 발견을 그래픽 요약본으로 만들어 발표 자료에 활용합니다.
+* 문장 표현은 가능한 한 간결하게 작성해 읽는 부담을 줄입니다.
+
+### 추가 학습 내용
+* 재현 가능한 분석을 위해 코드와 데이터를 별도 저장소에 관리합니다.
+* 보고서 리뷰 과정에서 사용되는 체크리스트를 만들어 품질을 높입니다.
+* 도표에 사용된 색상과 폰트 등 시각적 요소를 일관되게 유지합니다.
+
+### 논문 수준 보충
+* 국제 학술지 제출 규격에 맞춘 서지 정보 관리 방법을 제공합니다.
+* 보고서 작성 시 사용되는 인용 스타일(APA, MLA 등)의 차이를 설명합니다.
+* 결과 표와 그림에 대해 캡션 작성 원칙과 인용 범례 사용 규칙을 명시합니다.
+
+### 역사적 배경
+* IMRaD 형식의 학술 보고서는 20세기 중반 자연과학 논문에서 표준화되기 시작했습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import matplotlib.pyplot as plt
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(40)
+plt.hist(df['petal_length']); plt.title('꽃잎 길이 히스토그램')
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

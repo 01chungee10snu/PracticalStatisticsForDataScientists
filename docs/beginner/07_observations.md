@@ -10,13 +10,26 @@
 2. 체크리스트를 작성해 관찰해야 할 요소를 구체화합니다.
 3. 관찰 후 바로 기록을 정리해 기억의 왜곡을 최소화합니다.
 
+### 추가 학습 내용
+* 필드노트 작성을 위한 표준 템플릿을 만들어 기록을 통일합니다.
+* 시간대별 관찰 계획을 수립해 반복 측정 가능성을 높입니다.
+* 비참여 관찰에서 발생할 수 있는 관찰자 효과를 최소화하는 방법을 실험합니다.
+
+### 논문 수준 보충
+* 관찰 자료의 상호 신뢰도(inter-rater reliability)를 계산하는 공식을 추가합니다.
+* 행위자 네트워크 이론을 기반으로 관찰 내용을 해석하는 절차를 제시합니다.
+* 장기 관찰에서 발생하는 드리프트 현상을 방지하기 위한 점검 일정표를 제공합니다.
+
+### 역사적 배경
+* 참여 관찰법의 기원은 말리노프스키가 1910년대 트로브리안드 제도에서 실시한 현지조사에 뿌리를 두고 있습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import statistics
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(20)
+mean_len = statistics.mean(df['sepal_length'])
+print('평균 길이:', mean_len)
 ```
 
 ### 필드노트 예시
@@ -29,4 +42,12 @@ img = plot_iris_example(data)
 
 짧은 메모라도 관찰 직후 작성해 두면 후속 분석 시 맥락을 이해하는 데 큰 도움이 됩니다. 영상 자료나 사진을 활용할 경우 촬영 대상에게 사전 동의를 구하고 보안 저장소를 이용해야 개인정보 유출 위험을 줄일 수 있습니다.
 
+### 실무 노하우
+* 관찰 일정이 길어질 경우 교대 관찰자를 배치해 집중력을 유지합니다.
+* 관찰 시 사용한 도구와 설정을 기록해 재현성을 확보합니다.
 
+
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
