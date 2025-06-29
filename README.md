@@ -1,5 +1,10 @@
 제공된 자료를 바탕으로 각 문헌의 학습 목차와 세부 내용을 다음과 같이 풍부하게 기술합니다:
 
+본 저장소는 [MIT 라이선스](LICENSE)를 따르며, 서적 PDF는 학습 목적의 인용용으로만 사용됩니다.
+
+## 학습 경로 안내
+전체 문서 흐름은 [docs/overview.md](docs/overview.md)에서 순서대로 확인할 수 있습니다.
+
 ---
 
 ### 1. "Dawson R. Hancock, Bob Algozzine - Doing Case Study Research: A Practical Guide for Beginning Researchers (2006)"
@@ -718,6 +723,15 @@
 
 
 ---
+## 환경 설정
+가상환경을 만들고 의존성을 설치하려면 다음 명령을 사용하세요.
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
 
 ## 웹 데모 실행
 
@@ -726,6 +740,12 @@
 ```bash
 python webapp.py
 ```
+
+## 노트북 예제 실행
+`notebooks/interactive_demo.ipynb` 파일을 열어 `create_interactive_demo()` 함수를 실행하면 슬라이더로 데이터 크기를 조절하며 그래프를 확인할 수 있습니다. 타이타닉 데이터셋 샘플링 예제도 함께 포함되어 있습니다.
+
+### 추가 데이터셋
+`modules.data_processing.sample_titanic_dataset()` 함수를 통해 타이타닉 생존 데이터도 실습에 활용할 수 있습니다.
 
 ### 역사적 배경
 - 본 학습 자료는 피셔의 실험 설계 연구와 스피어먼의 요인 분석 등 20세기 초 통계학 발전사를 토대로 구성되었습니다.

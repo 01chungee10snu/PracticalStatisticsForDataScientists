@@ -25,7 +25,7 @@
 * 피셔가 1936년 아이리스 데이터를 이용해 선형 판별 분석을 시연한 것이 현대 분류 기법의 초기 사례입니다.
 ## 실습 코드 예시
 ```python
-from modules.data_processing import sample_public_dataset
+from modules.data_processing import sample_public_dataset, sample_titanic_dataset
 from sklearn.ensemble import RandomForestClassifier
 
 df = sample_public_dataset(100)
@@ -33,6 +33,13 @@ X = df[['sepal_length', 'sepal_width', 'petal_length', 'petal_width']]
 y = df['species']
 clf = RandomForestClassifier(n_estimators=50).fit(X, y)
 print('훈련 정확도:', clf.score(X, y))
+
+# 타이타닉 생존 예측 간단 실습
+tdf = sample_titanic_dataset(200).dropna(subset=['age','fare'])
+X_t = tdf[['age', 'fare']]
+y_t = tdf['survived']
+clf = RandomForestClassifier(n_estimators=50).fit(X_t, y_t)
+print('타이타닉 훈련 정확도:', clf.score(X_t, y_t))
 ```
 
 
@@ -40,3 +47,12 @@ print('훈련 정확도:', clf.score(X, y))
 ### 추가 예시
 - 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
 더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+
+### 연습 문제
+1. 랜덤 포레스트가 단일 결정 트리보다 성능이 우수한 이유를 설명하세요.
+2. 데이터 불균형 문제가 분류 정확도에 미치는 영향을 예시와 함께 서술하세요.
+3. 실습 코드에 적용된 피처 엔지니어링 방식이 모델 성능 향상에 어떻게 기여했는지 분석하세요.
+
+[정답 보기](../answers.md)
+
+[목차로 돌아가기](../overview.md)
