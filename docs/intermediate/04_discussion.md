@@ -10,13 +10,35 @@
 2. 데이터 세트 규모에 따른 적용 한계를 사례별로 검토합니다.
 3. 추가 실험 설계를 통해 보완할 수 있는 부분을 정리합니다.
 
+### 대학원 수준 심화
+* 실험 설계의 조건부 모델을 활용해 요인 구조가 상황에 따라 어떻게 달라지는지 평가합니다.
+* 모델 적합도 비교를 위해 AIC/BIC 등 정보 기준을 사용해 가설을 검증합니다.
+* 다중 집단에서 요인의 불변성을 확인하는 단계적 접근 방법을 간략히 소개합니다.
+
+### 추가 학습 내용
+* 후속 연구에서 사용할 수 있는 데이터 수집 설계를 구상합니다.
+* 요인 결과를 시각화하는 다양한 플롯 유형을 비교합니다.
+* 연구 한계를 정리한 표를 만들어 논문의 투명성을 높입니다.
+
+### 논문 수준 보충
+* 논의에서 제기된 잠재적 편향을 정량화할 수 있는 방법을 검토합니다.
+* 요인 구조의 일반화 가능성을 평가하기 위해 교차 검증 접근을 설명합니다.
+* 논문 작성 시 인용되는 주요 이론적 배경과 그 발전 흐름을 요약합니다.
+
+### 역사적 배경
+* 요인 분석의 응용은 20세기 중반 교육 심리학 연구에서 폭넓게 확산되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import numpy as np
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(40)
+summary = np.percentile(df['petal_width'], [25, 50, 75])
+print('사분위수:', summary)
 ```
 
 
+
+### 추가 예시
+- 요인 분석 계산을 스프레드시트와 파이썬으로 비교해 보는 실습을 권장합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

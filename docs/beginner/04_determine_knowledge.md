@@ -10,13 +10,36 @@
 2. 관련 문헌을 다운로드하여 중요도에 따라 우선순위를 지정합니다.
 3. 메모와 요약 노트를 활용해 각 문헌의 주요 내용을 기록합니다.
 
+### 실무 노하우
+* 검색 결과를 스프레드시트로 관리하여 출처와 핵심 요약을 쉽게 비교합니다.
+* 주요 연구자에게 직접 연락해 최신 미발표 자료를 확인할 수 있습니다.
+
+### 추가 학습 내용
+* 주요 학술 데이터베이스 사용법과 검색 연산자를 정리합니다.
+* 문헌 관리 소프트웨어의 태그 기능을 활용해 주제를 분류합니다.
+* 연구 흐름을 파악하기 위해 인용 네트워크를 시각화합니다.
+
+### 논문 수준 보충
+* 체계적 문헌 고찰(PRISMA) 흐름도를 작성해 검색 및 제외 기준을 명확히 합니다.
+* 참고문헌 관리에서 DOI와 저자식 표기 체계를 통일하는 방법을 기술합니다.
+* 시각화 도구를 사용한 인용 네트워크 분석 절차를 단계별로 설명합니다.
+
+### 역사적 배경
+* 체계적인 문헌 검토 절차는 1960년대 이후 학술 연구 방법론 교재에서 강조되기 시작했습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import networkx as nx
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(15)
+G = nx.Graph()
+for idx, row in df.iterrows():
+    G.add_node(idx, label=row['species'])
+print('노드 수:', G.number_of_nodes())
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

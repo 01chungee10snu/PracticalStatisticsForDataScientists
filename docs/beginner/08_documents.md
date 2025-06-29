@@ -10,13 +10,34 @@
 2. 중요 문서는 스캔하여 전자 파일로 보관합니다.
 3. 문서에서 추출한 정보를 코드화하여 다른 데이터와 연결합니다.
 
+### 실무 노하우
+* 문서가 많은 경우 메타데이터를 추가하여 검색과 분류를 쉽게 합니다.
+* 원본 훼손을 막기 위해 복사본을 사용하고 원본은 안전하게 보관합니다.
+
+### 추가 학습 내용
+* 문서 색인(indexing) 전략을 세워 검색 속도를 향상합니다.
+* PDF 텍스트 마이닝을 활용해 반복되는 주제를 자동 추출합니다.
+* 보안이 필요한 문서는 암호화된 저장소에 분리 보관합니다.
+
+### 논문 수준 보충
+* 문서 분석 시 메타데이터 표준을 적용해 출처와 작성 시점을 기록합니다.
+* OCR 품질 향상을 위한 사전 처리 기법과 오류 교정을 단계별로 설명합니다.
+* 자료 공개 여부에 따른 법적 책임과 라이선스 유형을 비교 검토합니다.
+
+### 역사적 배경
+* 문헌과 공문서 분석은 19세기 후반 역사학자들이 자료 비판을 체계화한 뒤 학문적 방법론으로 자리 잡았습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import os
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(10)
+os.makedirs('docs_backup', exist_ok=True)
+df.to_csv('docs_backup/sample.csv', index=False)
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

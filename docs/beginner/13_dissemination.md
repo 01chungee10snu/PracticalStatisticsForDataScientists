@@ -10,13 +10,33 @@
 2. 연구 성과를 인포그래픽이나 동영상으로 요약하여 배포합니다.
 3. 실무자와 정책 입안자에게 직접 보고서를 전달해 피드백을 받습니다.
 
+### 실무 노하우
+* 온라인 배포 시 Creative Commons 라이선스를 검토해 활용 범위를 명확히 합니다.
+* 후속 연구 기회를 위해 발표 후 질의응답 내용을 문서화합니다.
+
+### 추가 학습 내용
+* SNS 활용 전략을 마련해 연구 소식을 실시간으로 알립니다.
+* 학술 커뮤니티와 대중 매체에 맞춘 두 가지 버전의 요약본을 작성합니다.
+* 발표 후 수집한 피드백을 기록해 향후 협력 기회를 모색합니다.
+
+### 논문 수준 보충
+* 오픈 액세스 저널과 전통적 구독형 저널의 장단점을 비교합니다.
+* 컨퍼런스 포스터 발표 시 QR 코드 등 디지털 자료 제공 방식의 효과를 평가합니다.
+* 연구 성과의 사회적 영향력을 측정하기 위한 알트메트릭스 활용을 설명합니다.
+
+### 역사적 배경
+* 연구 결과 보급 활동은 계몽주의 시대 전단지 배포에서 시작해 학회와 저널로 발전했습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import webbrowser
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(5)
+webbrowser.open('https://example.com')
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

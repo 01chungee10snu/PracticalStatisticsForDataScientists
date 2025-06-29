@@ -10,13 +10,34 @@
 2. 필요 시 보완하여 지원 기관의 요구 양식에 맞게 수정합니다.
 3. 제출 후 문의 사항에 대비해 관련 자료를 정리해 둡니다.
 
+### 실무 노하우
+* 제안서 작성 시 예상 질문 목록을 준비해 심사 위원 대응을 원활하게 합니다.
+* 연구 일정이 길어지면 중간 보고 계획을 포함해 신뢰도를 높입니다.
+
+### 추가 학습 내용
+* 위험 관리 계획을 포함해 예상 리스크를 체계적으로 정리합니다.
+* 이해관계자에게 제안 내용을 설명하는 프레젠테이션을 준비합니다.
+* 예산 배분 근거를 표로 작성해 심사 위원의 신뢰를 얻습니다.
+
+### 논문 수준 보충
+* 제안서 작성 시 사용되는 논문 형식의 요약(Abstract) 작성 요령을 설명합니다.
+* 예산 산출 근거에 통계적 추정을 적용한 사례를 제시합니다.
+* 제안서 검토 과정에서 흔히 발견되는 오류와 수정 방법을 목록화합니다.
+
+### 역사적 배경
+* 연구 제안서 형식은 1950년대 미국 사회과학 재단의 지원 프로그램에서 공식화되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import pandas as pd
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(10)
+budget = pd.Series({'인건비': 50, '장비': 20, '기타': 30})
+print(budget.sum())
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

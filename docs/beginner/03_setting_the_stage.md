@@ -10,13 +10,34 @@
 2. 협조가 이루어지면 실제 관찰 또는 인터뷰 일정을 조율합니다.
 3. 자료 수집 계획을 단계별로 정리한 뒤 연구 기록을 남깁니다.
 
+### 실무 노하우
+* 연구 참여자와 장기적으로 협력할 수 있도록 연락처를 체계적으로 관리합니다.
+* 현장 관찰 중 예상치 못한 변수에 대비해 예비 계획을 마련합니다.
+
+### 추가 학습 내용
+* 연구 현장 접근 전 이해관계자와 사전 미팅 일정을 조율합니다.
+* 예상 질문 목록을 준비해 참여자를 설득하는 방법을 연습합니다.
+* 초기 자료 수집 계획을 간트 차트로 작성해 일정 관리를 시각화합니다.
+
+### 논문 수준 보충
+* 현장 접근 허가 서류와 윤리 승인 절차를 표준 포맷으로 정리합니다.
+* 실제 현장에서 발생할 수 있는 비상 상황 대응 계획을 세부 항목으로 명시합니다.
+* 연구 초기 단계의 리스크 평가 방법을 체크리스트 형식으로 제공합니다.
+
+### 역사적 배경
+* 현장 접근의 윤리 논의는 인류학자 브로니스와프 말리노프스키의 1910년대 현지조사 경험에서 시작되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import matplotlib.pyplot as plt
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(30)
+plt.plot(df.index, df['sepal_length']); plt.title('길이 추세')
+plt.show()
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

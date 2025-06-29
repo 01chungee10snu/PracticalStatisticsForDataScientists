@@ -1,4 +1,7 @@
 book_structure = {
+    '통합 개요': [
+        {'title': '전체 요약', 'file': 'overview.md'}
+    ],
     '통계학습': [
         {'title': '서문', 'file': 'advanced/01_preface.md'},
         {'title': '탐색적 데이터 분석', 'file': 'advanced/02_eda.md'},

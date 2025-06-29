@@ -10,13 +10,34 @@
 2. 질문 흐름에 따라 인터뷰를 진행하고 주요 발언을 기록합니다.
 3. 인터뷰 직후 메모를 작성해 인상 깊은 내용을 남깁니다.
 
+### 실무 노하우
+* 인터뷰 전 사전 안내문을 보내 질문 의도를 명확히 합니다.
+* 녹음 자료의 보안을 위해 암호화 저장소를 사용합니다.
+
+### 추가 학습 내용
+* 인터뷰 전 파일럿 테스트를 진행해 질문 흐름을 점검합니다.
+* 인터뷰 도중 생기는 예기치 않은 응답을 처리하는 기법을 연습합니다.
+* 추가 질문을 위한 프로빙(probing) 전략을 문서화합니다.
+
+### 논문 수준 보충
+* 인터뷰 스크립트 버전 관리를 통해 질문 수정 이력을 남기는 방법을 소개합니다.
+* 녹취록 전사 정확도를 높이기 위한 자동화 도구 사용 시 한계와 검증 절차를 설명합니다.
+* 인터뷰 데이터 공개 시 익명화 처리 기준을 국제 가이드라인과 비교해 기술합니다.
+
+### 역사적 배경
+* 구조화된 인터뷰 방식은 1950년대 사회조사 연구에서 정형화되며 널리 확산되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import csv
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(5)
+df[['species']].to_csv('interview_ids.csv', index=False)
+print('저장된 행 수:', len(df))
 ```
 
 
+
+### 추가 예시
+- 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

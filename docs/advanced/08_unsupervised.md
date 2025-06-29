@@ -8,13 +8,34 @@
 - **차원 축소 시각화**: t-SNE와 UMAP을 사용해 고차원 데이터를 2D 공간에서 시각화합니다.
 - **군집 평가**: 실루엣 점수 등 지표로 군집 품질을 정량화하는 방식을 설명합니다.
 
+### 핵심 포인트
+* 비지도 학습은 라벨 없는 데이터에서 구조를 발견합니다.
+* 차원 축소와 군집화 기법으로 패턴을 요약합니다.
+
+### 추가 학습 내용
+* 군집화 결과를 평가하기 위해 실루엣 분석을 시각화합니다.
+* 밀도 기반 방법에서 파라미터 민감도를 조정하며 안정성을 확인합니다.
+* 차원 축소 후 재구성 오류(reconstruction error)를 계산해 정보 손실을 측정합니다.
+
+### 논문 수준 보충
+* 군집 수 결정 시 BIC와 갭 통계량을 함께 보고하여 신뢰성을 높입니다.
+* 고차원 자료의 군집 평가를 위해 내부 지표와 외부 지표를 구분해 설명합니다.
+* 차원 축소 기술 적용 시 학습/검증 데이터 분할을 준수하는 방법을 명시합니다.
+
+### 역사적 배경
+* 군집 분석의 뿌리는 1930년대 생물학에서 종 분류 문제를 해결하기 위한 연구에서 찾을 수 있습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+from sklearn.cluster import KMeans
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(60)
+kmeans = KMeans(n_clusters=3, random_state=1).fit(df[['sepal_length', 'petal_length']])
+print('군집 레이블 일부:', kmeans.labels_[:5])
 ```
 
 
+
+### 추가 예시
+- 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

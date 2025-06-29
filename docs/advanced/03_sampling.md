@@ -6,13 +6,34 @@
 - **샘플 크기와 정확도**: 샘플 수가 늘어날수록 추정의 분산이 줄어드는 원리를 소개합니다.
 - **샘플링 편향 방지**: 실무에서 발생하기 쉬운 편향을 줄이기 위한 설계 전략을 설명합니다.
 
+### 핵심 포인트
+* 적절한 표본 추출은 통계적 추론의 신뢰도를 높입니다.
+* 샘플 크기와 편향 관리가 대표성 확보의 핵심입니다.
+
+### 추가 학습 내용
+* 부트스트랩 방법을 사용해 표본 분포 추정을 실습합니다.
+* 적절한 표집 틀(frame)을 마련하기 위한 사전 조사를 수행합니다.
+* 가중치 샘플링(weighted sampling) 사례를 비교 분석합니다.
+
+### 논문 수준 보충
+* 샘플링 편향을 정량화하기 위한 이론적 지표를 서술합니다.
+* 응답률 감소에 따른 가중치 조정 방법을 공식 식으로 제시합니다.
+* 대규모 표본 설계를 위한 층화 계수(stratum coefficient) 계산 절차를 설명합니다.
+
+### 역사적 배경
+* 체계적인 표본 추출 기법은 피셔와 요트가 1930년대 농업 실험을 통해 정교화하면서 현대 통계 연구의 기반이 되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import numpy as np
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(50)
+boot_means = [np.mean(df.sample(frac=1, replace=True)['sepal_length']) for _ in range(200)]
+print('부트스트랩 평균 분포:', boot_means[:5])
 ```
 
 
+
+### 추가 예시
+- 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

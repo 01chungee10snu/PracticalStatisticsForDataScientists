@@ -6,13 +6,40 @@
 - **다중 비교 문제**: 여러 가설을 동시에 검정할 때 생기는 오류 증가를 보정하는 방법을 다룹니다.
 - **A/B 테스트 사례**: 실제 비즈니스 현장에서 활용되는 실험 예시를 제시합니다.
 
+### 핵심 포인트
+* 실험 설계는 무작위화와 대조군 설정으로 편향을 최소화합니다.
+* 유의성 검정과 효과 크기 해석이 실험 결과 판단 기준입니다.
+
+### 대학원 수준 심화
+* 효과 크기와 검정력을 동시에 고려한 사전(Power) 분석 절차를 상세히 서술합니다.
+* 반복 측정 설계나 교차 실험에서 발생할 수 있는 순서 효과를 모델링하는 방법을 소개합니다.
+* 다중 비교 문제에 대한 False Discovery Rate(FDR) 교정과 같은 고급 보정 기법을 설명합니다.
+
+### 추가 학습 내용
+* 요인 설계 실험에서 교란 변수를 통제하기 위한 블록 구성을 연습합니다.
+* 시뮬레이션 데이터를 활용해 검정력(power) 변화를 비교합니다.
+* 분석 결과를 그래프로 표현하여 실험 효과를 직관적으로 파악합니다.
+
+### 논문 수준 보충
+* 실험 반복을 고려한 혼합효과 모델로 결과를 일반화하는 방법을 제안합니다.
+* 검정력 분석 시 필요한 최소 표본 크기를 계산하는 공식과 예시를 제공합니다.
+* 프리레지스터(pre-registration) 절차를 통해 연구 투명성을 확보하는 방안을 논의합니다.
+
+### 역사적 배경
+* 무작위화와 유의성 검정의 개념은 1920년대 피셔가 수행한 농업 실험에서 처음 대중화되었습니다.
 ## 실습 코드 예시
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+import numpy as np
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df_ctrl = sample_public_dataset(30)
+df_treat = sample_public_dataset(30)
+effect = np.mean(df_treat['sepal_length']) - np.mean(df_ctrl['sepal_length'])
+print('처치 효과 추정치:', effect)
 ```
 
 
+
+### 추가 예시
+- 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.

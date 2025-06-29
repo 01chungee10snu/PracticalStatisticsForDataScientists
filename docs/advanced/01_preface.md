@@ -4,6 +4,10 @@
 - 실습을 위한 환경 구축 방법과 필요한 소프트웨어를 간략히 안내합니다.
 - 각 장에서 기대하는 학습 목표와 난이도를 미리 제시합니다.
 
+### 핵심 포인트
+* 본 교재는 실무 중심의 통계 개념을 빠르게 학습하도록 구성되어 있습니다.
+* 각 장의 실습 예제는 R과 Python을 병기하여 재현 가능한 분석을 제시합니다.
+
 ### 3. "Peter Bruce, Andrew Bruce, Peter Gedeck - Practical Statistics for Data Scientists: 50+ Essential Concepts Using R and Python (2020)"
 
 이 책은 R 및/또는 Python 프로그래밍 언어에 익숙하고 통계에 대한 사전 지식이 있는 데이터 과학자들을 대상으로 합니다. 데이터 과학 관점에서 통계의 핵심 개념들을 소화하기 쉽고 쉽게 참조할 수 있는 형태로 제시하며, 어떤 개념이 중요하고 유용한지 설명합니다. 이 책은 통계, 컴퓨터 과학, 정보 기술의 융합을 강조하며 실용적인 적용에 중점을 둡니다.
@@ -34,13 +38,30 @@
     *   **세부 내용:**
         *   **데이터 프레임 (Data frame):** 스프레드시트와 같은 직사각형 데이터는 통계 및 기계 학습 모델의 기본 데이터 구조입니다.
 
+### 추가 학습 내용
+* 통계 용어와 수식 사용 예시를 찾아 개념을 정교하게 이해합니다.
+* 데이터 전처리 과정에서 발생하는 오류 사례를 기록해 교훈을 얻습니다.
+* 실습 코드와 함께 최신 라이브러리 사용법을 실험합니다.
+
+### 논문 수준 보충
+* 주요 통계 모델의 기본 가정과 한계를 논문 형식으로 정리합니다.
+* 재현 가능한 실험 환경을 위해 데이터와 코드 공개 방안을 명시합니다.
+* 최신 연구 동향을 인용하며 후속 연구 아이디어를 제시합니다.
+
+### 역사적 배경
+* 통계학은 17~18세기 인구 조사와 도박 확률 계산에서 발전해 피셔의 실험 설계 연구를 거치며 현대적 형태로 정립되었습니다.
 ## 실습 코드 예시
 
 ```python
 from modules.data_processing import sample_public_dataset
-from modules.visualization import plot_iris_example
+from sklearn.preprocessing import StandardScaler
 
-data = sample_public_dataset(50)
-img = plot_iris_example(data)
+df = sample_public_dataset(50)
+X = StandardScaler().fit_transform(df[['sepal_length', 'sepal_width']])
+print('표준화 후 첫 행:', X[0])
 ```
 
+
+### 추가 예시
+- 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
+더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
