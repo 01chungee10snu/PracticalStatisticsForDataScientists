@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 import markdown
 import os
+import re
 from docs.docs_index import book_structure
 from modules import data_processing
 
@@ -12,6 +13,12 @@ COLORS = {
 }
 
 app = Flask(__name__)
+THEME = os.getenv('BOOTSWATCH_THEME', 'cosmo')
+
+
+def slugify(text):
+    """단순 슬러그 생성"""
+    return re.sub(r'[^a-zA-Z0-9]+', '-', text).strip('-').lower()
 
 
 def load_markdown(path):
@@ -48,6 +55,7 @@ def index():
             datasets = data_processing.prepare_scatter_datasets(
                 public_df, x_col, y_col, COLORS
             )
+            image_query = slugify(sec['title'])
             books[key].append({
                 'title': sec['title'],
                 'content': html,
@@ -55,9 +63,10 @@ def index():
                 'chart': datasets,
                 'x': x_col,
                 'y': y_col,
+                'image_url': f"https://source.unsplash.com/featured/?{image_query}"
             })
 
-    return render_template('index.html', books=books)
+    return render_template('index.html', books=books, theme=THEME)
 
 
 if __name__ == '__main__':
