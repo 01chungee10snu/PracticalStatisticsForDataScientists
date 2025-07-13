@@ -8,37 +8,37 @@ let currentSection = 'home';
 let currentDemoTab = 'stats';
 let currentContentLevel = 'foundation';
 
-// DOM 로드 완료 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    initializeApp();
+// DOM 로드 완료 시 시스템 초기화 시작
+document.addEventListener('DOMContentLoaded', async () => {
+    // 비동기적으로 학습 시스템 초기화 (콘텐츠 로드 포함)
+    await window.learningSystem.initialize();
+    
+    // 시스템 초기화가 완료된 후 UI 초기화
+    initializeUI();
 });
 
 /**
- * 애플리케이션 초기화
+ * UI 관련 초기화
  */
-function initializeApp() {
-    // 네비게이션 이벤트 리스너 설정
+function initializeUI() {
     setupNavigation();
-    
-    // 기본 데모 차트 생성
     setupDemoCharts();
     
-    // 사용자 데이터 복원
     if (learningSystem.currentUser) {
         showUserInfo(learningSystem.currentUser);
+    } else {
+        // 사용자가 없으면 학습 섹션의 로그인 폼을 보여줌
+        showSection('learn');
     }
     
-    // 시뮬레이션 초기화
     updateSimulation();
-    
-    console.log('✅ 적응형 학습 시스템이 초기화되었습니다!');
+    console.log('✅ UI가 초기화되었습니다.');
 }
 
 /**
  * 네비게이션 설정
  */
 function setupNavigation() {
-    // 네비게이션 링크 클릭 이벤트
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -52,24 +52,20 @@ function setupNavigation() {
  * 섹션 표시
  */
 function showSection(sectionName) {
-    // 모든 섹션 숨기기
     document.querySelectorAll('.section').forEach(section => {
         section.style.display = 'none';
     });
     
-    // 선택된 섹션 표시
     const targetSection = document.getElementById(sectionName);
     if (targetSection) {
         targetSection.style.display = 'block';
         currentSection = sectionName;
         
-        // 네비게이션 활성화 상태 업데이트
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
         });
         document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
         
-        // 섹션별 초기화 로직
         if (sectionName === 'learn') {
             initializeLearningSection();
         } else if (sectionName === 'demo') {
@@ -90,17 +86,11 @@ function registerLearner() {
         return;
     }
     
-    const result = learningSystem.registerLearner(name, {
-        name: name,
-        difficulty: 5,
-        pace: 'medium'
-    });
+    const result = learningSystem.registerLearner(name, { name: name });
     
     if (result.status === 'success') {
         showUserInfo(name);
         nameInput.value = '';
-        
-        // 성공 애니메이션
         showNotification('환영합니다! 개인 맞춤형 학습을 시작해보세요! 🎉', 'success');
     } else {
         alert('등록에 실패했습니다. 다시 시도해주세요.');
@@ -111,27 +101,14 @@ function registerLearner() {
  * 사용자 정보 표시
  */
 function showUserInfo(userId) {
-    const loginForm = document.getElementById('login-form');
-    const userInfo = document.getElementById('user-info');
-    const learningArea = document.getElementById('learning-area');
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('user-info').style.display = 'block';
+    document.getElementById('learning-area').style.display = 'block';
+    document.getElementById('username').textContent = userId;
     
-    if (loginForm && userInfo && learningArea) {
-        loginForm.style.display = 'none';
-        userInfo.style.display = 'block';
-        learningArea.style.display = 'block';
-        
-        // 사용자 이름 표시
-        document.getElementById('username').textContent = userId;
-        
-        // 학습 통계 업데이트
-        updateUserStats(userId);
-        
-        // 추천 콘텐츠 로드
-        loadRecommendedContent(userId);
-        
-        // 콘텐츠 라이브러리 표시
-        showContentLevel(currentContentLevel);
-    }
+    updateUserStats(userId);
+    loadRecommendedContent(userId);
+    showContentLevel(learningSystem.learners[userId].currentLevel || 'foundation');
 }
 
 /**
@@ -139,21 +116,13 @@ function showUserInfo(userId) {
  */
 function updateUserStats(userId) {
     const analytics = learningSystem.getLearningAnalytics(userId);
+    if (!analytics || analytics.error) return;
+
+    document.getElementById('user-level').textContent = analytics.overallStats.currentLevel;
+    document.getElementById('user-success-rate').textContent = `${analytics.overallStats.successRate}%`;
     
-    if (analytics && !analytics.error) {
-        const userLevel = document.getElementById('user-level');
-        const successRate = document.getElementById('user-success-rate');
-        const completedContent = document.getElementById('completed-content');
-        
-        if (userLevel) userLevel.textContent = analytics.overallStats.currentLevel;
-        if (successRate) successRate.textContent = `${analytics.overallStats.successRate}%`;
-        if (completedContent) {
-            // 완료한 콘텐츠 수 계산
-            const learner = learningSystem.learners[userId];
-            const completedCount = Object.keys(learner.performance).length;
-            completedContent.textContent = completedCount;
-        }
-    }
+    const completedCount = Object.keys(learningSystem.learners[userId].performance).filter(id => learningSystem.isContentMastered(userId, id)).length;
+    document.getElementById('completed-content').textContent = completedCount;
 }
 
 /**
@@ -162,60 +131,27 @@ function updateUserStats(userId) {
 function loadRecommendedContent(userId) {
     const content = learningSystem.getPersonalizedContent(userId);
     const container = document.getElementById('recommended-content');
-    
     if (!container) return;
-    
-    if (content.error) {
-        container.innerHTML = `<p class="error">❌ ${content.error}</p>`;
+
+    if (content.error || !content.content) {
+        container.innerHTML = `<p class="info">${content.message || '추천할 콘텐츠를 불러오는 데 실패했습니다.'}</p>`;
         return;
     }
-    
-    if (content.message) {
-        container.innerHTML = `<p class="info">📝 ${content.message}</p>`;
-        return;
-    }
-    
-    // 추천 콘텐츠 카드 생성
+
     const html = `
         <div class="recommended-content-card">
             <h4 class="content-title">${content.content.title}</h4>
             <p class="content-description">${content.content.content}</p>
-            
             <div class="content-details">
-                <div class="detail-item">
-                    <span class="detail-label">⏱️ 예상 시간:</span>
-                    <span class="detail-value">${content.estimatedTime}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">💡 추천 이유:</span>
-                    <span class="detail-value">${content.recommendationReason}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">📊 현재 레벨:</span>
-                    <span class="detail-value">${content.userLevel}</span>
-                </div>
+                 <div class="detail-item"><span>⏱️ 예상 시간:</span><span>${content.estimatedTime}</span></div>
+                 <div class="detail-item"><span>💡 추천 이유:</span><span>${content.recommendationReason}</span></div>
+                 <div class="detail-item"><span>📊 현재 레벨:</span><span>${content.userLevel}</span></div>
             </div>
-            
-            ${content.content.learningObjectives ? `
-                <div class="learning-objectives">
-                    <h5>🎯 학습 목표</h5>
-                    <ul>
-                        ${content.content.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}
-                    </ul>
-                </div>
-            ` : ''}
-            
             <div class="content-actions">
-                <button class="btn btn-primary" onclick="startContent('${content.contentId}', '${userId}')">
-                    🚀 학습 시작하기
-                </button>
-                <button class="btn btn-secondary" onclick="showContentDetails('${content.contentId}')">
-                    📖 상세 보기
-                </button>
+                <button class="btn btn-primary" onclick="startContent('${content.contentId}', '${userId}')">🚀 학습 시작하기</button>
+                <button class="btn btn-secondary" onclick="showContentDetails('${content.contentId}')">📖 상세 보기</button>
             </div>
-        </div>
-    `;
-    
+        </div>`;
     container.innerHTML = html;
 }
 
@@ -223,84 +159,64 @@ function loadRecommendedContent(userId) {
  * 콘텐츠 시작
  */
 function startContent(contentId, userId) {
-    const content = learningSystem.getPersonalizedContent(userId);
-    if (!content.content) return;
+    let contentData = null;
+    for (const level in learningSystem.contentLibrary) {
+        if (learningSystem.contentLibrary[level][contentId]) {
+            contentData = learningSystem.contentLibrary[level][contentId];
+            break;
+        }
+    }
+
+    if (!contentData) {
+        alert('콘텐츠를 찾을 수 없습니다.');
+        return;
+    }
     
-    // 학습 모달 또는 새 페이지로 이동
-    showContentModal(content, userId);
+    showContentModal({ contentId, content: contentData }, userId);
 }
 
 /**
  * 콘텐츠 모달 표시
  */
-function showContentModal(content, userId) {
-    // 모달 HTML 생성
+function showContentModal(contentData, userId) {
+    const { contentId, content } = contentData;
     const modalHtml = `
         <div class="modal-overlay" id="content-modal" onclick="closeModal()">
             <div class="modal-content" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>${content.content.title}</h3>
-                    <button class="modal-close" onclick="closeModal()">×</button>
-                </div>
-                
+                <div class="modal-header"><h3>${content.title}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
                 <div class="modal-body">
                     <div class="content-explanation">
-                        <p>${content.content.content}</p>
-                        
-                        ${content.content.detailedExplanation ? `
-                            <div class="detailed-explanation">
-                                <h4>📖 핵심 개념</h4>
-                                ${Object.entries(content.content.detailedExplanation).map(([key, value]) => `
-                                    <div class="concept-item">
-                                        <strong>${key}:</strong> ${value}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                        
-                        ${content.content.realWorldExamples ? `
-                            <div class="real-world-examples">
-                                <h4>🌍 실생활 예시</h4>
-                                <ul>
-                                    ${content.content.realWorldExamples.map(example => `<li>${example}</li>`).join('')}
-                                </ul>
-                            </div>
-                        ` : ''}
+                        <p>${content.content}</p>
+                        <h4>📖 핵심 개념</h4>
+                        ${Object.entries(content.detailedExplanation).map(([key, value]) => `<div class="concept-item"><strong>${key}:</strong> ${value}</div>`).join('')}
+                        <h4>🔬 심화 학습</h4>
+                        ${Object.entries(content.inDepthContent).map(([key, value]) => `<div class="concept-item"><strong>${key}:</strong> ${typeof value === 'object' ? JSON.stringify(value, null, 2) : value}</div>`).join('')}
+                        <h4>🌍 실생활 예시</h4>
+                        <ul>${content.realWorldExamples.map(example => `<li>${example}</li>`).join('')}</ul>
+                        <h4>💻 코드 예제</h4>
+                        <pre><code class="language-python">${content.codeSnippet}</code></pre>
                     </div>
-                    
                     <div class="questions-section">
                         <h4>🧠 연습 문제</h4>
                         <div id="questions-container">
-                            ${content.content.questions.map((question, index) => `
-                                <div class="question-card" id="question-${index}">
-                                    <div class="question-header">
-                                        <h5>문제 ${index + 1}</h5>
-                                        <span class="difficulty-badge">난이도: ${'★'.repeat(question.difficulty || 3)}</span>
-                                    </div>
-                                    <div class="question-text">${question.q}</div>
+                            ${content.questions.map((q, i) => `
+                                <div class="question-card" id="question-${i}">
+                                    <div class="question-header"><h5>문제 ${i + 1}</h5><span class="difficulty-badge">난이도: ${'★'.repeat(q.difficulty || 3)}</span></div>
+                                    <div class="question-text">${q.q}</div>
                                     <div class="question-options">
-                                        ${question.options.map((option, optIndex) => `
-                                            <label class="option-label">
-                                                <input type="radio" name="question-${index}" value="${optIndex}">
-                                                <span class="option-text">${option}</span>
-                                            </label>
-                                        `).join('')}
+                                        ${q.options.map((opt, optIdx) => `<label class="option-label"><input type="radio" name="question-${i}" value="${optIdx}"><span class="option-text">${opt}</span></label>`).join('')}
                                     </div>
-                                    <button class="btn btn-primary" onclick="submitQuestionAnswer(${index}, '${content.contentId}', '${userId}')">
-                                        답안 제출
-                                    </button>
-                                    <div class="answer-result" id="result-${index}"></div>
-                                </div>
-                            `).join('')}
+                                    <button class="btn btn-primary" onclick="submitQuestionAnswer(${i}, '${contentId}', '${userId}')">답안 제출</button>
+                                    <div class="answer-result" id="result-${i}"></div>
+                                </div>`).join('')}
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-    
-    // 모달을 body에 추가
+        </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+    // 코드 하이라이팅을 위해 Prism.js 같은 라이브러리가 있다면 여기서 호출
+    // 예: Prism.highlightAll();
 }
 
 /**
@@ -308,7 +224,6 @@ function showContentModal(content, userId) {
  */
 function submitQuestionAnswer(questionIndex, contentId, userId) {
     const selectedOption = document.querySelector(`input[name="question-${questionIndex}"]:checked`);
-    
     if (!selectedOption) {
         alert('답을 선택해주세요!');
         return;
@@ -317,35 +232,22 @@ function submitQuestionAnswer(questionIndex, contentId, userId) {
     const answer = parseInt(selectedOption.value);
     const result = learningSystem.submitAnswer(userId, contentId, questionIndex, answer);
     
-    // 결과 표시
     const resultContainer = document.getElementById(`result-${questionIndex}`);
     if (resultContainer) {
         const html = `
             <div class="answer-feedback ${result.correct ? 'correct' : 'incorrect'}">
-                <div class="feedback-header">
-                    ${result.correct ? '✅ 정답입니다!' : '❌ 틀렸습니다.'}
-                </div>
+                <div class="feedback-header">${result.correct ? '✅ 정답입니다!' : '❌ 틀렸습니다.'}</div>
                 <div class="feedback-content">
-                    <p><strong>선택한 답:</strong> ${result.yourAnswer}</p>
                     <p><strong>정답:</strong> ${result.correctAnswer}</p>
                     <p><strong>해설:</strong> ${result.explanation}</p>
-                    <p><strong>성과:</strong> ${result.performanceSummary.successRate}% 성공률 (${result.performanceSummary.attempts}회 시도)</p>
                     ${result.levelUp ? `<p class="level-up">🎉 축하합니다! ${result.newLevel} 레벨로 승급했습니다!</p>` : ''}
                 </div>
-            </div>
-        `;
+            </div>`;
         resultContainer.innerHTML = html;
-        
-        // 사용자 통계 업데이트
         updateUserStats(userId);
     }
     
-    // 성공/실패에 따른 알림
-    if (result.correct) {
-        showNotification('정답입니다! 🎉', 'success');
-    } else {
-        showNotification('다시 한번 생각해보세요! 💪', 'info');
-    }
+    showNotification(result.correct ? '정답입니다! 🎉' : '다시 한번 생각해보세요! 💪', result.correct ? 'success' : 'info');
 }
 
 /**
@@ -353,9 +255,7 @@ function submitQuestionAnswer(questionIndex, contentId, userId) {
  */
 function closeModal() {
     const modal = document.getElementById('content-modal');
-    if (modal) {
-        modal.remove();
-    }
+    if (modal) modal.remove();
 }
 
 /**
@@ -363,38 +263,26 @@ function closeModal() {
  */
 function showContentLevel(level) {
     currentContentLevel = level;
-    
-    // 탭 활성화 상태 업데이트
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.querySelector(`[onclick="showContentLevel('${level}')"]`).classList.add('active');
     
-    // 콘텐츠 목록 생성
     const contentList = learningSystem.contentLibrary[level] || {};
     const container = document.getElementById('content-list');
-    
     if (!container) return;
-    
-    const html = Object.entries(contentList).map(([contentId, content]) => `
-        <div class="content-item" onclick="showContentDetails('${contentId}')">
-            <div class="content-title">${content.title}</div>
-            <div class="content-description">${content.content}</div>
-            <div class="content-meta">
-                <div class="difficulty-indicator">
-                    ${Array.from({length: 10}, (_, i) => 
-                        `<div class="difficulty-dot ${i < content.difficulty ? 'active' : ''}"></div>`
-                    ).join('')}
+
+    const html = Object.keys(contentList).length > 0 
+        ? Object.entries(contentList).map(([contentId, content]) => `
+            <div class="content-item" onclick="showContentDetails('${contentId}')">
+                <div class="content-title">${content.title}</div>
+                <div class="content-description">${content.content}</div>
+                <div class="content-meta">
+                    <div class="difficulty-indicator">${Array.from({length: 10}, (_, i) => `<div class="difficulty-dot ${i < content.difficulty ? 'active' : ''}"></div>`).join('')}</div>
+                    <div class="content-category">${content.category}</div>
                 </div>
-                <div class="content-category">${content.category}</div>
-            </div>
-            ${content.prerequisites && content.prerequisites.length > 0 ? 
-                `<div class="prerequisites">전제조건: ${content.prerequisites.join(', ')}</div>` : ''
-            }
-        </div>
-    `).join('');
+            </div>`).join('')
+        : '<p>이 레벨에는 아직 콘텐츠가 없습니다.</p>';
     
-    container.innerHTML = html || '<p>이 레벨에는 아직 콘텐츠가 없습니다.</p>';
+    container.innerHTML = html;
 }
 
 /**
@@ -402,11 +290,15 @@ function showContentLevel(level) {
  */
 function initializeLearningSection() {
     if (learningSystem.currentUser) {
-        updateUserStats(learningSystem.currentUser);
-        loadRecommendedContent(learningSystem.currentUser);
+        showUserInfo(learningSystem.currentUser);
+    } else {
+        document.getElementById('login-form').style.display = 'block';
+        document.getElementById('user-info').style.display = 'none';
+        document.getElementById('learning-area').style.display = 'none';
     }
-    showContentLevel(currentContentLevel);
 }
+
+// ... (이하 데모 관련 함수들은 이전과 동일하게 유지) ...
 
 /**
  * 데모 탭 표시
@@ -684,23 +576,6 @@ function showNotification(message, type = 'info') {
         </div>
     `;
     
-    // 스타일 적용
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        z-index: 10000;
-        max-width: 400px;
-        padding: 1rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        animation: slideInRight 0.3s ease-out;
-        ${type === 'success' ? 'background: #d4edda; border-left: 4px solid #28a745; color: #155724;' : ''}
-        ${type === 'error' ? 'background: #f8d7da; border-left: 4px solid #dc3545; color: #721c24;' : ''}
-        ${type === 'info' ? 'background: #d1ecf1; border-left: 4px solid #17a2b8; color: #0c5460;' : ''}
-        ${type === 'warning' ? 'background: #fff3cd; border-left: 4px solid #ffc107; color: #856404;' : ''}
-    `;
-    
     document.body.appendChild(notification);
     
     // 3초 후 자동 제거
@@ -716,7 +591,6 @@ function showNotification(message, type = 'info') {
  * 콘텐츠 상세 정보 표시
  */
 function showContentDetails(contentId) {
-    // 콘텐츠 찾기
     let content = null;
     for (const levelContent of Object.values(learningSystem.contentLibrary)) {
         if (levelContent[contentId]) {
@@ -730,266 +604,35 @@ function showContentDetails(contentId) {
         return;
     }
     
-    // 상세 정보 모달 표시
     const modalHtml = `
         <div class="modal-overlay" onclick="closeModal()">
             <div class="modal-content content-details-modal" onclick="event.stopPropagation()">
-                <div class="modal-header">
-                    <h3>${content.title}</h3>
-                    <button class="modal-close" onclick="closeModal()">×</button>
-                </div>
-                
+                <div class="modal-header"><h3>${content.title}</h3><button class="modal-close" onclick="closeModal()">×</button></div>
                 <div class="modal-body">
                     <div class="content-overview">
                         <p class="content-description">${content.content}</p>
-                        
                         <div class="content-metadata">
-                            <div class="meta-item">
-                                <span class="meta-label">난이도:</span>
-                                <span class="meta-value">${'★'.repeat(content.difficulty)} (${content.difficulty}/10)</span>
-                            </div>
-                            <div class="meta-item">
-                                <span class="meta-label">카테고리:</span>
-                                <span class="meta-value">${content.category}</span>
-                            </div>
-                            ${content.prerequisites && content.prerequisites.length > 0 ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">전제조건:</span>
-                                    <span class="meta-value">${content.prerequisites.join(', ')}</span>
-                                </div>
-                            ` : ''}
+                            <div class="meta-item"><span>난이도:</span><span>${'★'.repeat(content.difficulty)} (${content.difficulty}/10)</span></div>
+                            <div class="meta-item"><span>카테고리:</span><span>${content.category}</span></div>
+                            ${content.prerequisites && content.prerequisites.length > 0 ? `<div class="meta-item"><span>전제조건:</span><span>${content.prerequisites.join(', ')}</span></div>` : ''}
                         </div>
                     </div>
-                    
-                    ${content.learningObjectives ? `
-                        <div class="learning-objectives">
-                            <h4>🎯 학습 목표</h4>
-                            <ul>
-                                ${content.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${content.detailedExplanation ? `
-                        <div class="detailed-explanation">
-                            <h4>📖 핵심 개념</h4>
-                            ${Object.entries(content.detailedExplanation).map(([key, value]) => `
-                                <div class="concept-item">
-                                    <strong>${key}:</strong> ${value}
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                    
-                    ${content.realWorldExamples ? `
-                        <div class="real-world-examples">
-                            <h4>🌍 실생활 예시</h4>
-                            <ul>
-                                ${content.realWorldExamples.map(example => `<li>${example}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="questions-preview">
-                        <h4>📝 연습 문제 미리보기</h4>
-                        <p>총 ${content.questions.length}개의 문제가 준비되어 있습니다.</p>
-                        <div class="question-concepts">
-                            ${[...new Set(content.questions.map(q => q.concept))].map(concept => 
-                                `<span class="concept-tag">${concept}</span>`
-                            ).join('')}
-                        </div>
+                    <h4>🎯 학습 목표</h4>
+                    <ul>${content.learningObjectives.map(obj => `<li>${obj}</li>`).join('')}</ul>
+                    <h4>📖 핵심 개념</h4>
+                    ${Object.entries(content.detailedExplanation).map(([key, value]) => `<div class="concept-item"><strong>${key}:</strong> ${value}</div>`).join('')}
+                    <h4>🔬 심화 학습</h4>
+                    ${Object.entries(content.inDepthContent).map(([key, value]) => `<div class="concept-item"><strong>${key}:</strong> ${typeof value === 'object' ? JSON.stringify(value, null, 2) : value}</div>`).join('')}
+                    <h4>🌍 실생활 예시</h4>
+                    <ul>${content.realWorldExamples.map(example => `<li>${example}</li>`).join('')}</ul>
+                    <h4>💻 코드 예제</h4>
+                    <pre><code class="language-python">${content.codeSnippet}</code></pre>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="closeModal(); startContent('${contentId}', '${learningSystem.currentUser}')">🚀 학습 시작하기</button>
                     </div>
-                    
-                    ${learningSystem.currentUser ? `
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" onclick="closeModal(); startContent('${contentId}', '${learningSystem.currentUser}')">
-                                🚀 학습 시작하기
-                            </button>
-                        </div>
-                    ` : `
-                        <div class="login-prompt">
-                            <p>학습을 시작하려면 먼저 이름을 등록해주세요!</p>
-                            <button class="btn btn-primary" onclick="closeModal(); showSection('learn')">
-                                👤 학습자 등록하기
-                            </button>
-                        </div>
-                    `}
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
     
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
-
-// CSS 애니메이션 추가
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-    
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-        animation: fadeIn 0.3s ease-out;
-    }
-    
-    .modal-content {
-        background: white;
-        border-radius: 15px;
-        max-width: 800px;
-        max-height: 90vh;
-        overflow-y: auto;
-        margin: 20px;
-        animation: slideInUp 0.3s ease-out;
-    }
-    
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 2rem 2rem 1rem;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .modal-close {
-        background: none;
-        border: none;
-        font-size: 2rem;
-        cursor: pointer;
-        color: #666;
-        padding: 0;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background 0.3s;
-    }
-    
-    .modal-close:hover {
-        background: #f0f0f0;
-    }
-    
-    .modal-body {
-        padding: 2rem;
-    }
-    
-    .question-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid #4c51bf;
-    }
-    
-    .question-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-    
-    .difficulty-badge {
-        background: #4c51bf;
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-    }
-    
-    .question-options {
-        margin: 1rem 0;
-    }
-    
-    .option-label {
-        display: block;
-        margin: 0.5rem 0;
-        padding: 0.8rem;
-        background: white;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-    
-    .option-label:hover {
-        background: #e6e8ff;
-    }
-    
-    .answer-feedback {
-        margin-top: 1rem;
-        padding: 1rem;
-        border-radius: 8px;
-    }
-    
-    .answer-feedback.correct {
-        background: #d4edda;
-        border-left: 4px solid #28a745;
-        color: #155724;
-    }
-    
-    .answer-feedback.incorrect {
-        background: #f8d7da;
-        border-left: 4px solid #dc3545;
-        color: #721c24;
-    }
-    
-    .level-up {
-        color: #e83e8c;
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin: 1rem 0;
-    }
-    
-    .stat-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 5px;
-    }
-    
-    .concept-tag {
-        background: #4c51bf;
-        color: white;
-        padding: 0.3rem 0.8rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-        display: inline-block;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideInUp {
-        from { transform: translateY(50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-`;
-document.head.appendChild(style);

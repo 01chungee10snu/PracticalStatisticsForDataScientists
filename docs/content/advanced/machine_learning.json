@@ -1,0 +1,52 @@
+{
+    "title": "🤖 통계적 기계 학습",
+    "category": "machine_learning",
+    "difficulty": 8,
+    "prerequisites": ["classification", "regression"],
+    "learningObjectives": [
+        "교차 검증의 필요성과 작동 방식 이해",
+        "앙상블 기법(배깅, 부스팅)의 원리 파악",
+        "하이퍼파라미터 튜닝의 중요성 학습",
+        "모델의 일반화 성능과 과적합 사이의 관계 이해"
+    ],
+    "content": "통계적 기계 학습은 데이터로부터 예측 모델을 구축하고 평가하는 과정을 자동화하고 일반화하는 데 중점을 둡니다. 이 단원에서는 모델의 성능을 극대화하기 위한 고급 기법들을 다룹니다.",
+    "detailedExplanation": {
+        "교차 검증 (Cross-Validation)": "데이터를 여러 개의 폴드(fold)로 나누어, 일부는 훈련용으로, 일부는 검증용으로 사용하는 것을 반복하는 방법입니다. 모델의 일반화 성능을 더 안정적으로 평가할 수 있게 해줍니다.",
+        "앙상블 기법 (Ensemble Methods)": "여러 개의 약한 모델(weak learner)을 결합하여 하나의 강력한 모델을 만드는 기법입니다. 배깅(Bagging, 예: 랜덤 포레스트)과 부스팅(Boosting, 예: Gradient Boosting)이 대표적입니다.",
+        "하이퍼파라미터 튜닝 (Hyperparameter Tuning)": "모델이 학습을 통해 스스로 찾는 파라미터(예: 회귀계수)와 달리, 연구자가 직접 설정해야 하는 값(예: 정규화 강도, 트리 깊이)을 하이퍼파라미터라고 합니다. 그리드 서치나 랜덤 서치를 통해 최적의 하이퍼파라미터 조합을 찾는 과정은 모델 성능에 큰 영향을 미칩니다."
+    },
+    "inDepthContent": {
+        "학습 곡선 (Learning Curve)": "훈련 데이터의 크기를 변화시키면서 훈련 세트와 검증 세트의 점수를 그래프로 그려, 모델의 과소적합(underfitting) 또는 과적합(overfitting) 여부를 진단하는 데 사용됩니다.",
+        "구조적 위험 최소화 (Structural Risk Minimization)": "모델의 복잡도와 훈련 데이터에 대한 오차 사이의 균형을 맞추려는 원칙입니다. 너무 복잡한 모델은 훈련 오차는 낮지만 일반화 성능이 떨어질 수 있습니다. 정규화는 이 원칙을 구현하는 대표적인 방법입니다.",
+        "커널 트릭 (Kernel Trick)": "데이터를 더 높은 차원의 공간으로 매핑하여 선형적으로 분리할 수 있도록 만드는 기법입니다. 서포트 벡터 머신(SVM)에서 비선형 분류를 가능하게 하는 핵심 원리입니다."
+    },
+    "realWorldExamples": [
+        "K-Fold 교차 검증을 사용하여 여러 머신러닝 모델(SVM, 랜덤 포레스트, 신경망 등)의 성능을 공정하게 비교하고 최종 모델 선택",
+        "금융 시장 예측 모델에서 부스팅 알고리즘을 사용하여 미세한 패턴들을 학습하고 예측 정확도 향상",
+        "이미지 분류 모델의 하이퍼파라미터(학습률, 배치 사이즈 등)를 튜닝하여 정확도를 0.1%라도 더 높이기 위한 경쟁"
+    ],
+    "codeSnippet": "import numpy as np\nimport matplotlib.pyplot as plt\nfrom sklearn.model_selection import learning_curve\nfrom sklearn.datasets import make_classification\nfrom sklearn.ensemble import RandomForestClassifier\n\n# 가상 데이터 생성\nX, y = make_classification(n_samples=1000, n_features=20, n_informative=5, n_redundant=0, random_state=42)\n\n# 모델 정의\nmodel = RandomForestClassifier(random_state=42)\n\n# 학습 곡선 계산\ntrain_sizes, train_scores, validation_scores = learning_curve(\n    model, X, y, train_sizes=np.linspace(0.1, 1.0, 10), cv=5, scoring='accuracy')\n\n# 평균 및 표준편차 계산\ntrain_scores_mean = np.mean(train_scores, axis=1)\nvalidation_scores_mean = np.mean(validation_scores, axis=1)\n\n# 학습 곡선 시각화\nplt.figure(figsize=(10, 6))\nplt.plot(train_sizes, train_scores_mean, 'o-', color=\"r\", label=\"Training score\")\nplt.plot(train_sizes, validation_scores_mean, 'o-', color=\"g\", label=\"Cross-validation score\")\nplt.title('Learning Curve')\nplt.xlabel('Training examples')\nplt.ylabel('Score')\nplt.legend(loc=\"best\")\nplt.grid()\nplt.show()",
+    "interpretingTheResults": {
+        "그래프 해석": "학습 곡선은 훈련 데이터의 양(x축)이 늘어남에 따라 모델의 성능(y축, 여기서는 정확도)이 어떻게 변하는지를 보여줍니다. 빨간색 선은 훈련 데이터에 대한 점수, 초록색 선은 교차 검증 데이터에 대한 점수를 나타냅니다.",
+        "과적합 진단": "그래프에서 훈련 점수(빨간선)는 매우 높게 유지되는 반면, 교차 검증 점수(초록색 선)는 그보다 낮고 두 선 사이에 상당한 간격이 존재합니다. 이는 모델이 훈련 데이터는 거의 완벽하게 학습했지만, 새로운 데이터(검증 데이터)에 대해서는 그만큼의 성능을 내지 못하는 '과적합(Overfitting)' 상태임을 시사합니다.",
+        "결론 및 다음 단계": "이러한 과적합을 해결하기 위해 몇 가지 전략을 시도해볼 수 있습니다. 예를 들어, 랜덤 포레스트의 하이퍼파라미터(예: 트리의 최대 깊이 `max_depth`나, 각 노드를 분할하는 데 필요한 최소 샘플 수 `min_samples_split`)를 조정하여 모델의 복잡도를 낮추거나, 더 많은 데이터를 수집하거나, 정규화(regularization)가 더 강한 모델을 사용하는 것을 고려해볼 수 있습니다."
+    },
+    "questions": [
+        {
+            "q": "교차 검증을 수행하는 가장 주된 이유는 무엇인가요?",
+            "options": ["모델 훈련 시간을 단축하기 위해", "데이터를 더 효율적으로 사용하기 위해", "모델이 특정 데이터셋에만 과적합되는 것을 방지하고 일반화 성능을 신뢰성 있게 평가하기 위해", "더 많은 변수를 사용하기 위해"],
+            "correct": 2,
+            "explanation": "데이터를 훈련/테스트 세트로 한 번만 나누면, 우연히 테스트 세트가 쉽거나 어려워서 모델 성능이 과대/과소평가될 수 있습니다. 교차 검증은 데이터를 여러 번 다르게 나누어 훈련과 평가를 반복함으로써 이러한 변동성을 줄이고 모델의 일반화 성능을 더 안정적으로 측정합니다.",
+            "difficulty": 7,
+            "concept": "교차 검증"
+        },
+        {
+            "q": "학습 곡선(Learning Curve)에서 훈련 점수(Training score)는 매우 높은데 교차 검증 점수(Cross-validation score)가 낮고 두 점수 간의 간격이 크다면, 이는 무엇을 시사하나요?",
+            "options": ["모델이 과소적합(underfitting)되었다.", "모델이 과적합(overfitting)되었다.", "데이터가 더 많이 필요하다.", "모델이 최적의 상태이다."],
+            "correct": 1,
+            "explanation": "훈련 점수는 높지만 검증 점수가 낮다는 것은 모델이 훈련 데이터에만 너무 잘 맞춰져 있고, 새로운 데이터에 대해서는 일반화 성능이 떨어진다는 것을 의미합니다. 이는 과적합의 전형적인 신호입니다.",
+            "difficulty": 8,
+            "concept": "학습 곡선"
+        }
+    ]
+}

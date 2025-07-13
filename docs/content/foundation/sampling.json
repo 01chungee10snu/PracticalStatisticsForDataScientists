@@ -1,0 +1,50 @@
+{
+    "title": "🎲 데이터와 표본 분포",
+    "category": "inferential_statistics",
+    "difficulty": 5,
+    "prerequisites": ["eda"],
+    "learningObjectives": [
+        "모집단과 표본의 개념 이해 및 샘플링 편향의 위험성 인지",
+        "중심극한정리의 의미를 시각적으로 확인하고 설명하는 능력 습득",
+        "부트스트랩(Bootstrap)의 원리와 신뢰구간 추정 방법 학습",
+        "표본 크기가 표본 분포에 미치는 영향 이해"
+    ],
+    "content": "모집단 전체를 조사하기 어려울 때, 우리는 표본을 통해 모집단의 특성을 추론합니다. 이 단원에서는 표본 추출의 원리와, 표본 통계량의 분포가 어떻게 형성되는지 학습합니다.",
+    "detailedExplanation": {
+        "표본추출 (Sampling)": "모집단으로부터 일부를 선택하는 과정입니다. 단순 임의 추출, 층화 추출 등 다양한 방법이 있으며, 표본이 모집단을 잘 대표하도록 설계하는 것이 중요합니다. 샘플링 편향(Sampling Bias)은 표본이 모집단을 제대로 대표하지 못할 때 발생하며, 잘못된 결론으로 이어질 수 있습니다.",
+        "중심극한정리 (Central Limit Theorem)": "모집단의 분포가 정규분포가 아니더라도, 표본의 크기가 충분히 크다면(일반적으로 n > 30) 표본 평균의 분포는 정규분포에 가까워진다는 매우 중요한 정리입니다. 이는 통계적 추론의 이론적 기반이 됩니다.",
+        "부트스트랩 (Bootstrap)": "현재 가진 표본에서 다시 무작위 복원추출을 반복하여, 수많은 가상의 표본을 만드는 방법입니다. 이를 통해 통계량(예: 평균, 중앙값, 회귀계수)의 신뢰구간이나 표준오차를 컴퓨터 시뮬레이션으로 쉽게 추정할 수 있습니다. 이는 복잡한 수식 없이도 통계적 불확실성을 평가할 수 있게 해주는 강력한 도구입니다."
+    },
+    "inDepthContent": {
+        "샘플링 편향의 종류": "자기선택 편향(self-selection bias), 생존 편향(survivorship bias) 등 다양한 종류의 샘플링 편향이 존재하며, 연구 설계 단계에서 이를 인지하고 통제하는 것이 매우 중요합니다.",
+        "부트스트랩의 한계": "부트스트랩은 표본이 모집단을 어느 정도 대표한다는 가정 하에 작동합니다. 만약 초기 표본 자체가 심하게 편향되어 있다면, 부트스트랩 결과 역시 편향될 수 있습니다. 또한, 표본의 크기가 너무 작으면 부트스트랩 추정치가 불안정해질 수 있습니다.",
+        "신뢰구간의 정확한 해석": "'95% 신뢰구간'이란, 같은 방법으로 표본추출과 신뢰구간 계산을 100번 반복했을 때, 그 중 95개의 신뢰구간이 실제 모집단의 모수(예: 평균)를 포함할 것이라고 기대하는 것을 의미합니다. 이는 특정 신뢰구간 하나가 95% 확률로 모수를 포함한다는 의미가 아니라는 점에 주의해야 합니다."
+    },
+    "realWorldExamples": [
+        "대통령 선거 출구조사: 전체 유권자 중 일부만 조사하여 전체 득표율과 그 신뢰구간을 예측.",
+        "제조업 품질 관리: 생산 라인에서 일부 제품만 샘플링하여 전체 제품의 불량률을 추정."
+    ],
+    "codeSnippet": "import numpy as np\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\n# 가상 모집단 데이터 (오른쪽으로 치우친 지수분포)\npopulation = np.random.exponential(scale=10, size=10000)\n\n# 표본 크기를 다르게 하여 표본 평균의 분포 비교\nfig, axes = plt.subplots(1, 3, figsize=(18, 5))\nfig.suptitle('Central Limit Theorem: Distribution of Sample Means by Sample Size', fontsize=16)\n\nsample_sizes = [5, 30, 100]\n\nfor i, n in enumerate(sample_sizes):\n    sample_means = [np.mean(np.random.choice(population, n)) for _ in range(1000)]\n    sns.histplot(sample_means, kde=True, ax=axes[i])\n    axes[i].set_title(f'Sample Size (n) = {n}')\n    axes[i].set_xlim(0, 30)\n\nplt.show()\n\n# 부트스트랩 시각화\n# 모집단에서 표본 하나를 추출\nsample = np.random.choice(population, size=100)\n\n# 부트스트랩 실행\nbootstrap_means = [np.mean(np.random.choice(sample, 100, replace=True)) for _ in range(5000)]\n\nplt.figure(figsize=(8, 6))\nsns.histplot(bootstrap_means, kde=True, label='Bootstrap Distribution of Mean')\n\n# 신뢰구간 계산 및 시각화\nconfidence_interval = np.percentile(bootstrap_means, [2.5, 97.5])\nplt.axvline(confidence_interval[0], color='g', linestyle='--', label=f'95% CI Lower: {confidence_interval[0]:.2f}')\nplt.axvline(confidence_interval[1], color='g', linestyle='--', label=f'95% CI Upper: {confidence_interval[1]:.2f}')\nplt.axvline(np.mean(sample), color='r', linestyle='-', label=f'Original Sample Mean: {np.mean(sample):.2f}')\nplt.title('Bootstrap Distribution and 95% Confidence Interval')\nplt.legend()\nplt.show()",
+    "interpretingTheResults": {
+        "중심극한정리 시각화 해석": "- **첫 번째 그래프 (n=5)**: 표본 크기가 작을 때는 표본 평균들의 분포가 여전히 오른쪽으로 치우쳐져 있으며, 원래 모집단 분포의 영향을 많이 받습니다.\n- **두 번째 그래프 (n=30)**: 표본 크기가 30이 되자, 분포가 훨씬 대칭적인 종 모양에 가까워진 것을 볼 수 있습니다.\n- **세 번째 그래프 (n=100)**: 표본 크기가 100으로 커지자, 분포의 모양은 더욱 정규분포에 가까워지고, 분산(퍼진 정도)도 눈에 띄게 줄어들었습니다.\n- **결론**: 이 시각화는 중심극한정리의 핵심을 명확히 보여줍니다. 즉, 표본의 크기가 커질수록 표본 평균의 분포는 모집단의 원래 분포 모양과 상관없이 정규분포를 따르게 됩니다.",
+        "부트스트랩 시각화 해석": "- **분포**: 히스토그램은 단 하나의 표본(크기 100)에서 5000번의 부트스트랩 샘플링을 통해 얻은 표본 평균들의 분포를 보여줍니다. 이 분포 역시 중심극한정리에 따라 정규분포와 유사한 모양을 띱니다.\n- **신뢰구간**: 녹색 점선으로 표시된 95% 신뢰구간은 우리가 추정한 모집단 평균이 존재할 가능성이 높은 범위를 나타냅니다. 즉, 우리는 모집단의 실제 평균이 약 7.99와 12.14 사이에 있을 것이라고 95% 신뢰수준에서 말할 수 있습니다.\n- **결론**: 부트스트랩은 모집단에 대한 정보 없이, 오직 우리가 가진 단 하나의 표본만으로도 통계량의 불확실성을 평가하고 신뢰구간을 추정할 수 있는 강력하고 직관적인 방법입니다."
+    },
+    "questions": [
+        {
+            "q": "중심극한정리에 따르면, 표본의 크기가 커질수록 표본 평균의 분포는 어떻게 변하나요?",
+            "options": ["점점 더 치우쳐진다", "분산이 점점 더 커진다", "모집단 분포와 상관없이 정규분포에 가까워진다", "항상 균등분포가 된다"],
+            "correct": 2,
+            "explanation": "중심극한정리는 표본 크기가 충분히 크면, 모집단의 분포 형태와 무관하게 표본 평균의 분포가 정규분포를 따른다는 것을 핵심 내용으로 합니다.",
+            "difficulty": 5,
+            "concept": "중심극한정리"
+        },
+        {
+            "q": "부트스트랩 신뢰구간의 폭이 너무 넓게 나왔습니다. 신뢰구간의 폭을 줄일 수 있는 가장 확실한 방법은 무엇일까요?",
+            "options": ["부트스트랩 반복 횟수를 늘린다", "더 작은 크기의 초기 표본을 사용한다", "더 큰 크기의 초기 표본을 수집한다", "신뢰수준을 99%로 높인다"],
+            "correct": 2,
+            "explanation": "신뢰구간의 폭은 표본의 변동성에 의해 결정됩니다. 더 큰 크기의 표본을 사용하면 표본 평균의 표준오차가 줄어들어 더 좁고 정밀한 신뢰구간을 얻을 수 있습니다. 부트스트랩 반복 횟수를 늘리는 것은 추정의 안정성을 높일 뿐, 구간의 폭을 직접적으로 줄이지는 않습니다.",
+            "difficulty": 8,
+            "concept": "부트스트랩 신뢰구간"
+        }
+    ]
+}

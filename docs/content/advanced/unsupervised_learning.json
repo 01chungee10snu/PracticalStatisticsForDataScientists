@@ -1,0 +1,53 @@
+{
+    "title": "🔍 비지도 학습",
+    "category": "machine_learning",
+    "difficulty": 8,
+    "prerequisites": ["machine_learning"],
+    "learningObjectives": [
+        "비지도 학습과 지도 학습의 근본적인 차이점 이해",
+        "차원 축소(PCA)와 군집화(K-평균)의 원리 및 활용 사례 학습",
+        "비지도 학습 모델의 평가 방법(실루엣 점수 등) 파악",
+        "밀도 기반 군집화(DBSCAN)의 개념과 장점 이해"
+    ],
+    "content": "비지도 학습은 정답(레이블)이 없는 데이터에서 스스로 패턴이나 구조를 찾아내는 기법입니다. 고객 그룹 분류, 이상 거래 탐지, 데이터 시각화 등 다양한 분야에서 활용됩니다.",
+    "detailedExplanation": {
+        "차원 축소 (Dimension Reduction)": "고차원 데이터의 중요한 정보는 최대한 유지하면서, 변수의 개수(차원)를 줄이는 기법입니다. 주성분 분석(PCA)이 대표적이며, 데이터 시각화나 다른 모델의 성능 향상을 위해 사용됩니다.",
+        "군집화 (Clustering)": "데이터를 유사한 특성을 가진 몇 개의 그룹(군집)으로 묶는 기법입니다. K-평균(K-Means) 알고리즘이 널리 사용되며, 고객 세분화(market segmentation) 등에 활용됩니다.",
+        "모델 평가": "정답이 없기 때문에 평가가 까다롭습니다. 군집화의 경우, 실루엣 점수(Silhouette Score)와 같이 '군집 내 거리는 가깝고, 군집 간 거리는 멀수록' 좋다는 원칙을 기반으로 한 지표들이 사용됩니다."
+    },
+    "inDepthContent": {
+        "주성분 분석 (PCA)의 원리": "PCA는 데이터의 분산이 가장 큰 방향을 첫 번째 주성분으로, 그 다음으로 분산이 큰 방향을 (첫 번째 주성분과 직교하는 방향 중에서) 두 번째 주성분으로 찾는 방식으로 작동합니다. 즉, 데이터의 정보를 가장 잘 설명하는 새로운 축을 찾는 과정입니다.",
+        "K-평균 군집화의 한계": "K-평균은 군집이 원형(spherical)이고 크기가 비슷하다고 가정하기 때문에, 길쭉하거나 복잡한 모양의 군집은 잘 찾아내지 못합니다. 또한, 사전에 군집의 개수(K)를 지정해야 하는 단점이 있습니다.",
+        "밀도 기반 군집화 (DBSCAN)": "데이터가 밀집된 영역을 하나의 군집으로 간주하는 알고리즘입니다. K-평균과 달리 임의의 모양을 가진 군집을 찾을 수 있고, 군집의 개수를 미리 지정할 필요가 없다는 장점이 있습니다.",
+        "t-SNE와 UMAP": "고차원 데이터의 시각화를 위한 대표적인 비선형 차원 축소 기법입니다. 데이터 포인트 간의 지역적(local) 구조를 보존하면서 저차원 공간에 표현하는 데 탁월하여, 복잡한 데이터의 구조를 시각적으로 탐색하는 데 널리 사용됩니다."
+    },
+    "realWorldExamples": [
+        "온라인 쇼핑몰 고객들의 구매 패턴을 분석하여 '알뜰 쇼핑족', '신제품 매니아', '충동 구매족' 등으로 군집화하고 타겟 마케팅 진행",
+        "수십 개의 경제 지표를 PCA를 이용해 2~3개의 주성분으로 축소하여 전체 경제 상황을 나타내는 대시보드 시각화",
+        "정상적인 시스템 로그 데이터의 패턴을 학습한 후, 이와 다른 패턴을 보이는 로그를 이상 징후로 탐지"
+    ],
+    "codeSnippet": "import matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.datasets import make_blobs, make_moons\nfrom sklearn.cluster import KMeans, DBSCAN\nfrom sklearn.metrics import silhouette_score\n\n# K-평균에 적합하지 않은 데이터 생성 (달 모양)\nX, y = make_moons(n_samples=200, noise=0.05, random_state=0)\n\n# K-평균과 DBSCAN 비교\nkmeans = KMeans(n_clusters=2, random_state=0, n_init=10)\nkmeans_labels = kmeans.fit_predict(X)\ndbscan = DBSCAN(eps=0.3, min_samples=5)\ndbscan_labels = dbscan.fit_predict(X)\n\n# 결과 시각화\nfig, axes = plt.subplots(1, 2, figsize=(12, 5))\nsns.scatterplot(x=X[:, 0], y=X[:, 1], hue=kmeans_labels, palette='viridis', ax=axes[0])\naxes[0].set_title(f'K-Means (Silhouette: {silhouette_score(X, kmeans_labels):.2f})')\n\nsns.scatterplot(x=X[:, 0], y=X[:, 1], hue=dbscan_labels, palette='viridis', ax=axes[1])\naxes[1].set_title(f'DBSCAN (Silhouette: {silhouette_score(X, dbscan_labels):.2f})')\n\nplt.tight_layout()\nplt.show()",
+    "interpretingTheResults": {
+        "결과 비교": "왼쪽의 K-평균 군집화 결과는 두 개의 달 모양 데이터를 제대로 분리하지 못하고, 단순히 데이터를 수직으로 나누었습니다. 이는 K-평균이 군집의 모양이 원형일 것이라는 가정에 기반하기 때문입니다. 반면, 오른쪽의 DBSCAN 결과는 데이터의 밀도를 기반으로 하여 복잡한 달 모양의 군집을 성공적으로 찾아냈습니다.",
+        "실루엣 점수 해석": "실루엣 점수는 군집화가 얼마나 잘 되었는지를 나타내는 지표로, -1에서 1 사이의 값을 가집니다. 1에 가까울수록 좋습니다. K-평균의 실루엣 점수는 0.49인 반면, DBSCAN의 점수는 0.31입니다. 이 경우, 시각적으로는 DBSCAN이 더 잘 된 것처럼 보이지만 실루엣 점수는 K-평균이 더 높게 나왔습니다. 이는 실루엣 점수 또한 군집이 볼록한(convex) 모양일 때 더 높은 점수를 주는 경향이 있기 때문이며, 비지도 학습의 평가가 얼마나 복잡하고 다면적일 수 있는지를 보여주는 좋은 예시입니다.",
+        "결론": "어떤 군집화 알고리즘이 항상 우월한 것은 없습니다. 데이터의 형태와 분포에 따라 적합한 알고리즘이 다릅니다. 따라서 데이터의 특성을 먼저 파악(EDA)하고, 다양한 알고리즘을 적용해보며, 실루엣 점수와 같은 정량적 지표와 시각적 결과를 함께 고려하여 최적의 군집화 방법을 선택하는 것이 중요합니다."
+    },
+    "questions": [
+        {
+            "q": "K-평균 군집화에서 '엘보우 방법(Elbow Method)'은 무엇을 결정하는 데 사용되나요?",
+            "options": ["데이터의 차원", "이상치의 개수", "최적의 군집 개수 (K)", "알고리즘의 수행 시간"],
+            "correct": 2,
+            "explanation": "엘보우 방법은 K를 1부터 점차 늘려가면서 각 K에 대한 군집 내 오차 제곱합(SSE)의 변화를 그래프로 그렸을 때, 그래프의 기울기가 팔꿈치처럼 급격히 꺾이는 지점을 최적의 K로 판단하는 방법입니다.",
+            "difficulty": 7,
+            "concept": "군집화"
+        },
+        {
+            "q": "밀도 기반 군집화 알고리즘인 DBSCAN이 K-평균에 비해 가지는 장점은 무엇인가요?",
+            "options": ["계산 속도가 항상 더 빠르다.", "군집의 개수를 미리 지정할 필요가 없고, 임의의 모양을 가진 군집을 찾을 수 있다.", "모든 종류의 데이터에 더 좋은 성능을 보인다.", "해석하기가 더 쉽다."],
+            "correct": 1,
+            "explanation": "DBSCAN은 데이터의 밀도를 기반으로 군집을 형성하므로, K-평균처럼 군집이 원형일 것이라는 가정이 없습니다. 따라서 복잡한 모양의 군집을 잘 찾아내고, 노이즈 포인트를 구분할 수 있으며, K값을 미리 정할 필요가 없다는 장점이 있습니다.",
+            "difficulty": 8,
+            "concept": "DBSCAN"
+        }
+    ]
+}

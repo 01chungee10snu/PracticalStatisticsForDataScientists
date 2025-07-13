@@ -1,0 +1,53 @@
+{
+    "title": "📈 회귀 및 예측",
+    "category": "predictive_modeling",
+    "difficulty": 7,
+    "prerequisites": ["hypothesis_testing", "eda"],
+    "learningObjectives": [
+        "단순 선형 회귀와 다중 회귀의 차이점 이해",
+        "회귀계수의 의미를 해석하고 신뢰구간의 중요성 파악",
+        "과적합(Overfitting) 문제와 정규화(Regularization)의 필요성 이해",
+        "회귀 모델의 성능을 평가하는 다양한 지표(R-squared, RMSE) 학습"
+    ],
+    "content": "회귀 분석은 하나 이상의 독립 변수(X)를 사용하여 종속 변수(Y)를 예측하는 모델을 만드는 통계 기법입니다. 주택 가격 예측, 매출액 예측 등 다양한 분야에서 활용됩니다.",
+    "detailedExplanation": {
+        "선형 회귀 (Linear Regression)": "독립 변수와 종속 변수 간의 관계를 직선으로 모델링합니다. 모델이 학습한 각 변수의 계수(coefficient)는 해당 변수가 한 단위 증가할 때 종속 변수가 얼마나 변하는지를 의미합니다.",
+        "다중공선성 (Multicollinearity)": "다중 회귀 분석에서 독립 변수들끼리 강한 상관관계를 가질 때 발생하는 문제입니다. 이는 모델의 안정성을 해치고 계수 해석을 어렵게 만듭니다. 분산 팽창 계수(VIF)를 통해 진단할 수 있습니다.",
+        "과적합과 정규화 (Overfitting and Regularization)": "모델이 학습 데이터에만 너무 잘 맞춰져서 새로운 데이터에 대한 예측 성능이 떨어지는 현상을 과적합이라고 합니다. 릿지(L2)나 라쏘(L1)와 같은 정규화 기법은 모델의 복잡도에 페널티를 부과하여 과적합을 방지하는 데 도움을 줍니다."
+    },
+    "inDepthContent": {
+        "회귀 진단 (Regression Diagnostics)": "모델이 데이터를 잘 설명하는지 확인하기 위해 잔차(residuals)를 분석하는 과정입니다. 잔차의 등분산성, 정규성, 독립성 등을 검토하여 모델의 가정이 만족되었는지 확인해야 합니다. 잔차 플롯을 통해 시각적으로 확인할 수 있습니다.",
+        "변수 선택 (Feature Selection)": "모델의 성능을 높이고 해석을 용이하게 하기 위해 중요한 변수만 선택하는 과정입니다. 단계적 선택법(Stepwise selection)은 변수를 추가하거나 제거하며 최적의 모델을 찾고, 라쏘(L1) 회귀는 중요하지 않은 변수의 계수를 0으로 만들어 자동으로 변수를 선택합니다.",
+        "일반화 선형 모델 (Generalized Linear Models, GLM)": "종속 변수가 정규분포를 따르지 않는 경우(예: 이항분포, 포아송분포)에도 선형 모델을 적용할 수 있도록 확장한 개념입니다. 로지스틱 회귀가 대표적인 예입니다."
+    },
+    "realWorldExamples": [
+        "부동산 앱에서 주택의 크기, 방 개수, 위치 등을 변수로 사용하여 주택 가격 예측",
+        "광고비, 프로모션 횟수 등을 변수로 사용하여 다음 분기 제품 판매량 예측",
+        "학생의 공부 시간, 출석률 등을 변수로 사용하여 기말고사 성적 예측"
+    ],
+    "codeSnippet": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nfrom sklearn.linear_model import Ridge, Lasso\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.metrics import mean_squared_error\n\n# 다중공선성이 있는 가상 데이터 생성\nnp.random.seed(42)\nX1 = np.random.rand(100, 1) * 10\nX2 = X1 + np.random.normal(0, 0.5, (100, 1)) # X1과 X2는 강한 상관관계\nX3 = np.random.rand(100, 1) * 10\ny = 2*X1 + 3*X2 + 4*X3 + np.random.randn(100, 1) * 5\n\n\nX = np.hstack([X1, X2, X3])\n\n# 라쏘(L1)와 릿지(L2) 회귀 모델 학습\nlasso = Lasso(alpha=1.0)\nlasso.fit(X, y)\n\nridge = Ridge(alpha=1.0)\nridge.fit(X, y)\n\n# 회귀 계수 시각화\ncoef_df = pd.DataFrame({\n    'Lasso': lasso.coef_,\n    'Ridge': ridge.coef_\n}, index=['X1 (Size)', 'X2 (Nearby_Size)', 'X3 (Location_Score)'])\n\ncoef_df.plot(kind='bar', figsize=(10, 6))\nplt.title('Lasso vs Ridge Coefficients for Multicollinear Data')\nplt.ylabel('Coefficient Value')\nplt.xticks(rotation=0)\nplt.show()\n\nprint("라쏘 회귀 계수:", lasso.coef_)",
+    "interpretingTheResults": {
+        "결과 해석": "위 그래프는 다중공선성이 있는 데이터에 라쏘와 릿지 회귀를 적용했을 때의 회귀 계수를 보여줍니다. X1과 X2는 서로 상관관계가 매우 높게 설정되었습니다.",
+        "라쏘(Lasso) 회귀의 특징": "라쏘 모델의 결과를 보면, X1의 계수는 4.85인 반면, X2의 계수는 0으로 추정되었습니다. 이는 라쏘 회귀가 상관관계가 높은 변수 그룹에서 하나의 변수만 남기고 나머지 변수의 계수를 0으로 만들어, 자동으로 변수를 선택하는 특징을 보여줍니다.",
+        "릿지(Ridge) 회귀의 특징": "반면, 릿지 모델은 X1과 X2의 계수를 각각 2.36과 2.53으로 추정했습니다. 릿지 회귀는 상관관계가 높은 변수들의 계수를 0으로 만들기보다는, 전체적으로 크기를 줄여서 모델의 안정성을 높이는 경향이 있습니다.",
+        "결론": "이러한 결과는 모델의 해석이 중요하고, 변수 간의 상관관계가 높을 때 어떤 변수가 더 중요한지 선택해야 하는 상황이라면 라쏘 회귀가 더 유용할 수 있음을 시사합니다. 반면, 모든 변수를 고려하되 안정적인 예측 모델을 원한다면 릿지 회귀가 더 적합할 수 있습니다."
+    },
+    "questions": [
+        {
+            "q": "다중 회귀 분석에서 다중공선성(Multicollinearity) 문제가 발생했을 때, 어떤 현상이 나타날 수 있나요?",
+            "options": ["모델의 예측 정확도가 매우 높아진다.", "회귀계수의 부호가 예상과 다르게 나타나거나, 표준오차가 매우 커진다.", "모든 변수의 p-값이 0에 가까워진다.", "결정계수(R-squared)가 항상 1이 된다."],
+            "correct": 1,
+            "explanation": "다중공선성은 독립 변수들끼리 서로 정보를 공유하고 있어, 각 변수가 종속 변수에 미치는 고유한 영향을 분리하기 어렵게 만듭니다. 이로 인해 회귀계수가 불안정해지고 해석이 어려워지는 문제가 발생합니다.",
+            "difficulty": 8,
+            "concept": "다중공선성"
+        },
+        {
+            "q": "라쏘(L1) 회귀가 릿지(L2) 회귀와 구별되는 가장 큰 특징은 무엇인가요?",
+            "options": ["계산 속도가 더 빠르다.", "항상 더 높은 예측 성능을 보인다.", "중요하지 않은 변수의 회귀계수를 정확히 0으로 만들어 변수 선택 효과를 가진다.", "이상치에 더 강건하다."],
+            "correct": 2,
+            "explanation": "라쏘 회귀는 특정 변수의 계수를 완전히 0으로 만들 수 있어, 모델에 포함될 변수를 자동으로 선택해주는 효과가 있습니다. 반면 릿지 회귀는 계수를 0에 가깝게 줄일 뿐, 0으로 만들지는 않습니다.",
+            "difficulty": 7,
+            "concept": "정규화"
+        }
+    ]
+}

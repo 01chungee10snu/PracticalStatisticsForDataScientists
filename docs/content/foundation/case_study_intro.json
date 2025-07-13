@@ -1,0 +1,57 @@
+{
+    "title": "🧐 사례 연구 입문",
+    "category": "case_study_methodology",
+    "difficulty": 3,
+    "prerequisites": [],
+    "learningObjectives": [
+        "사례 연구의 정의와 철학적 기반 이해",
+        "다양한 사례 연구 설계(고유적, 도구적, 집단적)의 차이점 분석",
+        "사례 연구의 강점과 약점을 비판적으로 평가",
+        "분석적 일반화의 개념과 적용 방법 학습"
+    ],
+    "content": "사례 연구는 특정 현상을 그 실제 삶의 맥락 안에서 심층적으로 탐구하는 연구 방법론입니다. 이 단원에서는 사례 연구의 본질, 설계, 그리고 다른 연구 방법론과의 관계를 깊이 있게 학습합니다.",
+    "detailedExplanation": {
+        "사례 연구의 정의와 본질": "Robert K. Yin에 따르면, 사례 연구는 '실제 삶의 맥락 속에서 현대적 현상을 경험적으로 탐구하는 것'으로, 특히 '현상과 맥락 간의 경계가 명확하지 않을 때' 유용합니다. 이는 통제된 환경에서의 실험과 달리, 현실의 복잡성을 그대로 받아들이고 탐구하는 데 강점이 있습니다.",
+        "철학적 기반": "사례 연구는 주로 해석주의(interpretivism)와 사회적 구성주의(social constructivism)에 철학적 뿌리를 두고 있습니다. 이는 객관적인 실재보다는 사회적으로 구성되는 현실과 그 의미를 탐구하는 데 중점을 둡니다.",
+        "다중 증거원 활용": "사례 연구의 신뢰도를 높이는 핵심 전략은 인터뷰, 관찰, 문서, 아카이브 기록 등 다양한 출처의 데이터를 종합적으로 활용하는 '삼각측량(Triangulation)'입니다. 이를 통해 하나의 현상을 여러 각도에서 조명하고, 편향을 줄일 수 있습니다."
+    },
+    "inDepthContent": {
+        "사례 연구 설계 유형 심화": {
+            "고유적 사례 연구 (Intrinsic Case Study)": "연구자가 특정 사례 자체에 순수한 관심을 가질 때 수행됩니다. 사례는 그 자체로 독특하고 중요하기 때문에 연구의 대상이 됩니다. 일반화보다는 사례 자체의 깊은 이해가 목적입니다.",
+            "도구적 사례 연구 (Instrumental Case Study)": "특정 이론을 설명하거나 정교화하기 위한 '도구'로서 사례를 활용합니다. 연구의 주된 목적은 사례를 넘어선 외부의 이론적 문제에 있습니다.",
+            "집단적 사례 연구 (Collective Case Study)": "하나의 현상을 탐구하기 위해 여러 개의 도구적 사례를 함께 연구하는 것입니다. 이를 통해 더 광범위한 이론적 통찰과 일반화 가능성을 높일 수 있습니다."
+        },
+        "분석적 일반화 vs. 통계적 일반화": {
+            "통계적 일반화": "표본(sample)의 연구 결과를 모집단(population)으로 일반화하는 것을 목표로 합니다. 이는 주로 양적 연구에서 추구하는 방식입니다.",
+            "분석적 일반화": "사례 연구에서 추구하는 방식으로, 연구 결과를 기존에 존재하는 이론(theory)과 비교하고 대조하여 이론을 확장, 수정, 또는 새로운 이론을 구축하는 것을 목표로 합니다. 즉, '이론'에 대한 일반화입니다."
+        }
+    },
+    "realWorldExamples": [
+        "앨리슨과 젤리코프의 쿠바 미사일 위기 분석: 정부의 의사결정 과정을 심층적으로 탐구한 고전적인 사례 연구.",
+        "특정 IT 기업의 애자일(Agile) 방법론 도입 성공 사례: 어떻게 조직 문화와 프로세스가 변화했는지 인터뷰와 내부 문서를 통해 분석."
+    ],
+    "codeSnippet": "# 사례 연구는 질적 데이터 분석이 중심이므로, Python 코드는 주로 텍스트 데이터 전처리나 시각화에 활용될 수 있습니다.\nimport pandas as pd\nimport matplotlib.pyplot as plt\nfrom collections import Counter\n\n# 가상의 인터뷰 스크립트에서 키워드 빈도 분석\ninterview_text = \"\"\"The new system was initially challenging, but the continuous training and support from the management were key factors. The support system helped us overcome the technical challenges. We believe leadership and consistent support are crucial.\"\"\"\n\nkeywords = [word for word in interview_text.lower().replace('.','').replace(',','').split() if len(word) > 4]\nkeyword_counts = Counter(keywords)\n\ndf_keywords = pd.DataFrame(keyword_counts.most_common(5), columns=['Keyword', 'Frequency'])\n\ndf_keywords.set_index('Keyword', inplace=True)\ndf_keywords.plot(kind='barh')\nplt.title('Keyword Frequency in Interview')\nplt.xlabel('Frequency')\nplt.show()",
+    "interpretingTheResults": {
+        "결과 해석": "위 코드는 가상의 인터뷰 텍스트에서 특정 키워드들의 빈도를 계산하고 시각화합니다. 막대그래프는 어떤 단어가 가장 많이 언급되었는지 보여줍니다.",
+        "통찰 도출": "차트에서 'support'(지원)와 'challenging'(어려움)이 가장 빈번하게 나타난 것을 확인할 수 있습니다. 이는 '새로운 시스템 도입 과정에서 어려움이 있었지만, 지원 시스템이 중요한 역할을 했다'는 잠정적인 결론을 도출하게 합니다.",
+        "후속 분석 제안": "이러한 빈도 분석 결과는 질적 분석의 출발점이 될 수 있습니다. 연구자는 이제 'support'와 'challenges'가 언급된 인터뷰의 구체적인 맥락을 심층적으로 분석하여, 어떤 종류의 어려움이 있었고 어떤 지원이 효과적이었는지 등을 더 깊이 파고들 수 있습니다."
+    },
+    "questions": [
+        {
+            "q": "사례 연구에서 '분석적 일반화'를 추구한다는 것은 무엇을 의미하나요?",
+            "options": ["연구 결과를 모든 사람에게 적용하는 것", "통계적으로 유의미한 결론을 도출하는 것", "연구 결과를 기존 이론에 연결하여 이론을 발전시키는 것", "사례의 독특성을 강조하여 일반화를 포기하는 것"],
+            "correct": 2,
+            "explanation": "분석적 일반화는 통계적 일반화와 달리, 표본의 결과를 모집단으로 확장하는 것이 아니라, 사례 연구에서 발견된 패턴이나 관계를 기존 이론과 비교하여 이론을 더욱 정교하게 만들거나 새로운 이론적 명제를 제시하는 지적 과정입니다.",
+            "difficulty": 8,
+            "concept": "분석적 일반화"
+        },
+        {
+            "q": "특정 혁신 교육 모델의 성공 요인을 밝히기 위해, 해당 모델을 성공적으로 적용한 여러 학교를 선정하여 비교 분석하는 연구는 어떤 사례 연구 설계에 해당하나요?",
+            "options": ["고유적 사례 연구", "도구적 사례 연구", "집단적 사례 연구", "역사적 사례 연구"],
+            "correct": 2,
+            "explanation": "집단적 사례 연구는 하나의 현상(혁신 교육 모델의 성공 요인)을 더 깊이 이해하고 이론화하기 위해 여러 관련 사례(성공적인 학교들)를 종합적으로 연구하는 설계입니다.",
+            "difficulty": 7,
+            "concept": "사례 연구 설계"
+        }
+    ]
+}
