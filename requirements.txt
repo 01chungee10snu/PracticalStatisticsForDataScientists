@@ -7,3 +7,8 @@ markdown
 numpy
 scikit-learn
 plotly
+flask-cors
+flask-limiter
+werkzeug
+hashlib
+pathlib

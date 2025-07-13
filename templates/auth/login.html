@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - Statistics Learning Platform</title>
+    <link rel="stylesheet" href="/static/css/modern-styles.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light-color) 100%);
+            padding: var(--spacing-4);
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 28rem;
+            background: var(--surface-1);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+        }
+
+        .auth-header {
+            padding: var(--spacing-8) var(--spacing-6) var(--spacing-6);
+            text-align: center;
+            background: var(--surface-2);
+        }
+
+        .auth-logo {
+            width: 4rem;
+            height: 4rem;
+            margin: 0 auto var(--spacing-4);
+            background: var(--primary);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .auth-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-2);
+            color: var(--text-primary);
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .auth-form {
+            padding: var(--spacing-6);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-5);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-2);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-3) var(--spacing-4);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            transition: all var(--transition-fast);
+            background: var(--surface-1);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px hsla(var(--primary-hue), var(--primary-sat), var(--primary-light), 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+        }
+
+        .error-message {
+            margin-top: var(--spacing-2);
+            color: var(--error);
+            font-size: var(--font-size-sm);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: var(--spacing-4);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            position: relative;
+        }
+
+        .auth-button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-spinner {
+            display: none;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--spacing-2);
+        }
+
+        .auth-button.loading .button-spinner {
+            display: inline-block;
+        }
+
+        .auth-links {
+            padding: var(--spacing-4) var(--spacing-6);
+            text-align: center;
+            border-top: 1px solid var(--border-light);
+            background: var(--surface-2);
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--transition-fast);
+        }
+
+        .auth-link:hover {
+            color: var(--primary-dark);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: var(--spacing-6) 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        .divider span {
+            padding: 0 var(--spacing-4);
+            color: var(--text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+
+        .demo-login {
+            margin-top: var(--spacing-4);
+            padding: var(--spacing-3);
+            background: var(--surface-3);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+        }
+
+        .demo-title {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--spacing-2);
+            color: var(--text-secondary);
+        }
+
+        .demo-credentials {
+            font-size: var(--font-size-xs);
+            color: var(--text-tertiary);
+            font-family: monospace;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: var(--spacing-2);
+            }
+            
+            .auth-card {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">SL</div>
+                <h1 class="auth-title">로그인</h1>
+                <p class="auth-subtitle">통계 학습 플랫폼에 오신 것을 환영합니다</p>
+            </div>
+
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">사용자명</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        required 
+                        autocomplete="username"
+                        placeholder="사용자명을 입력하세요"
+                    >
+                    <div class="error-message" id="username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">비밀번호</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="비밀번호를 입력하세요"
+                    >
+                    <div class="error-message" id="password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label style="display: flex; align-items: center; font-size: var(--font-size-sm);">
+                            <input type="checkbox" id="remember" name="remember" style="margin-right: var(--spacing-2);">
+                            로그인 상태 유지
+                        </label>
+                        <a href="#" class="auth-link">비밀번호 찾기</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-button" id="login-button">
+                    <span class="button-spinner"></span>
+                    로그인
+                </button>
+
+                <div class="demo-login">
+                    <div class="demo-title">데모 계정</div>
+                    <div class="demo-credentials">
+                        사용자명: demo<br>
+                        비밀번호: demo123!
+                    </div>
+                </div>
+            </form>
+
+            <div class="auth-links">
+                <p style="margin-bottom: var(--spacing-2); color: var(--text-secondary); font-size: var(--font-size-sm);">
+                    계정이 없으신가요?
+                </p>
+                <a href="/register" class="auth-link">회원가입하기</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        class AuthManager {
+            constructor() {
+                this.form = document.getElementById('login-form');
+                this.button = document.getElementById('login-button');
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Real-time validation
+                ['username', 'password'].forEach(field => {
+                    const input = document.getElementById(field);
+                    input.addEventListener('blur', () => this.validateField(field));
+                    input.addEventListener('input', () => this.clearError(field));
+                });
+
+                // Demo login quick fill
+                const demoLogin = document.querySelector('.demo-login');
+                demoLogin.addEventListener('click', () => {
+                    document.getElementById('username').value = 'demo';
+                    document.getElementById('password').value = 'demo123!';
+                });
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                this.setLoading(true);
+
+                try {
+                    const formData = new FormData(this.form);
+                    const data = {
+                        username: formData.get('username'),
+                        password: formData.get('password'),
+                        remember: formData.get('remember') === 'on'
+                    };
+
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showToast('로그인 성공! 대시보드로 이동합니다...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1000);
+                    } else {
+                        this.showToast(result.message, 'error');
+                        this.setLoading(false);
+                    }
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showToast('로그인 중 오류가 발생했습니다', 'error');
+                    this.setLoading(false);
+                }
+            }
+
+            validateForm() {
+                let isValid = true;
+                
+                ['username', 'password'].forEach(field => {
+                    if (!this.validateField(field)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            validateField(fieldName) {
+                const input = document.getElementById(fieldName);
+                const value = input.value.trim();
+                let errorMessage = '';
+
+                switch (fieldName) {
+                    case 'username':
+                        if (!value) {
+                            errorMessage = '사용자명을 입력해주세요';
+                        } else if (value.length < 3) {
+                            errorMessage = '사용자명은 3자 이상이어야 합니다';
+                        }
+                        break;
+                    
+                    case 'password':
+                        if (!value) {
+                            errorMessage = '비밀번호를 입력해주세요';
+                        } else if (value.length < 6) {
+                            errorMessage = '비밀번호는 6자 이상이어야 합니다';
+                        }
+                        break;
+                }
+
+                this.setFieldError(fieldName, errorMessage);
+                return !errorMessage;
+            }
+
+            setFieldError(fieldName, message) {
+                const input = document.getElementById(fieldName);
+                const errorElement = document.getElementById(`${fieldName}-error`);
+                
+                if (message) {
+                    input.classList.add('error');
+                    errorElement.textContent = message;
+                } else {
+                    input.classList.remove('error');
+                    errorElement.textContent = '';
+                }
+            }
+
+            clearError(fieldName) {
+                this.setFieldError(fieldName, '');
+            }
+
+            setLoading(loading) {
+                this.button.classList.toggle('loading', loading);
+                this.button.disabled = loading;
+                
+                const buttonText = this.button.querySelector('span:not(.button-spinner)');
+                if (buttonText) {
+                    buttonText.textContent = loading ? '로그인 중...' : '로그인';
+                }
+            }
+
+            showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <span class="toast-message">${message}</span>
+                    <button class="toast-close" onclick="this.parentElement.remove()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                        </svg>
+                    </button>
+                `;
+
+                const container = document.getElementById('toast-container');
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    if (toast.parentElement) {
+                        toast.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new AuthManager();
+        });
+    </script>
+</body>
+</html>

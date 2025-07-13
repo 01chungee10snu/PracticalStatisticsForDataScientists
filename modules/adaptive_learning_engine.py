@@ -13,6 +13,14 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timedelta
 from enum import Enum
 import json
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+import pickle
+import warnings
+warnings.filterwarnings('ignore')
 
 
 class LearningState(Enum):
@@ -77,7 +85,7 @@ class ContentRecommendation:
 
 
 class AdaptiveLearningEngine:
-    """적응형 학습 엔진"""
+    """적응형 학습 엔진 - ML 강화 버전"""
     
     def __init__(self):
         self.learner_profiles: Dict[str, LearnerProfile] = {}
@@ -85,6 +93,21 @@ class AdaptiveLearningEngine:
         self.content_difficulty_map: Dict[str, int] = {}
         self.learning_objectives_map: Dict[str, List[str]] = {}
         self.adaptation_parameters = self._initialize_adaptation_parameters()
+        
+        # ML 모델들
+        self.success_predictor = None
+        self.difficulty_predictor = None
+        self.engagement_predictor = None
+        self.scaler = StandardScaler()
+        
+        # 모델 성능 추적
+        self.model_performance = {
+            'success_predictor': {'accuracy': 0.0, 'last_trained': None},
+            'difficulty_predictor': {'accuracy': 0.0, 'last_trained': None},
+            'engagement_predictor': {'accuracy': 0.0, 'last_trained': None}
+        }
+        
+        self._initialize_ml_models()
     
     def _initialize_adaptation_parameters(self) -> Dict[str, Any]:
         """적응 매개변수 초기화"""
@@ -98,8 +121,54 @@ class AdaptiveLearningEngine:
             "attempt_weight": 0.5,                  # 시도 횟수 가중치
             "recent_interaction_window": 10,        # 최근 상호작용 윈도우
             "learning_rate_alpha": 0.1,             # 학습률
-            "forgetting_factor": 0.95               # 망각 계수
+            "forgetting_factor": 0.95,              # 망각 계수
+            "ml_retrain_threshold": 100,            # ML 모델 재훈련 임계값
+            "feature_importance_threshold": 0.05,   # 특성 중요도 임계값
+            "ensemble_weights": [0.4, 0.3, 0.3],   # 앙상블 가중치
+            "temporal_decay_factor": 0.95           # 시간적 감쇠 계수
         }
+    
+    def _initialize_ml_models(self):
+        """ML 모델 초기화"""
+        try:
+            # 저장된 모델 로드 시도
+            self._load_models()
+        except FileNotFoundError:
+            # 새 모델 생성
+            self.success_predictor = RandomForestClassifier(
+                n_estimators=100, random_state=42, max_depth=10
+            )
+            self.difficulty_predictor = LogisticRegression(
+                random_state=42, max_iter=1000
+            )
+            self.engagement_predictor = RandomForestClassifier(
+                n_estimators=50, random_state=42, max_depth=8
+            )
+    
+    def _load_models(self):
+        """저장된 모델 로드"""
+        with open('models/success_predictor.pkl', 'rb') as f:
+            self.success_predictor = pickle.load(f)
+        with open('models/difficulty_predictor.pkl', 'rb') as f:
+            self.difficulty_predictor = pickle.load(f)
+        with open('models/engagement_predictor.pkl', 'rb') as f:
+            self.engagement_predictor = pickle.load(f)
+        with open('models/scaler.pkl', 'rb') as f:
+            self.scaler = pickle.load(f)
+    
+    def _save_models(self):
+        """모델 저장"""
+        import os
+        os.makedirs('models', exist_ok=True)
+        
+        with open('models/success_predictor.pkl', 'wb') as f:
+            pickle.dump(self.success_predictor, f)
+        with open('models/difficulty_predictor.pkl', 'wb') as f:
+            pickle.dump(self.difficulty_predictor, f)
+        with open('models/engagement_predictor.pkl', 'wb') as f:
+            pickle.dump(self.engagement_predictor, f)
+        with open('models/scaler.pkl', 'wb') as f:
+            pickle.dump(self.scaler, f)
     
     def track_interaction(self, interaction: LearningInteraction):
         """학습 상호작용 추적"""
@@ -390,7 +459,38 @@ class AdaptiveLearningEngine:
         }
     
     def _predict_success_probability(self, user_id: str, content_id: str) -> float:
-        """성공 확률 예측"""
+        """ML 기반 성공 확률 예측"""
+        if self.success_predictor is None or user_id not in self.learner_profiles:
+            return self._fallback_success_prediction(user_id, content_id)
+        
+        try:
+            # 특성 벡터 생성
+            features = self._extract_prediction_features(user_id, content_id)
+            features_scaled = self.scaler.transform([features])
+            
+            # ML 모델 예측
+            if hasattr(self.success_predictor, 'predict_proba'):
+                prediction = self.success_predictor.predict_proba(features_scaled)[0][1]
+            else:
+                prediction = self.success_predictor.predict(features_scaled)[0]
+            
+            # 기존 규칙 기반 예측과 앙상블
+            rule_based = self._fallback_success_prediction(user_id, content_id)
+            ensemble_prediction = (
+                0.7 * prediction + 0.3 * rule_based
+            )
+            
+            return max(0.0, min(1.0, ensemble_prediction))
+            
+        except Exception as e:
+            print(f"ML 예측 오류: {e}, 규칙 기반으로 대체")
+            return self._fallback_success_prediction(user_id, content_id)
+    
+    def _fallback_success_prediction(self, user_id: str, content_id: str) -> float:
+        """규칙 기반 성공 확률 예측 (백업)"""
+        if user_id not in self.learner_profiles:
+            return 0.5
+            
         profile = self.learner_profiles[user_id]
         
         # 특성 기반 예측
@@ -413,6 +513,40 @@ class AdaptiveLearningEngine:
         )
         
         return max(0.0, min(1.0, prediction))
+    
+    def _extract_prediction_features(self, user_id: str, content_id: str) -> List[float]:
+        """예측을 위한 특성 벡터 추출"""
+        profile = self.learner_profiles[user_id]
+        
+        features = [
+            # 학습자 특성
+            profile.prior_knowledge_level / 10.0,
+            profile.preferred_difficulty / 10.0,
+            profile.motivation_level / 10.0,
+            profile.time_availability / 12.0,
+            
+            # 콘텐츠 특성
+            self.content_difficulty_map.get(content_id, 5) / 10.0,
+            len(self._get_content_prerequisites(content_id)) / 5.0,
+            
+            # 학습 스타일 매칭
+            self._calculate_learning_style_match(profile, content_id),
+            
+            # 성과 기록
+            self._calculate_success_rate(user_id),
+            self._calculate_topic_success_rate(user_id, self._get_content_topic(content_id)),
+            
+            # 시간적 특성
+            self._get_time_since_last_activity(user_id) / (24 * 3600),  # 일 단위
+            self._get_session_frequency(user_id),
+            
+            # 상호작용 패턴
+            self._get_avg_attempts(user_id),
+            self._get_hint_usage_rate(user_id),
+            self._get_avg_completion_time_ratio(user_id)
+        ]
+        
+        return features
     
     def generate_adaptive_feedback(self, user_id: str, 
                                  interaction: LearningInteraction) -> Dict[str, Any]:
@@ -529,6 +663,211 @@ class AdaptiveLearningEngine:
             "factor_analysis": 1800  # 30분
         }
         return duration_map.get(content_id, 600)
+    
+    # 새로운 ML 기반 메서드들
+    def train_ml_models(self):
+        """ML 모델 훈련"""
+        if len(self.interaction_history) < self.adaptation_parameters["ml_retrain_threshold"]:
+            print(f"데이터 부족: {len(self.interaction_history)}개 (최소 {self.adaptation_parameters['ml_retrain_threshold']}개 필요)")
+            return False
+        
+        try:
+            # 훈련 데이터 준비
+            X, y_success, y_difficulty, y_engagement = self._prepare_training_data()
+            
+            if len(X) == 0:
+                print("훈련 데이터가 없습니다.")
+                return False
+            
+            # 데이터 분할
+            X_train, X_test, y_success_train, y_success_test = train_test_split(
+                X, y_success, test_size=0.2, random_state=42, stratify=y_success
+            )
+            
+            # 특성 스케일링
+            X_train_scaled = self.scaler.fit_transform(X_train)
+            X_test_scaled = self.scaler.transform(X_test)
+            
+            # 성공 예측 모델 훈련
+            self.success_predictor.fit(X_train_scaled, y_success_train)
+            success_pred = self.success_predictor.predict(X_test_scaled)
+            success_accuracy = accuracy_score(y_success_test, success_pred)
+            
+            # 모델 성능 업데이트
+            self.model_performance['success_predictor'].update({
+                'accuracy': success_accuracy,
+                'last_trained': datetime.now()
+            })
+            
+            # 모델 저장
+            self._save_models()
+            
+            print(f"ML 모델 훈련 완료 - 성공 예측 정확도: {success_accuracy:.3f}")
+            return True
+            
+        except Exception as e:
+            print(f"ML 모델 훈련 오류: {e}")
+            return False
+    
+    def _prepare_training_data(self) -> Tuple[List[List[float]], List[int], List[int], List[int]]:
+        """훈련 데이터 준비"""
+        X = []
+        y_success = []
+        y_difficulty = []
+        y_engagement = []
+        
+        for interaction in self.interaction_history:
+            if interaction.user_id not in self.learner_profiles:
+                continue
+                
+            try:
+                features = self._extract_prediction_features(
+                    interaction.user_id, interaction.content_id
+                )
+                X.append(features)
+                
+                # 성공 여부 레이블
+                y_success.append(1 if interaction.success else 0)
+                
+                # 난이도 레이블 (적절/부적절)
+                profile = self.learner_profiles[interaction.user_id]
+                content_difficulty = self.content_difficulty_map.get(interaction.content_id, 5)
+                difficulty_appropriate = abs(profile.preferred_difficulty - content_difficulty) <= 2
+                y_difficulty.append(1 if difficulty_appropriate else 0)
+                
+                # 참여도 레이블 (시간 기반)
+                expected_time = self._get_expected_duration(interaction.content_id)
+                engagement_level = 1 if interaction.duration > expected_time * 0.5 else 0
+                y_engagement.append(engagement_level)
+                
+            except Exception as e:
+                print(f"특성 추출 오류: {e}")
+                continue
+        
+        return X, y_success, y_difficulty, y_engagement
+    
+    def get_feature_importance(self) -> Dict[str, float]:
+        """특성 중요도 분석"""
+        if self.success_predictor is None or not hasattr(self.success_predictor, 'feature_importances_'):
+            return {}
+        
+        feature_names = [
+            'prior_knowledge', 'preferred_difficulty', 'motivation', 'time_availability',
+            'content_difficulty', 'prerequisites_count', 'learning_style_match',
+            'success_rate', 'topic_success_rate', 'time_since_activity',
+            'session_frequency', 'avg_attempts', 'hint_usage', 'completion_time_ratio'
+        ]
+        
+        importances = self.success_predictor.feature_importances_
+        return dict(zip(feature_names, importances))
+    
+    def adaptive_difficulty_recommendation(self, user_id: str) -> Dict[str, Any]:
+        """적응형 난이도 추천"""
+        if user_id not in self.learner_profiles:
+            return {"recommended_difficulty": 5, "confidence": 0.5}
+        
+        profile = self.learner_profiles[user_id]
+        recent_performance = self._get_recent_performance_metrics(user_id)
+        
+        # ML 기반 추천 (있는 경우)
+        ml_recommendation = self._get_ml_difficulty_recommendation(user_id)
+        
+        # 규칙 기반 추천
+        rule_recommendation = self._get_rule_based_difficulty_recommendation(user_id)
+        
+        # 앙상블 결합
+        if ml_recommendation['confidence'] > 0.7:
+            final_difficulty = int(
+                0.7 * ml_recommendation['difficulty'] + 
+                0.3 * rule_recommendation['difficulty']
+            )
+            confidence = (ml_recommendation['confidence'] + rule_recommendation['confidence']) / 2
+        else:
+            final_difficulty = rule_recommendation['difficulty']
+            confidence = rule_recommendation['confidence']
+        
+        return {
+            "recommended_difficulty": max(1, min(10, final_difficulty)),
+            "confidence": confidence,
+            "reasoning": self._generate_difficulty_reasoning(user_id, final_difficulty),
+            "recent_performance": recent_performance
+        }
+    
+    def _get_recent_performance_metrics(self, user_id: str) -> Dict[str, float]:
+        """최근 성과 지표 계산"""
+        recent_interactions = self._get_recent_interactions(user_id, 20)
+        
+        if not recent_interactions:
+            return {"success_rate": 0.5, "avg_attempts": 1.0, "completion_rate": 0.5}
+        
+        success_rate = np.mean([i.success for i in recent_interactions if i.success is not None])
+        avg_attempts = np.mean([i.attempts for i in recent_interactions])
+        
+        # 완료율 (스킵하지 않은 비율)
+        non_skip_interactions = [i for i in recent_interactions if i.interaction_type != InteractionType.SKIP_CONTENT]
+        completion_rate = len(non_skip_interactions) / len(recent_interactions) if recent_interactions else 0.5
+        
+        return {
+            "success_rate": success_rate,
+            "avg_attempts": avg_attempts,
+            "completion_rate": completion_rate
+        }
+    
+    # 유틸리티 메서드들 추가
+    def _get_historical_performance(self, user_id: str) -> float:
+        """전체 성과 기록"""
+        return self._calculate_success_rate(user_id, window_size=50)
+    
+    def _get_time_since_last_activity(self, user_id: str) -> float:
+        """마지막 활동 이후 시간 (초)"""
+        if user_id not in self.learner_profiles:
+            return 86400  # 1일
+        
+        last_activity = self.learner_profiles[user_id].last_activity
+        return (datetime.now() - last_activity).total_seconds()
+    
+    def _get_session_frequency(self, user_id: str) -> float:
+        """세션 빈도 (일주일 기준)"""
+        week_ago = datetime.now() - timedelta(days=7)
+        recent_sessions = [
+            i for i in self.interaction_history
+            if i.user_id == user_id and i.timestamp > week_ago
+        ]
+        
+        # 날짜별 그룹화
+        session_dates = set(i.timestamp.date() for i in recent_sessions)
+        return len(session_dates) / 7.0
+    
+    def _get_avg_attempts(self, user_id: str) -> float:
+        """평균 시도 횟수"""
+        user_interactions = [i for i in self.interaction_history if i.user_id == user_id]
+        if not user_interactions:
+            return 1.0
+        
+        return np.mean([i.attempts for i in user_interactions])
+    
+    def _get_hint_usage_rate(self, user_id: str) -> float:
+        """힌트 사용률"""
+        user_interactions = [i for i in self.interaction_history if i.user_id == user_id]
+        if not user_interactions:
+            return 0.0
+        
+        hint_used = sum(1 for i in user_interactions if i.hint_used)
+        return hint_used / len(user_interactions)
+    
+    def _get_avg_completion_time_ratio(self, user_id: str) -> float:
+        """평균 완료 시간 비율 (예상 시간 대비)"""
+        user_interactions = [i for i in self.interaction_history if i.user_id == user_id]
+        if not user_interactions:
+            return 1.0
+        
+        ratios = []
+        for interaction in user_interactions:
+            expected = self._get_expected_duration(interaction.content_id)
+            if expected > 0:
+                ratios.append(interaction.duration / expected)
+        
+        return np.mean(ratios) if ratios else 1.0
 
 
 # 전역 적응형 학습 엔진

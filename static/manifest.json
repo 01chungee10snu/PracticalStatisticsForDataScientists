@@ -1,0 +1,125 @@
+{
+  "name": "Statistics Learning Platform",
+  "short_name": "StatLearn",
+  "description": "전문 통계 학습 플랫폼 - 연구방법론부터 고급 통계까지",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4c51bf",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "ko",
+  "dir": "ltr",
+  "scope": "/",
+  "screenshots": [
+    {
+      "src": "/static/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "데스크톱 학습 대시보드"
+    },
+    {
+      "src": "/static/images/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "모바일 학습 인터페이스"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "학습하기",
+      "short_name": "Learn",
+      "description": "새로운 통계 개념 학습 시작",
+      "url": "/#learning",
+      "icons": [
+        {
+          "src": "/static/images/shortcut-learn.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "진도 확인",
+      "short_name": "Progress",
+      "description": "학습 진도와 성과 확인",
+      "url": "/#progress",
+      "icons": [
+        {
+          "src": "/static/images/shortcut-progress.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "커뮤니티",
+      "short_name": "Community",
+      "description": "다른 학습자들과 소통",
+      "url": "/#community",
+      "icons": [
+        {
+          "src": "/static/images/shortcut-community.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+statlearn",
+      "url": "/?action=%s"
+    }
+  ]
+}

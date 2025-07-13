@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics Learning Platform - 전문 통계 학습 플랫폼</title>
+    
+    <!-- Progressive Web App -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#4c51bf">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="StatLearn">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/static/fonts/noto-sans-kr.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/css/modern-styles.css" as="style">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/modern-styles.css">
+    
+    <!-- Chart.js and Interactive Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    
+    <!-- Modern UI Components -->
+    <script type="module" src="/static/js/components.js"></script>
+    <script type="module" src="/static/js/adaptive-learning.js"></script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-animation">
+            <div class="spinner"></div>
+            <p>통계 학습 플랫폼을 로딩 중...</p>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="main-nav" role="navigation" aria-label="주 내비게이션">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="/static/images/logo.svg" alt="StatLearn Logo" class="nav-logo">
+                <span class="nav-title">StatLearn</span>
+            </div>
+            
+            <div class="nav-menu" id="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                    </svg>
+                    대시보드
+                </a>
+                <a href="#learning" class="nav-link" data-section="learning">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                    </svg>
+                    학습하기
+                </a>
+                <a href="#progress" class="nav-link" data-section="progress">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                    </svg>
+                    진도 관리
+                </a>
+                <a href="#community" class="nav-link" data-section="community">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H16.5l-1.03-3.1A1.5 1.5 0 0 0 14.05 4H9.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5h3.55l.5 1.5H9c-.83 0-1.5.67-1.5 1.5v4H9v8H7v-8H5.5v-4c0-.83.67-1.5 1.5-1.5h1.5v2H7v8h2z"/>
+                    </svg>
+                    커뮤니티
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-toggle" aria-label="다크 모드 전환">
+                    <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
+                    </svg>
+                    <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z"/>
+                    </svg>
+                </button>
+                
+                <div class="user-menu">
+                    <button class="user-avatar" id="user-menu-button" aria-expanded="false">
+                        <img src="/static/images/default-avatar.png" alt="사용자 프로필" class="avatar-image">
+                    </button>
+                    <div class="dropdown-menu" id="user-menu">
+                        <a href="#profile" class="dropdown-item">프로필</a>
+                        <a href="#settings" class="dropdown-item">설정</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#logout" class="dropdown-item">로그아웃</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h1 class="section-title">학습 대시보드</h1>
+                <p class="section-subtitle">당신의 통계 학습 여정을 한눈에 확인하세요</p>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="overall-progress">85%</h3>
+                        <p class="stat-label">전체 진도</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="completed-lessons">24</h3>
+                        <p class="stat-label">완료한 강의</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="success-rate">92%</h3>
+                        <p class="stat-label">정답률</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-info">
+                        <h3 class="stat-value" id="study-streak">12</h3>
+                        <p class="stat-label">연속 학습일</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Learning Progress Chart -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card large">
+                    <div class="card-header">
+                        <h3 class="card-title">학습 진도</h3>
+                        <div class="card-actions">
+                            <button class="btn-secondary" id="progress-timeframe">주간</button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <canvas id="progress-chart" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Recommended Learning -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">추천 학습</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="recommendation-list" id="recommendations">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">최근 활동</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list" id="recent-activity">
+                            <!-- Dynamic content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Section -->
+        <section id="learning" class="content-section">
+            <div class="section-header">
+                <h1 class="section-title">학습하기</h1>
+                <p class="section-subtitle">단계별 통계 학습으로 전문가가 되어보세요</p>
+            </div>
+            
+            <!-- Learning Path -->
+            <div class="learning-path">
+                <div class="path-step completed" data-level="beginner">
+                    <div class="step-icon">1</div>
+                    <div class="step-content">
+                        <h3 class="step-title">연구방법론</h3>
+                        <p class="step-description">질적 연구의 기초부터 사례연구까지</p>
+                        <div class="step-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%"></div>
+                            </div>
+                            <span class="progress-text">100% 완료</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="path-step current" data-level="intermediate">
+                    <div class="step-icon">2</div>
+                    <div class="step-content">
+                        <h3 class="step-title">요인분석 이론</h3>
+                        <p class="step-description">다변량 분석과 통계적 추론</p>
+                        <div class="step-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                            <span class="progress-text">65% 완료</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="path-step locked" data-level="advanced">
+                    <div class="step-icon">3</div>
+                    <div class="step-content">
+                        <h3 class="step-title">통계학습</h3>
+                        <p class="step-description">머신러닝과 고급 통계 기법</p>
+                        <div class="step-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="progress-text">잠금됨</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Learning Content -->
+            <div class="learning-content" id="learning-content">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progress" class="content-section">
+            <div class="section-header">
+                <h1 class="section-title">진도 관리</h1>
+                <p class="section-subtitle">상세한 학습 분석과 성과 추적</p>
+            </div>
+            
+            <!-- Progress Details -->
+            <div class="progress-grid">
+                <!-- Detailed analytics will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="content-section">
+            <div class="section-header">
+                <h1 class="section-title">커뮤니티</h1>
+                <p class="section-subtitle">다른 학습자들과 함께 성장하세요</p>
+            </div>
+            
+            <!-- Community Features -->
+            <div class="community-grid">
+                <!-- Community content will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="help-fab" aria-label="도움말">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+        </svg>
+    </button>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Main Application Scripts -->
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+</html>
