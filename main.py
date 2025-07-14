@@ -79,13 +79,12 @@ class LearningSystemLauncher:
         print("="*50)
         print("1. 🖥️  웹 인터페이스 모드 (추천)")
         print("2. 💻 터미널 대화형 모드")
-        print("3. 📊 학습 진도 확인")
-        print("4. 🔧 시스템 설정")
-        print("5. 📖 학습 가이드")
-        print("6. 🧪 데모 모드")
-        print("7. 📊 시각화 데모")
-        print("8. 🎓 인터랙티브 튜토리얼")
-        print("9. 🚪 종료")
+        print("3. 🔧 시스템 설정")
+        print("4. 📖 학습 가이드")
+        print("5. 🧪 데모 모드")
+        print("6. 📊 시각화 데모")
+        print("7. 🎓 인터랙티브 튜토리얼")
+        print("8. 🚪 종료")
         print("="*50)
     
     def run_web_interface(self):
@@ -114,10 +113,19 @@ class LearningSystemLauncher:
         """대화형 모드 실행"""
         print("\n💻 터미널 대화형 모드를 시작합니다...")
         
-        # 사용자 등록 또는 로그인
-        user_id = self.handle_user_session()
-        if not user_id:
-            return
+        # 익명 사용자로 바로 학습 세션 시작
+        user_id = "anonymous_user"
+        
+        # 기본 프로필로 자동 등록
+        default_profile = {
+            "name": "익명 사용자",
+            "learning_style": "visual",
+            "learning_pace": "medium",
+            "learning_goal": "basic_understanding",
+            "weekly_hours": 4
+        }
+        
+        self.system.register_learner(user_id, default_profile)
         
         # 학습 세션 시작
         self.interactive_learning_session(user_id)
@@ -272,26 +280,17 @@ class LearningSystemLauncher:
             print("\n" + "="*40)
             print("📚 학습 메뉴")
             print("="*40)
-            print("1. 개인화된 콘텐츠 학습")
+            print("1. 콘텐츠 학습")
             print("2. 문제 풀이")
-            print("3. 학습 진도 확인")
-            print("4. 성과 분석")
-            print("5. 학습 목표 설정")
-            print("6. 메인 메뉴로 돌아가기")
+            print("3. 메인 메뉴로 돌아가기")
             
-            choice = input("선택하세요 (1-6): ").strip()
+            choice = input("선택하세요 (1-3): ").strip()
             
             if choice == "1":
                 self.content_learning_session(user_id, session_log)
             elif choice == "2":
                 self.problem_solving_session(user_id, session_log)
             elif choice == "3":
-                self.show_progress(user_id)
-            elif choice == "4":
-                self.show_analytics(user_id)
-            elif choice == "5":
-                self.set_learning_goals(user_id)
-            elif choice == "6":
                 break
             else:
                 print("❌ 잘못된 선택입니다.")
@@ -305,19 +304,17 @@ class LearningSystemLauncher:
     
     def content_learning_session(self, user_id: str, session_log: Dict[str, Any]):
         """콘텐츠 학습 세션"""
-        print("\n📖 개인화된 콘텐츠 학습")
+        print("\n📖 콘텐츠 학습")
         
-        # 추천 콘텐츠 가져오기
+        # 기본 콘텐츠 가져오기 (추천 시스템 사용하지 않음)
         content = self.system.get_personalized_content(user_id)
         
         if "error" in content:
             print(f"❌ {content['error']}")
             return
         
-        print(f"\n🎯 추천 콘텐츠: {content['content']['title']}")
+        print(f"\n📚 학습 콘텐츠: {content['content']['title']}")
         print(f"📝 내용: {content['content']['content']}")
-        print(f"⏱️ 예상 시간: {content['estimated_time']}")
-        print(f"💡 추천 이유: {content['recommendation_reason']}")
         print(f"📊 난이도: {'⭐' * content['content']['difficulty']}")
         
         # 학습 진행 의사 확인
@@ -1321,34 +1318,28 @@ class LearningSystemLauncher:
         
         while True:
             self.show_main_menu()
-            choice = input("선택하세요 (1-7): ").strip()
+            choice = input("선택하세요 (1-8): ").strip()
             
             if choice == "1":
                 self.run_web_interface()
             elif choice == "2":
                 self.run_interactive_mode()
             elif choice == "3":
-                user_id = input("사용자 이름을 입력하세요: ").strip()
-                if user_id:
-                    self.show_progress(user_id)
-                else:
-                    print("❌ 사용자 이름을 입력해주세요.")
-            elif choice == "4":
                 self.show_system_settings()
-            elif choice == "5":
+            elif choice == "4":
                 self.show_learning_guide()
-            elif choice == "6":
+            elif choice == "5":
                 self.run_demo_mode()
-            elif choice == "7":
+            elif choice == "6":
                 self.run_visualization_demo()
-            elif choice == "8":
+            elif choice == "7":
                 self.run_interactive_tutorial()
-            elif choice == "9":
+            elif choice == "8":
                 print("\n👋 학습 시스템을 종료합니다.")
                 print("🎓 학습하느라 수고하셨습니다!")
                 break
             else:
-                print("❌ 잘못된 선택입니다. 1-9 사이의 숫자를 입력하세요.")
+                print("❌ 잘못된 선택입니다. 1-8 사이의 숫자를 입력하세요.")
 
 
 def main():

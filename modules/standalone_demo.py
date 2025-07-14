@@ -752,21 +752,18 @@ def run_interactive_demo():
     
     while True:
         print("\n" + "="*50)
-        print("1. 개인화된 콘텐츠 추천 받기")
+        print("1. 콘텐츠 학습하기")
         print("2. 문제 풀기")
-        print("3. 학습 분석 보기")
-        print("4. 시스템 통계 보기")
-        print("5. 종료")
+        print("3. 시스템 통계 보기")
+        print("4. 종료")
         
-        choice = input("\n선택하세요 (1-5): ").strip()
+        choice = input("\n선택하세요 (1-4): ").strip()
         
         if choice == "1":
             content = system.get_personalized_content("demo_user")
             if "error" not in content:
-                print(f"\n📚 추천 콘텐츠: {content['content']['title']}")
+                print(f"\n📚 학습 콘텐츠: {content['content']['title']}")
                 print(f"📖 내용: {content['content']['content']}")
-                print(f"⏱️ 예상 시간: {content['estimated_time']}")
-                print(f"💡 추천 이유: {content['recommendation_reason']}")
             else:
                 print(f"❌ {content['error']}")
         
@@ -803,18 +800,6 @@ def run_interactive_demo():
                         print(f"🎉 축하합니다! {result['new_level']} 레벨로 승급했습니다!")
         
         elif choice == "3":
-            analytics = system.get_learning_analytics("demo_user")
-            if "error" not in analytics:
-                print(f"\n📈 학습 분석 결과:")
-                print(f"총 시도: {analytics['overall_stats']['total_attempts']}회")
-                print(f"정답률: {analytics['overall_stats']['success_rate']}%")
-                print(f"현재 레벨: {analytics['overall_stats']['current_level']}")
-                print(f"학습 상태: {analytics['learning_state']}")
-                print(f"추천사항: {analytics['recommendation']}")
-            else:
-                print(f"❌ {analytics['error']}")
-        
-        elif choice == "4":
             stats = system.get_system_stats()
             print(f"\n📊 시스템 통계:")
             print(f"전체 학습자: {stats['total_learners']}명")
@@ -822,12 +807,12 @@ def run_interactive_demo():
             print(f"전체 성공률: {stats['overall_success_rate']}%")
             print(f"레벨별 분포: {stats['level_distribution']}")
         
-        elif choice == "5":
+        elif choice == "4":
             print("\n👋 학습 시스템을 종료합니다. 좋은 하루 되세요!")
             break
         
         else:
-            print("❌ 잘못된 선택입니다. 1-5 사이의 숫자를 입력하세요.")
+            print("❌ 잘못된 선택입니다. 1-4 사이의 숫자를 입력하세요.")
 
 
 if __name__ == "__main__":
