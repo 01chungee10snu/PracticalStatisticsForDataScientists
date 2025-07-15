@@ -10,6 +10,7 @@
         body {
             background-color: white !important;
             font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
         }
         
         .accordion-button {
@@ -20,12 +21,19 @@
             transition: all 0.3s ease;
             margin-bottom: 10px;
             border-radius: 8px !important;
+            font-weight: 500;
+            padding: 15px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .accordion-button:hover {
             background: linear-gradient(135deg, #5a6bb8 0%, #6b4290 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .accordion-button:active {
+            transform: translateY(0);
         }
         
         .panel {
@@ -36,6 +44,7 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
+            display: none;
         }
         
         .content-section {
@@ -44,6 +53,7 @@
             padding: 25px;
             margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #f0f0f0;
         }
         
         .code-container {
@@ -53,33 +63,43 @@
             border-radius: 8px;
             margin: 15px 0;
             overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
         .code-header {
             background: linear-gradient(90deg, #495057, #6c757d);
             color: white;
-            padding: 10px 15px;
+            padding: 12px 15px;
             font-size: 14px;
             font-weight: 500;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
         .copy-button {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 5px 12px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .copy-button:hover {
             background: rgba(255, 255, 255, 0.3);
             border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .copy-button:active {
+            transform: scale(0.95);
         }
         
         .copy-button.copied {
@@ -97,6 +117,8 @@
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.6;
+            color: #495057;
+            overflow-x: auto;
         }
         
         code {
@@ -111,6 +133,7 @@
             border-radius: 8px;
             margin: 15px 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
         }
         
         h1, h2, h3 {
@@ -121,18 +144,21 @@
         h1 {
             border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
+            font-weight: 600;
         }
         
         h2 {
             border-left: 4px solid #667eea;
             padding-left: 15px;
             margin-top: 30px;
+            font-weight: 500;
         }
         
         h3 {
             color: #495057;
             font-size: 1.2rem;
             margin-top: 25px;
+            font-weight: 500;
         }
         
         .toast {
@@ -147,11 +173,17 @@
             opacity: 0;
             transform: translateX(100%);
             transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
         }
         
         .toast.show {
             opacity: 1;
             transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #dc3545;
         }
         
         /* 콘텐츠가 누적되는 영역 */
@@ -162,12 +194,14 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             min-height: 100px;
             padding: 20px;
+            border: 1px solid #f0f0f0;
         }
         
         .content-item {
             border-bottom: 2px solid #f8f9fa;
             padding-bottom: 30px;
             margin-bottom: 30px;
+            position: relative;
         }
         
         .content-item:last-child {
@@ -181,6 +215,8 @@
             padding: 15px 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
         .content-title {
@@ -188,53 +224,183 @@
             font-size: 1.3rem;
             font-weight: 600;
         }
+        
+        .remove-content-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 18px;
+            line-height: 1;
+        }
+        
+        .remove-content-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .clear-all-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .clear-all-btn:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .usage-info {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            padding: 40px 20px;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        /* 스크롤바 스타일링 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
     </style>
     <script>
+        let chartInstances = {};
+        
         function createChart(id, datasets) {
             const canvas = document.getElementById(id);
             if (canvas && datasets && datasets.length > 0) {
-                new Chart(canvas, {
-                    type: 'scatter',
-                    data: { datasets: datasets },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
+                // 기존 차트가 있으면 삭제
+                if (chartInstances[id]) {
+                    chartInstances[id].destroy();
+                }
+                
+                try {
+                    chartInstances[id] = new Chart(canvas, {
+                        type: 'scatter',
+                        data: { datasets: datasets },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                title: {
+                                    display: true,
+                                    text: '데이터 시각화'
+                                }
                             },
-                            title: {
-                                display: true,
-                                text: '데이터 시각화'
-                            }
-                        },
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                position: 'bottom'
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    position: 'bottom'
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (error) {
+                    console.warn('차트 생성 오류:', error);
+                }
             }
         }
         
         function copyToClipboard(button, text) {
-            navigator.clipboard.writeText(text).then(function() {
-                const originalText = button.textContent;
-                button.textContent = '복사됨!';
-                button.classList.add('copied');
-                
-                showToast('코드가 클립보드에 복사되었습니다!');
-                
-                setTimeout(function() {
-                    button.textContent = originalText;
-                    button.classList.remove('copied');
-                }, 2000);
-            }).catch(function(err) {
+            // 안전한 텍스트 처리
+            const cleanText = text.replace(/\\`/g, '`');
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(cleanText).then(function() {
+                    showCopySuccess(button);
+                }).catch(function(err) {
+                    console.error('복사 실패:', err);
+                    fallbackCopyTextToClipboard(cleanText, button);
+                });
+            } else {
+                fallbackCopyTextToClipboard(cleanText, button);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text, button) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess(button);
+                } else {
+                    showToast('복사에 실패했습니다.', 'error');
+                }
+            } catch (err) {
                 console.error('복사 실패:', err);
                 showToast('복사에 실패했습니다.', 'error');
-            });
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        function showCopySuccess(button) {
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ 복사됨!';
+            button.classList.add('copied');
+            
+            showToast('코드가 클립보드에 복사되었습니다!');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('copied');
+            }, 2000);
         }
         
         function showToast(message, type = 'success') {
@@ -243,7 +409,7 @@
             toast.textContent = message;
             
             if (type === 'error') {
-                toast.style.background = '#dc3545';
+                toast.classList.add('error');
             }
             
             document.body.appendChild(toast);
@@ -255,28 +421,122 @@
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
-                    document.body.removeChild(toast);
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
                 }, 300);
             }, 3000);
         }
         
+        function removeContentItem(button) {
+            const contentItem = button.closest('.content-item');
+            if (contentItem) {
+                contentItem.style.transition = 'all 0.3s ease';
+                contentItem.style.opacity = '0';
+                contentItem.style.transform = 'translateX(100%)';
+                
+                setTimeout(() => {
+                    contentItem.remove();
+                    updateContentNumbers();
+                    
+                    const contentDisplayArea = document.getElementById('content-display-area');
+                    if (contentDisplayArea.querySelectorAll('.content-item').length === 0) {
+                        showEmptyState();
+                    }
+                }, 300);
+                
+                showToast('콘텐츠가 제거되었습니다.');
+            }
+        }
+        
+        function clearAllContent() {
+            const contentItems = document.querySelectorAll('.content-item');
+            if (contentItems.length === 0) {
+                showToast('제거할 콘텐츠가 없습니다.', 'error');
+                return;
+            }
+            
+            if (confirm('모든 콘텐츠를 제거하시겠습니까?')) {
+                contentItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.transition = 'all 0.3s ease';
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(-20px)';
+                        
+                        setTimeout(() => {
+                            item.remove();
+                            if (index === contentItems.length - 1) {
+                                showEmptyState();
+                                window.contentCounter = 1;
+                            }
+                        }, 300);
+                    }, index * 100);
+                });
+                
+                showToast('모든 콘텐츠가 제거되었습니다.');
+            }
+        }
+        
+        function updateContentNumbers() {
+            const contentItems = document.querySelectorAll('.content-item');
+            contentItems.forEach((item, index) => {
+                const title = item.querySelector('.content-title');
+                if (title) {
+                    const originalText = title.textContent;
+                    const newText = originalText.replace(/^\d+\./, `${index + 1}.`);
+                    title.textContent = newText;
+                }
+            });
+            window.contentCounter = contentItems.length + 1;
+        }
+        
+        function showEmptyState() {
+            const contentDisplayArea = document.getElementById('content-display-area');
+            contentDisplayArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <h4>선택한 학습 콘텐츠</h4>
+                    <p>위의 학습 콘텐츠 버튼을 클릭하면 여기에 내용이 차례대로 추가됩니다.</p>
+                </div>
+            `;
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
-            let contentCounter = 1;
+            window.contentCounter = 1;
             const contentDisplayArea = document.getElementById('content-display-area');
             
             document.querySelectorAll('.accordion-button').forEach(btn => {
                 btn.addEventListener('click', () => {
+                    const panel = btn.nextElementSibling;
                     const sectionData = {
                         title: btn.textContent.trim(),
-                        content: btn.nextElementSibling.innerHTML
+                        content: panel.innerHTML
                     };
+                    
+                    // 첫 번째 콘텐츠 추가 시 빈 상태 제거
+                    if (contentDisplayArea.querySelector('.empty-state')) {
+                        contentDisplayArea.innerHTML = `
+                            <button class="clear-all-btn" onclick="clearAllContent()">
+                                🗑️ 모든 콘텐츠 제거
+                            </button>
+                            <div id="content-items-container"></div>
+                        `;
+                    }
+                    
+                    const container = document.getElementById('content-items-container') || contentDisplayArea;
                     
                     // 새로운 콘텐츠 아이템 생성
                     const contentItem = document.createElement('div');
                     contentItem.className = 'content-item';
+                    contentItem.style.opacity = '0';
+                    contentItem.style.transform = 'translateY(20px)';
+                    
                     contentItem.innerHTML = `
                         <div class="content-header">
-                            <h3 class="content-title">${contentCounter}. ${sectionData.title}</h3>
+                            <h3 class="content-title">${window.contentCounter}. ${sectionData.title}</h3>
+                            <button class="remove-content-btn" onclick="removeContentItem(this)" title="이 콘텐츠 제거">
+                                ×
+                            </button>
                         </div>
                         ${sectionData.content}
                     `;
@@ -292,14 +552,21 @@
                         
                         const header = document.createElement('div');
                         header.className = 'code-header';
-                        header.innerHTML = `
-                            <span>코드 스니펫</span>
-                            <button class="copy-button" onclick="copyToClipboard(this, \`${codeText.replace(/`/g, '\\`')}\`)">
-                                📋 복사
-                            </button>
-                        `;
                         
+                        const span = document.createElement('span');
+                        span.textContent = '코드 스니펫';
+                        
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'copy-button';
+                        copyBtn.innerHTML = '📋 복사';
+                        copyBtn.onclick = function() {
+                            copyToClipboard(this, codeText);
+                        };
+                        
+                        header.appendChild(span);
+                        header.appendChild(copyBtn);
                         container.appendChild(header);
+                        
                         pre.parentNode.insertBefore(container, pre);
                         container.appendChild(pre);
                     });
@@ -315,25 +582,36 @@
                     });
                     
                     // 콘텐츠 영역에 추가
-                    contentDisplayArea.appendChild(contentItem);
+                    container.appendChild(contentItem);
+                    
+                    // 애니메이션 효과
+                    setTimeout(() => {
+                        contentItem.style.transition = 'all 0.3s ease';
+                        contentItem.style.opacity = '1';
+                        contentItem.style.transform = 'translateY(0)';
+                    }, 100);
                     
                     // 차트 재생성
-                    const scripts = contentItem.querySelectorAll('script');
-                    scripts.forEach(script => {
-                        try {
-                            eval(script.textContent);
-                        } catch (e) {
-                            console.warn('차트 생성 오류:', e);
-                        }
-                    });
+                    setTimeout(() => {
+                        const scripts = contentItem.querySelectorAll('script');
+                        scripts.forEach(script => {
+                            try {
+                                eval(script.textContent);
+                            } catch (e) {
+                                console.warn('차트 생성 오류:', e);
+                            }
+                        });
+                    }, 400);
                     
-                    contentCounter++;
+                    window.contentCounter++;
                     
                     // 해당 영역으로 스크롤
-                    contentDisplayArea.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
+                    setTimeout(() => {
+                        contentItem.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                    }, 200);
                     
                     showToast(`"${sectionData.title}" 콘텐츠가 추가되었습니다!`);
                 });
@@ -344,9 +622,10 @@
 <body class="container my-4">
     <h1 class="mb-4">📊 통계 학습 데모</h1>
     
-    <div class="alert alert-info" role="alert">
+    <div class="alert usage-info" role="alert">
         <strong>💡 사용법:</strong> 아래 학습 콘텐츠 버튼을 클릭하면 하단에 내용이 누적되어 표시됩니다. 
-        코드는 박스 안에 표시되며 복사 버튼을 통해 쉽게 복사할 수 있습니다.
+        코드는 박스 안에 표시되며 복사 버튼을 통해 쉽게 복사할 수 있습니다. 
+        각 콘텐츠는 개별적으로 제거할 수 있습니다.
     </div>
     
     {% for book, sections in books.items() %}
@@ -356,7 +635,7 @@
                 <button class="accordion-button btn w-100 text-start mt-2">
                     📚 {{ sec.title }}
                 </button>
-                <div class="panel" style="display:none;">
+                <div class="panel">
                     <h3>💡 개념의 이해</h3>
                     {{ sec.content|safe }}
                     {% if sec.code %}
@@ -375,8 +654,9 @@
     
     <!-- 콘텐츠가 누적되는 영역 -->
     <div class="content-display-area" id="content-display-area">
-        <div class="text-center text-muted p-4">
-            <h4>📋 선택한 학습 콘텐츠</h4>
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h4>선택한 학습 콘텐츠</h4>
             <p>위의 학습 콘텐츠 버튼을 클릭하면 여기에 내용이 차례대로 추가됩니다.</p>
         </div>
     </div>
