@@ -2,6 +2,29 @@
 
 본 저장소는 [MIT 라이선스](LICENSE)를 따르며, 서적 PDF는 학습 목적의 인용용으로만 사용됩니다.
 
+## 🌐 GitHub Pages 데모 사이트
+
+이 프로젝트는 GitHub Pages를 통해 온라인 데모를 제공합니다:
+
+### 📱 메인 데모 사이트
+- **URL**: `https://your-username.github.io/your-repo/`
+- **설명**: 통계학습 교육 플랫폼의 모든 기능을 체험할 수 있는 메인 포털
+
+### 🎯 주요 데모 페이지
+- **통합 실습 데모**: 5단계 기술통계량 학습 과정
+- **Python 코드 실행기**: 브라우저 기반 안전한 코드 실행 환경
+- **학습 결과 리포트**: 개인화된 학습 성과 분석 및 공유
+- **문서 시스템**: 체계적인 학습 가이드 및 참고 자료
+
+### 🚀 GitHub Pages 배포 방법
+1. GitHub 저장소의 Settings > Pages로 이동
+2. Source를 "Deploy from a branch" 선택
+3. Branch를 "main" (또는 "master") 선택
+4. Folder를 "/ (root)" 선택
+5. Save 클릭하여 배포 시작
+
+배포 완료 후 `https://your-username.github.io/your-repo/`에서 접근 가능합니다.
+
 ## 학습 경로 안내
 전체 문서 흐름은 [docs/overview.md](docs/overview.md)에서 순서대로 확인할 수 있습니다.
 

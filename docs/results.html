@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학습 결과 모음 - 통계학습 교육 플랫폼</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .result-card:hover { transform: translateY(-5px); }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .result-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .stat { text-align: center; }
+        .stat-value { display: block; font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+        .stat-label { font-size: 0.9rem; color: #7f8c8d; }
+        .view-btn {
+            display: block;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .view-btn:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 학습 결과 모음</h1>
+            <p>완료된 학습 세션들의 결과를 확인해보세요</p>
+        </div>
+        
+        <div class="results-grid">
+            
+            <div class="result-card">
+                <div class="result-header">
+                    <h3>기술통계량 실습 완료</h3>
+                    <span class="result-date">2025.07.19</span>
+                </div>
+                <div class="result-stats">
+                    <div class="stat">
+                        <span class="stat-value">92%</span>
+                        <span class="stat-label">완료율</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">88%</span>
+                        <span class="stat-label">성공률</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">15</span>
+                        <span class="stat-label">시도</span>
+                    </div>
+                </div>
+                <a href="results/session_test_user_20250719_171618.html" class="view-btn">결과 보기</a>
+            </div>
+            <div class="result-card">
+                <div class="result-header">
+                    <h3>워크플로우 데모 세션</h3>
+                    <span class="result-date">2025.07.19</span>
+                </div>
+                <div class="result-stats">
+                    <div class="stat">
+                        <span class="stat-value">75%</span>
+                        <span class="stat-label">완료율</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">82%</span>
+                        <span class="stat-label">성공률</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">10</span>
+                        <span class="stat-label">시도</span>
+                    </div>
+                </div>
+                <a href="results/session_workflow_user_20250719_171618.html" class="view-btn">결과 보기</a>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="index.html" style="color: white; text-decoration: none; font-size: 1.1rem;">🏠 메인으로 돌아가기</a>
+        </div>
+    </div>
+</body>
+</html>
