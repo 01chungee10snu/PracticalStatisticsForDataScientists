@@ -1,0 +1,399 @@
+{
+  "session": {
+    "session_id": "session_workflow_user_20250719_171618",
+    "title": "완전한 워크플로우 테스트",
+    "user_id": "workflow_user",
+    "status": "active"
+  },
+  "summary": {
+    "session_info": {
+      "session_id": "session_workflow_user_20250719_171618",
+      "user_id": "workflow_user",
+      "title": "완전한 워크플로우 테스트",
+      "created_at": "2025-07-19T17:16:18.577736",
+      "updated_at": "2025-07-19T17:16:18.578317",
+      "status": "active",
+      "progress": {
+        "current_step": 0,
+        "total_steps": 5,
+        "completion_percentage": 0.0,
+        "steps_completed": []
+      },
+      "content_data": {
+        "standardized_content": {},
+        "learning_materials": []
+      },
+      "practice_data": {
+        "session_id": "session_workflow_user_20250719_171618",
+        "attempts": 3,
+        "successful_executions": 0,
+        "hints_used": 0
+      },
+      "results": [
+        {
+          "session_id": "session_workflow_user_20250719_171618",
+          "execution": {
+            "success": true,
+            "output": "",
+            "execution_time": 0.0,
+            "variables": {
+              "data": [
+                85,
+                90,
+                78,
+                92,
+                88,
+                76,
+                95,
+                89,
+                84,
+                91
+              ]
+            },
+            "code": "data = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]"
+          },
+          "practice": {
+            "execution": {
+              "success": true,
+              "output": "",
+              "execution_time": 0.0,
+              "variables": {
+                "data": [
+                  85,
+                  90,
+                  78,
+                  92,
+                  88,
+                  76,
+                  95,
+                  89,
+                  84,
+                  91
+                ]
+              },
+              "code": "data = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]"
+            },
+            "verification": {
+              "success": false,
+              "message": "필요한 변수가 누락되었습니다: scores",
+              "hint": "다음 변수들을 정의해주세요: scores"
+            },
+            "step_completed": false,
+            "session_progress": {
+              "total_steps": 5,
+              "completed_steps": 0,
+              "current_step_index": 0,
+              "progress_percentage": 0.0,
+              "completed": false
+            }
+          },
+          "interpretation": {
+            "type": "success",
+            "statistical_analysis": {},
+            "output_analysis": {
+              "line_count": 1,
+              "contains_statistics": false,
+              "contains_data": false,
+              "summary": "1줄의 출력이 생성되었습니다."
+            },
+            "learning_insights": [],
+            "next_steps": []
+          },
+          "standardized": {
+            "success": false,
+            "execution_time": 0.0,
+            "output_summary": "",
+            "variables_created": [
+              "data"
+            ],
+            "step_completed": false,
+            "verification_message": "필요한 변수가 누락되었습니다: scores",
+            "has_interpretation": true,
+            "learning_level": "intermediate"
+          },
+          "session_progress": {
+            "current_step": 0,
+            "total_steps": 5,
+            "completion_percentage": 0.0,
+            "steps_completed": []
+          },
+          "timestamp": "2025-07-19T17:16:18.577956"
+        },
+        {
+          "session_id": "session_workflow_user_20250719_171618",
+          "execution": {
+            "success": false,
+            "error": "name 'data' is not defined",
+            "error_type": "NameError",
+            "output": "",
+            "execution_time": 0.0,
+            "code": "mean_value = sum(data) / len(data)\nprint(f'평균: {mean_value}')"
+          },
+          "practice": {
+            "execution": {
+              "success": false,
+              "error": "name 'data' is not defined",
+              "error_type": "NameError",
+              "output": "",
+              "execution_time": 0.0,
+              "code": "mean_value = sum(data) / len(data)\nprint(f'평균: {mean_value}')"
+            },
+            "verification": {
+              "success": false,
+              "message": "코드 실행 중 오류가 발생했습니다: name 'data' is not defined",
+              "hint": "오류 메시지를 확인하고 코드를 수정해보세요."
+            },
+            "step_completed": false,
+            "session_progress": {
+              "total_steps": 5,
+              "completed_steps": 0,
+              "current_step_index": 0,
+              "progress_percentage": 0.0,
+              "completed": false
+            }
+          },
+          "interpretation": null,
+          "standardized": {
+            "success": false,
+            "execution_time": 0.0,
+            "output_summary": "",
+            "variables_created": [],
+            "step_completed": false,
+            "verification_message": "코드 실행 중 오류가 발생했습니다: name 'data' is not defined",
+            "has_interpretation": false,
+            "learning_level": "beginner"
+          },
+          "session_progress": {
+            "current_step": 0,
+            "total_steps": 5,
+            "completion_percentage": 0.0,
+            "steps_completed": []
+          },
+          "timestamp": "2025-07-19T17:16:18.578171"
+        },
+        {
+          "session_id": "session_workflow_user_20250719_171618",
+          "execution": {
+            "success": true,
+            "output": "워크플로우 테스트 완료\n",
+            "execution_time": 0.0,
+            "variables": {},
+            "code": "print('워크플로우 테스트 완료')"
+          },
+          "practice": {
+            "execution": {
+              "success": true,
+              "output": "워크플로우 테스트 완료\n",
+              "execution_time": 0.0,
+              "variables": {},
+              "code": "print('워크플로우 테스트 완료')"
+            },
+            "verification": {
+              "success": false,
+              "message": "필요한 변수가 누락되었습니다: scores",
+              "hint": "다음 변수들을 정의해주세요: scores"
+            },
+            "step_completed": false,
+            "session_progress": {
+              "total_steps": 5,
+              "completed_steps": 0,
+              "current_step_index": 0,
+              "progress_percentage": 0.0,
+              "completed": false
+            }
+          },
+          "interpretation": {
+            "type": "success",
+            "statistical_analysis": {},
+            "output_analysis": {
+              "line_count": 1,
+              "contains_statistics": false,
+              "contains_data": false,
+              "summary": "1줄의 출력이 생성되었습니다."
+            },
+            "learning_insights": [],
+            "next_steps": []
+          },
+          "standardized": {
+            "success": false,
+            "execution_time": 0.0,
+            "output_summary": "워크플로우 테스트 완료\n",
+            "variables_created": [],
+            "step_completed": false,
+            "verification_message": "필요한 변수가 누락되었습니다: scores",
+            "has_interpretation": true,
+            "learning_level": "intermediate"
+          },
+          "session_progress": {
+            "current_step": 0,
+            "total_steps": 5,
+            "completion_percentage": 0.0,
+            "steps_completed": []
+          },
+          "timestamp": "2025-07-19T17:16:18.578315"
+        }
+      ],
+      "notes": []
+    },
+    "practice_summary": {
+      "session_info": {
+        "session_id": "session_workflow_user_20250719_171618",
+        "title": "완전한 워크플로우 테스트",
+        "steps": {
+          "step1": {
+            "step_id": "step1",
+            "title": "1단계: 데이터 준비",
+            "description": "분석할 데이터를 준비하고 기본 정보를 파악합니다.",
+            "learning_objective": "데이터를 리스트로 생성하고 기본 정보를 확인할 수 있다.",
+            "code_template": "# 학생 성적 데이터 준비\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\n\n# 데이터 기본 정보 확인\nprint(f\"데이터: {scores}\")\nprint(f\"데이터 개수: {len(scores)}\")\nprint(\"데이터 타입: list\")\n",
+            "expected_output": "데이터: [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]",
+            "expected_variables": [
+              "scores"
+            ],
+            "attempts": 3,
+            "completed": false,
+            "start_time": "2025-07-19T17:16:18.577735",
+            "completion_time": null,
+            "user_code": "print('워크플로우 테스트 완료')",
+            "duration_minutes": null
+          },
+          "step2": {
+            "step_id": "step2",
+            "title": "2단계: 중심경향성 계산",
+            "description": "평균, 중앙값을 계산하여 데이터의 중심을 파악합니다.",
+            "learning_objective": "평균과 중앙값을 계산하고 그 의미를 이해할 수 있다.",
+            "code_template": "# 데이터 준비 (이전 단계에서 계속)\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\n\n# 평균 계산\ntotal = sum(scores)\ncount = len(scores)\nmean_value = total / count\n\nprint(f\"총합: {total}\")\nprint(f\"평균: {mean_value:.2f}\")\n\n# 중앙값 계산 (수동 정렬)\nsorted_scores = scores[:]  # 복사본 생성\nfor i in range(len(sorted_scores)):\n    for j in range(i + 1, len(sorted_scores)):\n        if sorted_scores[i] > sorted_scores[j]:\n            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]\n\nif len(sorted_scores) % 2 == 1:\n    median_value = sorted_scores[len(sorted_scores) // 2]\nelse:\n    mid1 = sorted_scores[len(sorted_scores) // 2 - 1]\n    mid2 = sorted_scores[len(sorted_scores) // 2]\n    median_value = (mid1 + mid2) / 2\n\nprint(f\"중앙값: {median_value}\")\n",
+            "expected_output": "총합: 868",
+            "expected_variables": [
+              "mean_value",
+              "median_value"
+            ],
+            "attempts": 0,
+            "completed": false,
+            "start_time": null,
+            "completion_time": null,
+            "user_code": "",
+            "duration_minutes": null
+          },
+          "step3": {
+            "step_id": "step3",
+            "title": "3단계: 산포도 계산",
+            "description": "표준편차와 분산을 계산하여 데이터의 퍼짐 정도를 파악합니다.",
+            "learning_objective": "분산과 표준편차를 계산하고 그 의미를 이해할 수 있다.",
+            "code_template": "# 데이터와 이전 계산 결과 준비\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\nmean_value = sum(scores) / len(scores)\n\n# 분산 계산 (단계별로)\nsquared_diffs = []\nfor x in scores:\n    diff = x - mean_value\n    squared_diff = diff * diff\n    squared_diffs.append(squared_diff)\n\nvariance = sum(squared_diffs) / len(scores)\n\n# 표준편차 계산\nstd_dev = variance ** 0.5\n\nprint(f\"분산: {variance:.2f}\")\nprint(f\"표준편차: {std_dev:.2f}\")\n\n# 범위 계산\ndata_range = max(scores) - min(scores)\nprint(f\"범위: {data_range}\")\n",
+            "expected_output": "분산:",
+            "expected_variables": [
+              "variance",
+              "std_dev",
+              "data_range"
+            ],
+            "attempts": 0,
+            "completed": false,
+            "start_time": null,
+            "completion_time": null,
+            "user_code": "",
+            "duration_minutes": null
+          },
+          "step4": {
+            "step_id": "step4",
+            "title": "4단계: 결과 해석",
+            "description": "계산된 통계량들의 의미를 해석하고 결론을 도출합니다.",
+            "learning_objective": "기술통계량의 의미를 해석하고 데이터의 특성을 설명할 수 있다.",
+            "code_template": "# 데이터와 이전 계산 결과 준비\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\nmean_value = sum(scores) / len(scores)\n\n# 수동 정렬\nsorted_scores = scores[:]\nfor i in range(len(sorted_scores)):\n    for j in range(i + 1, len(sorted_scores)):\n        if sorted_scores[i] > sorted_scores[j]:\n            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]\n\nmedian_value = (sorted_scores[4] + sorted_scores[5]) / 2\n\n# 분산 계산 (단계별로)\nsquared_diffs = []\nfor x in scores:\n    diff = x - mean_value\n    squared_diff = diff * diff\n    squared_diffs.append(squared_diff)\n\nvariance = sum(squared_diffs) / len(scores)\nstd_dev = variance ** 0.5\ndata_range = max(scores) - min(scores)\n\n# 모든 통계량 요약\nprint(\"=== 기술통계량 요약 ===\")\nprint(f\"데이터 개수: {len(scores)}\")\nprint(f\"평균: {mean_value:.2f}\")\nprint(f\"중앙값: {median_value}\")\nprint(f\"표준편차: {std_dev:.2f}\")\nprint(f\"분산: {variance:.2f}\")\nprint(f\"최솟값: {min(scores)}\")\nprint(f\"최댓값: {max(scores)}\")\nprint(f\"범위: {data_range}\")\n\nprint(\"\\n=== 해석 ===\")\nprint(\"이 학급의 평균 점수는 86.8점으로 양호한 수준입니다.\")\nprint(\"중앙값(88.5)이 평균보다 높아 약간 왼쪽으로 치우친 분포를 보입니다.\")\n",
+            "expected_output": "=== 기술통계량 요약 ===",
+            "expected_variables": [],
+            "attempts": 0,
+            "completed": false,
+            "start_time": null,
+            "completion_time": null,
+            "user_code": "",
+            "duration_minutes": null
+          },
+          "step5": {
+            "step_id": "step5",
+            "title": "5단계: 시각화 및 종합 분석",
+            "description": "데이터를 시각화하고 종합적인 분석을 수행합니다.",
+            "learning_objective": "기술통계량과 시각화를 통해 데이터를 종합적으로 분석할 수 있다.",
+            "code_template": "# 데이터와 이전 계산 결과 준비\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\n\n# 수동 정렬\nsorted_scores = scores[:]\nfor i in range(len(sorted_scores)):\n    for j in range(i + 1, len(sorted_scores)):\n        if sorted_scores[i] > sorted_scores[j]:\n            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]\n\n# 히스토그램 시뮬레이션\nprint(\"=== 히스토그램 시뮬레이션 ===\")\nprint(\"70-75: |\")\nprint(\"76-80: |██\")\nprint(\"81-85: |██\")\nprint(\"86-90: |████\")\nprint(\"91-95: |███\")\n\nprint(\"\\n=== 종합 분석 ===\")\nprint(\"1. 중심경향성: 평균 86.8점, 중앙값 88.5점\")\nprint(\"2. 산포도: 표준편차 6.1점으로 적당한 분산\")\nprint(\"3. 분포 형태: 약간 왼쪽으로 치우친 분포\")\n\n# 사분위수 계산\nq1_index = len(sorted_scores) // 4\nq3_index = 3 * len(sorted_scores) // 4\nq1 = sorted_scores[q1_index]\nq3 = sorted_scores[q3_index]\niqr = q3 - q1\n\nprint(f\"\\n=== 사분위수 ===\")\nprint(f\"1사분위수 (Q1): {q1}\")\nprint(f\"3사분위수 (Q3): {q3}\")\nprint(f\"사분위수 범위 (IQR): {iqr}\")\n",
+            "expected_output": "=== 히스토그램 시뮬레이션 ===",
+            "expected_variables": [
+              "q1",
+              "q3",
+              "iqr"
+            ],
+            "attempts": 0,
+            "completed": false,
+            "start_time": null,
+            "completion_time": null,
+            "user_code": "",
+            "duration_minutes": null
+          }
+        },
+        "step_order": [
+          "step1",
+          "step2",
+          "step3",
+          "step4",
+          "step5"
+        ],
+        "current_step_index": 0,
+        "start_time": "2025-07-19T17:16:18.577733",
+        "completion_time": null,
+        "completed": false,
+        "user_notes": [],
+        "session_variables": {},
+        "progress": {
+          "total_steps": 5,
+          "completed_steps": 0,
+          "current_step_index": 0,
+          "progress_percentage": 0.0,
+          "completed": false
+        },
+        "duration_minutes": 1.095e-05
+      },
+      "current_step": {
+        "step_id": "step1",
+        "title": "1단계: 데이터 준비",
+        "description": "분석할 데이터를 준비하고 기본 정보를 파악합니다.",
+        "learning_objective": "데이터를 리스트로 생성하고 기본 정보를 확인할 수 있다.",
+        "code_template": "# 학생 성적 데이터 준비\nscores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]\n\n# 데이터 기본 정보 확인\nprint(f\"데이터: {scores}\")\nprint(f\"데이터 개수: {len(scores)}\")\nprint(\"데이터 타입: list\")\n",
+        "expected_output": "데이터: [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]",
+        "expected_variables": [
+          "scores"
+        ],
+        "attempts": 3,
+        "completed": false,
+        "start_time": "2025-07-19T17:16:18.577735",
+        "completion_time": null,
+        "user_code": "print('워크플로우 테스트 완료')",
+        "duration_minutes": null
+      },
+      "progress": {
+        "total_steps": 5,
+        "completed_steps": 0,
+        "current_step_index": 0,
+        "progress_percentage": 0.0,
+        "completed": false
+      },
+      "total_attempts": 3,
+      "completed_steps": []
+    },
+    "performance_metrics": {
+      "success_rate": 0.0,
+      "total_attempts": 3,
+      "successful_executions": 0,
+      "hints_used": 0,
+      "completion_percentage": 0.0,
+      "efficiency_score": 0.0
+    },
+    "learning_achievements": [
+      "🧠 힌트 없이 스스로 해결했습니다!"
+    ],
+    "recommendations": [
+      "기초 개념을 다시 한 번 복습해보세요.",
+      "힌트를 적극 활용하여 학습 효과를 높이세요.",
+      "남은 단계들을 완료하여 전체 학습 과정을 마무리하세요."
+    ]
+  },
+  "saved_at": "2025-07-19T17:16:18.578860"
+}

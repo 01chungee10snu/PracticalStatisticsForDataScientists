@@ -1,0 +1,26 @@
+title: Foundation Level Content
+difficulty_level: foundation
+estimated_time: 20
+prerequisites: []
+sections:
+  concept_introduction:
+    required: true
+    description: 핵심 포인트와 정의
+    min_words: 100
+  visual_explanation:
+    required: true
+    description: 인터랙티브 시각화
+    visualization_required: true
+  practical_example:
+    required: true
+    description: 실습 코드와 해석
+    code_blocks_required: true
+    min_code_blocks: 1
+  common_misconceptions:
+    required: true
+    description: 흔한 오해와 올바른 이해
+    min_items: 2
+  self_assessment:
+    required: true
+    description: 자가 점검 문제
+    min_questions: 3

@@ -1,0 +1,116 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>기술통계 실습</title>
+        <meta charset="UTF-8">
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                line-height: 1.6;
+            }
+            .practice-header {
+                background-color: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            .learning-objectives {
+                background-color: #e3f2fd;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 15px 0;
+            }
+            .expected-insights {
+                background-color: #f3e5f5;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 15px 0;
+            }
+            .code-section {
+                margin: 20px 0;
+            }
+            .interpretation-section {
+                background-color: #fff3e0;
+                padding: 15px;
+                border-radius: 5px;
+                margin: 15px 0;
+            }
+            ul {
+                padding-left: 20px;
+            }
+            li {
+                margin: 5px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="practice-header">
+            <h1>기술통계 실습</h1>
+            <p>데이터의 기본적인 통계량을 계산하고 해석해보세요.</p>
+        </div>
+        
+        <div class="learning-objectives">
+            <h3>학습 목표</h3>
+            <ul>
+                <li>평균, 표준편차, 중앙값의 개념 이해</li><li>데이터 분포의 시각화 방법 학습</li><li>중심경향성과 산포도의 관계 파악</li>
+            </ul>
+        </div>
+        
+        <div class="expected-insights">
+            <h3>예상 인사이트</h3>
+            <ul>
+                <li>평균과 중앙값의 차이로 데이터의 치우침을 파악할 수 있습니다.</li><li>표준편차가 클수록 데이터가 넓게 분산되어 있습니다.</li><li>히스토그램을 통해 데이터의 분포 형태를 시각적으로 확인할 수 있습니다.</li>
+            </ul>
+        </div>
+        
+        <div class="code-section">
+            <h3>실습 코드</h3>
+            <p>아래 코드를 실행하고 결과를 분석해보세요:</p>
+            <pre style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto;">
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# 샘플 데이터 생성
+np.random.seed(42)
+data = np.random.normal(100, 15, 1000)
+
+# 기본 통계량 계산
+mean_value = np.mean(data)
+std_value = np.std(data)
+median_value = np.median(data)
+
+print(f"평균: {mean_value:.2f}")
+print(f"표준편차: {std_value:.2f}")
+print(f"중앙값: {median_value:.2f}")
+
+# 히스토그램 그리기
+plt.figure(figsize=(10, 6))
+plt.hist(data, bins=30, alpha=0.7, color='skyblue', edgecolor='black')
+plt.axvline(mean_value, color='red', linestyle='--', label=f'평균: {mean_value:.2f}')
+plt.axvline(median_value, color='green', linestyle='--', label=f'중앙값: {median_value:.2f}')
+plt.title('데이터 분포 히스토그램')
+plt.xlabel('값')
+plt.ylabel('빈도')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+            </pre>
+        </div>
+        
+        <div class="interpretation-section">
+            <h3>결과 해석 가이드</h3>
+            <p>코드를 실행한 후 다음 사항들을 확인해보세요:</p>
+            <ul>
+                <li>계산된 통계량들의 의미는 무엇인가요?</li>
+                <li>시각화 결과에서 어떤 패턴을 발견할 수 있나요?</li>
+                <li>이 결과를 실무에서 어떻게 활용할 수 있을까요?</li>
+            </ul>
+        </div>
+    </body>
+    </html>
+    

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기술통계량 실습 데모 - 통합 학습 시스템</title>
+    <style>
+        /* 기본 스타일 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            border-radius: 25px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 25px;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* 단계 패널 */
+        .step-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .step-description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .step-objective {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .step-objective strong {
+            color: #2c3e50;
+        }
+
+        /* 코드 에디터 */
+        .code-editor {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .editor-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(149, 165, 166, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+        }
+
+        .code-textarea {
+            width: 100%;
+            height: 200px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            resize: vertical;
+            background: #f8f9fa;
+            transition: border-color 0.3s ease;
+        }
+
+        .code-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+        }
+
+        /* 결과 패널 */
+        .result-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .result-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .result-output {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-interpretation {
+            background: #e8f5e8;
+            border-left: 4px solid #2ecc71;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .result-interpretation h4 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        /* 상태 메시지 */
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* 힌트 패널 */
+        .hint-panel {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .hint-panel h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .hint-panel p {
+            color: #856404;
+            margin: 0;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .step-panel,
+            .code-editor,
+            .result-panel {
+                padding: 20px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .editor-controls {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .step-panel,
+            .code-editor,
+            .result-panel {
+                padding: 15px;
+            }
+
+            .code-textarea {
+                height: 150px;
+            }
+        }
+
+        /* 애니메이션 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 로딩 스피너 */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🐍 기술통계량 실습 데모</h1>
+            <p>단계별 가이드로 배우는 데이터 분석의 기초</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0% 완료 (0/5 단계)</div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 단계 패널 -->
+            <div class="step-panel" id="stepPanel">
+                <div class="step-header">
+                    <div class="step-number" id="stepNumber">1</div>
+                    <div class="step-title" id="stepTitle">1단계: 데이터 준비</div>
+                </div>
+                <div class="step-description" id="stepDescription">
+                    분석할 데이터를 준비하고 기본 정보를 파악합니다.
+                </div>
+                <div class="step-objective">
+                    <strong>학습 목표:</strong> <span id="stepObjective">데이터를 리스트로 생성하고 기본 정보를 확인할 수 있다.</span>
+                </div>
+                <div class="editor-controls">
+                    <button class="btn btn-secondary" onclick="showHint()">💡 힌트</button>
+                    <button class="btn btn-success" onclick="nextStep()" id="nextBtn" disabled>다음 단계 →</button>
+                </div>
+            </div>
+
+            <!-- 코드 에디터 -->
+            <div class="code-editor">
+                <div class="editor-header">
+                    <div class="editor-title">Python 코드 에디터</div>
+                    <div class="editor-controls">
+                        <button class="btn btn-primary" onclick="runCode()">▶ 실행</button>
+                        <button class="btn btn-secondary" onclick="resetCode()">🔄 초기화</button>
+                    </div>
+                </div>
+                <textarea class="code-textarea" id="codeEditor" placeholder="여기에 Python 코드를 입력하세요..."></textarea>
+            </div>
+        </div>
+
+        <!-- 결과 패널 -->
+        <div class="result-panel">
+            <div class="result-header">실행 결과</div>
+            <div class="result-output" id="resultOutput">코드를 실행하면 결과가 여기에 표시됩니다.</div>
+            <div class="result-interpretation hidden" id="resultInterpretation">
+                <h4>📊 결과 해석</h4>
+                <p id="interpretationText"></p>
+            </div>
+        </div>
+
+        <!-- 상태 메시지 -->
+        <div id="statusMessage" class="hidden"></div>
+
+        <!-- 힌트 패널 -->
+        <div id="hintPanel" class="hint-panel hidden">
+            <h4>💡 힌트</h4>
+            <p id="hintText"></p>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let currentStep = 1;
+        let totalSteps = 5;
+        let stepCompleted = [false, false, false, false, false];
+        
+        // 단계별 데이터
+        const stepsData = {
+            1: {
+                title: "1단계: 데이터 준비",
+                description: "분석할 데이터를 준비하고 기본 정보를 파악합니다.",
+                objective: "데이터를 리스트로 생성하고 기본 정보를 확인할 수 있다.",
+                template: `# 학생 성적 데이터 준비
+scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+
+# 데이터 기본 정보 확인
+print(f"데이터: {scores}")
+print(f"데이터 개수: {len(scores)}")
+print("데이터 타입: list")`,
+                hint: "리스트를 생성하고 len() 함수를 사용해보세요.",
+                expectedOutput: "데이터: [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]"
+            },
+            2: {
+                title: "2단계: 중심경향성 계산",
+                description: "평균, 중앙값을 계산하여 데이터의 중심을 파악합니다.",
+                objective: "평균과 중앙값을 계산하고 그 의미를 이해할 수 있다.",
+                template: `# 데이터 준비 (이전 단계에서 계속)
+scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+
+# 평균 계산
+total = sum(scores)
+count = len(scores)
+mean_value = total / count
+
+print(f"총합: {total}")
+print(f"평균: {mean_value:.2f}")
+
+# 중앙값 계산 (수동 정렬)
+sorted_scores = scores[:]
+for i in range(len(sorted_scores)):
+    for j in range(i + 1, len(sorted_scores)):
+        if sorted_scores[i] > sorted_scores[j]:
+            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
+
+if len(sorted_scores) % 2 == 1:
+    median_value = sorted_scores[len(sorted_scores) // 2]
+else:
+    mid1 = sorted_scores[len(sorted_scores) // 2 - 1]
+    mid2 = sorted_scores[len(sorted_scores) // 2]
+    median_value = (mid1 + mid2) / 2
+
+print(f"중앙값: {median_value}")`,
+                hint: "sum() 함수와 정렬을 활용해보세요.",
+                expectedOutput: "총합: 868"
+            },
+            3: {
+                title: "3단계: 산포도 계산",
+                description: "표준편차와 분산을 계산하여 데이터의 퍼짐 정도를 파악합니다.",
+                objective: "분산과 표준편차를 계산하고 그 의미를 이해할 수 있다.",
+                template: `# 데이터와 이전 계산 결과 준비
+scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+mean_value = sum(scores) / len(scores)
+
+# 분산 계산 (단계별로)
+squared_diffs = []
+for x in scores:
+    diff = x - mean_value
+    squared_diff = diff * diff
+    squared_diffs.append(squared_diff)
+
+variance = sum(squared_diffs) / len(scores)
+
+# 표준편차 계산
+std_dev = variance ** 0.5
+
+print(f"분산: {variance:.2f}")
+print(f"표준편차: {std_dev:.2f}")
+
+# 범위 계산
+data_range = max(scores) - min(scores)
+print(f"범위: {data_range}")`,
+                hint: "분산은 편차의 제곱의 평균입니다.",
+                expectedOutput: "분산:"
+            },
+            4: {
+                title: "4단계: 결과 해석",
+                description: "계산된 통계량들의 의미를 해석하고 결론을 도출합니다.",
+                objective: "기술통계량의 의미를 해석하고 데이터의 특성을 설명할 수 있다.",
+                template: `# 데이터와 이전 계산 결과 준비
+scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+mean_value = sum(scores) / len(scores)
+
+# 수동 정렬
+sorted_scores = scores[:]
+for i in range(len(sorted_scores)):
+    for j in range(i + 1, len(sorted_scores)):
+        if sorted_scores[i] > sorted_scores[j]:
+            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
+
+median_value = (sorted_scores[4] + sorted_scores[5]) / 2
+
+# 분산 계산 (단계별로)
+squared_diffs = []
+for x in scores:
+    diff = x - mean_value
+    squared_diff = diff * diff
+    squared_diffs.append(squared_diff)
+
+variance = sum(squared_diffs) / len(scores)
+std_dev = variance ** 0.5
+data_range = max(scores) - min(scores)
+
+# 모든 통계량 요약
+print("=== 기술통계량 요약 ===")
+print(f"데이터 개수: {len(scores)}")
+print(f"평균: {mean_value:.2f}")
+print(f"중앙값: {median_value}")
+print(f"표준편차: {std_dev:.2f}")
+print(f"분산: {variance:.2f}")
+print(f"최솟값: {min(scores)}")
+print(f"최댓값: {max(scores)}")
+print(f"범위: {data_range}")
+
+print("\\n=== 해석 ===")
+print("이 학급의 평균 점수는 86.8점으로 양호한 수준입니다.")
+print("중앙값(88.5)이 평균보다 높아 약간 왼쪽으로 치우친 분포를 보입니다.")`,
+                hint: "계산된 값들을 정리하고 의미를 해석해보세요.",
+                expectedOutput: "=== 기술통계량 요약 ==="
+            },
+            5: {
+                title: "5단계: 시각화 및 종합 분석",
+                description: "데이터를 시각화하고 종합적인 분석을 수행합니다.",
+                objective: "기술통계량과 시각화를 통해 데이터를 종합적으로 분석할 수 있다.",
+                template: `# 데이터와 이전 계산 결과 준비
+scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+
+# 수동 정렬
+sorted_scores = scores[:]
+for i in range(len(sorted_scores)):
+    for j in range(i + 1, len(sorted_scores)):
+        if sorted_scores[i] > sorted_scores[j]:
+            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
+
+# 히스토그램 시뮬레이션
+print("=== 히스토그램 시뮬레이션 ===")
+print("70-75: |")
+print("76-80: |██")
+print("81-85: |██")
+print("86-90: |████")
+print("91-95: |███")
+
+print("\\n=== 종합 분석 ===")
+print("1. 중심경향성: 평균 86.8점, 중앙값 88.5점")
+print("2. 산포도: 표준편차 6.1점으로 적당한 분산")
+print("3. 분포 형태: 약간 왼쪽으로 치우친 분포")
+
+# 사분위수 계산
+q1_index = len(sorted_scores) // 4
+q3_index = 3 * len(sorted_scores) // 4
+q1 = sorted_scores[q1_index]
+q3 = sorted_scores[q3_index]
+iqr = q3 - q1
+
+print(f"\\n=== 사분위수 ===")
+print(f"1사분위수 (Q1): {q1}")
+print(f"3사분위수 (Q3): {q3}")
+print(f"사분위수 범위 (IQR): {iqr}")`,
+                hint: "사분위수를 계산하고 종합적인 분석을 해보세요.",
+                expectedOutput: "=== 히스토그램 시뮬레이션 ==="
+            }
+        };
+
+        // 초기화
+        function init() {
+            loadStep(currentStep);
+        }
+
+        // 단계 로드
+        function loadStep(stepNum) {
+            const step = stepsData[stepNum];
+            if (!step) return;
+
+            document.getElementById('stepNumber').textContent = stepNum;
+            document.getElementById('stepTitle').textContent = step.title;
+            document.getElementById('stepDescription').textContent = step.description;
+            document.getElementById('stepObjective').textContent = step.objective;
+            document.getElementById('codeEditor').value = step.template;
+
+            // 다음 단계 버튼 상태 업데이트
+            const nextBtn = document.getElementById('nextBtn');
+            if (stepCompleted[stepNum - 1]) {
+                nextBtn.disabled = false;
+                nextBtn.textContent = stepNum === totalSteps ? '완료!' : '다음 단계 →';
+            } else {
+                nextBtn.disabled = true;
+                nextBtn.textContent = '단계 완료 후 활성화';
+            }
+
+            // 힌트 패널 숨기기
+            document.getElementById('hintPanel').classList.add('hidden');
+            
+            // 애니메이션 효과
+            document.getElementById('stepPanel').classList.add('fade-in');
+            
+            updateProgress();
+        }
+
+        // 코드 실행 (시뮬레이션)
+        function runCode() {
+            const code = document.getElementById('codeEditor').value;
+            const resultOutput = document.getElementById('resultOutput');
+            const resultInterpretation = document.getElementById('resultInterpretation');
+            const interpretationText = document.getElementById('interpretationText');
+
+            // 로딩 표시
+            resultOutput.innerHTML = '<div class="loading-spinner"></div>';
+
+            // 시뮬레이션된 실행 (실제로는 백엔드 API 호출)
+            setTimeout(() => {
+                const step = stepsData[currentStep];
+                
+                // 간단한 코드 검증
+                if (code.includes(step.expectedOutput.split(':')[0]) || code.includes('scores')) {
+                    // 성공적인 실행 시뮬레이션
+                    let output = simulateCodeExecution(currentStep);
+                    resultOutput.textContent = output;
+                    
+                    // 결과 해석 표시
+                    resultInterpretation.classList.remove('hidden');
+                    interpretationText.textContent = getInterpretation(currentStep);
+                    
+                    // 단계 완료 처리
+                    completeStep(currentStep);
+                    
+                    showStatusMessage('코드가 성공적으로 실행되었습니다!', 'success');
+                } else {
+                    // 오류 시뮬레이션
+                    resultOutput.textContent = '오류: 코드를 확인해주세요. 템플릿을 참고하여 수정해보세요.';
+                    resultInterpretation.classList.add('hidden');
+                    showStatusMessage('코드 실행 중 오류가 발생했습니다.', 'error');
+                }
+            }, 1000);
+        }
+
+        // 코드 실행 시뮬레이션
+        function simulateCodeExecution(stepNum) {
+            const outputs = {
+                1: `데이터: [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+데이터 개수: 10
+데이터 타입: list`,
+                2: `총합: 868
+평균: 86.80
+중앙값: 88.5`,
+                3: `분산: 33.36
+표준편차: 5.78
+범위: 19`,
+                4: `=== 기술통계량 요약 ===
+데이터 개수: 10
+평균: 86.80
+중앙값: 88.5
+표준편차: 5.78
+분산: 33.36
+최솟값: 76
+최댓값: 95
+범위: 19
+
+=== 해석 ===
+이 학급의 평균 점수는 86.8점으로 양호한 수준입니다.
+중앙값(88.5)이 평균보다 높아 약간 왼쪽으로 치우친 분포를 보입니다.`,
+                5: `=== 히스토그램 시뮬레이션 ===
+70-75: |
+76-80: |██
+81-85: |██
+86-90: |████
+91-95: |███
+
+=== 종합 분석 ===
+1. 중심경향성: 평균 86.8점, 중앙값 88.5점
+2. 산포도: 표준편차 6.1점으로 적당한 분산
+3. 분포 형태: 약간 왼쪽으로 치우친 분포
+
+=== 사분위수 ===
+1사분위수 (Q1): 84
+3사분위수 (Q3): 91
+사분위수 범위 (IQR): 7`
+            };
+            return outputs[stepNum] || '실행 결과가 여기에 표시됩니다.';
+        }
+
+        // 결과 해석 생성
+        function getInterpretation(stepNum) {
+            const interpretations = {
+                1: "데이터가 성공적으로 준비되었습니다. 10개의 학생 성적 데이터를 리스트 형태로 저장했습니다.",
+                2: "중심경향성 분석 완료! 평균(86.8점)과 중앙값(88.5점)이 비슷하여 데이터가 비교적 균등하게 분포되어 있음을 알 수 있습니다.",
+                3: "산포도 분석 완료! 표준편차가 5.78점으로 적당한 수준이며, 대부분의 학생들이 평균 근처에 분포되어 있습니다.",
+                4: "모든 기술통계량이 계산되었습니다. 이 학급은 전반적으로 양호한 성적 분포를 보이며, 극단적인 값이 없어 안정적인 학습 환경임을 시사합니다.",
+                5: "종합 분석 완료! 히스토그램과 사분위수 분석을 통해 데이터의 전체적인 분포 패턴을 파악했습니다. 86-90점 구간에 가장 많은 학생이 분포되어 있습니다."
+            };
+            return interpretations[stepNum] || '';
+        }
+
+        // 단계 완료 처리
+        function completeStep(stepNum) {
+            stepCompleted[stepNum - 1] = true;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').textContent = stepNum === totalSteps ? '🎉 완료!' : '다음 단계 →';
+            updateProgress();
+        }
+
+        // 다음 단계로 이동
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                loadStep(currentStep);
+            } else {
+                // 모든 단계 완료
+                showStatusMessage('🎉 모든 단계를 완료했습니다! 기술통계량 분석을 마스터했네요!', 'success');
+                document.getElementById('nextBtn').textContent = '완료!';
+                document.getElementById('nextBtn').classList.add('pulse');
+            }
+        }
+
+        // 힌트 표시
+        function showHint() {
+            const step = stepsData[currentStep];
+            const hintPanel = document.getElementById('hintPanel');
+            const hintText = document.getElementById('hintText');
+            
+            hintText.textContent = step.hint;
+            hintPanel.classList.remove('hidden');
+            hintPanel.classList.add('fade-in');
+        }
+
+        // 코드 초기화
+        function resetCode() {
+            const step = stepsData[currentStep];
+            document.getElementById('codeEditor').value = step.template;
+            showStatusMessage('코드가 초기화되었습니다.', 'info');
+        }
+
+        // 진행률 업데이트
+        function updateProgress() {
+            const completedSteps = stepCompleted.filter(completed => completed).length;
+            const progressPercentage = (completedSteps / totalSteps) * 100;
+            
+            document.getElementById('progressFill').style.width = progressPercentage + '%';
+            document.getElementById('progressText').textContent = 
+                `${Math.round(progressPercentage)}% 완료 (${completedSteps}/${totalSteps} 단계)`;
+        }
+
+        // 상태 메시지 표시
+        function showStatusMessage(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type} fade-in`;
+            statusMessage.classList.remove('hidden');
+            
+            // 3초 후 자동 숨김
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

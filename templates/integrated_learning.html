@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 학습 시스템</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        .code-section, .result-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .code-section h3, .result-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        #codeInput {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            resize: vertical;
+        }
+        .button-group {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .result-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .interpretation {
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .hint-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 통합 학습 시스템</h1>
+            <p>기술통계량 학습을 위한 통합 플랫폼</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="code-section">
+                <h3>💻 코드 입력</h3>
+                <textarea id="codeInput" placeholder="Python 코드를 입력하세요..."></textarea>
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="executeCode()">실행</button>
+                    <button class="btn-secondary" onclick="getHint()">힌트</button>
+                    <button class="btn-success" onclick="createSession()">새 세션</button>
+                </div>
+                
+                <div id="progressSection">
+                    <h4>📊 학습 진행률</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div id="progressText">0% 완료</div>
+                </div>
+            </div>
+            
+            <div class="result-section">
+                <h3>📋 실행 결과</h3>
+                <div id="outputBox" class="result-box">실행 결과가 여기에 표시됩니다.</div>
+                
+                <div id="interpretationBox"></div>
+                <div id="hintBox"></div>
+                <div id="messageBox"></div>
+                
+                <div id="statsSection">
+                    <h4>📈 학습 통계</h4>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="successRate">0%</div>
+                            <div class="stat-label">성공률</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalAttempts">0</div>
+                            <div class="stat-label">총 시도</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="hintsUsed">0</div>
+                            <div class="stat-label">힌트 사용</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="efficiency">0</div>
+                            <div class="stat-label">효율성</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        
+        // 페이지 로드 시 세션 생성
+        window.onload = function() {
+            createSession();
+        };
+        
+        async function createSession() {
+            try {
+                const response = await fetch('/api/session/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: 'web_user_' + Date.now(),
+                        title: '웹 기반 기술통계량 학습'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    sessionId = data.session_id;
+                    showMessage('새 학습 세션이 생성되었습니다.', 'success');
+                    updateProgress();
+                } else {
+                    showMessage('세션 생성 실패: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('세션 생성 중 오류 발생: ' + error.message, 'error');
+            }
+        }
+        
+        async function executeCode() {
+            const code = document.getElementById('codeInput').value;
+            if (!code.trim()) {
+                showMessage('코드를 입력해주세요.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/code/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        include_interpretation: true
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayResult(data.result);
+                    updateProgress();
+                    updateStats();
+                } else {
+                    showMessage('실행 실패: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('실행 중 오류 발생: ' + error.message, 'error');
+            }
+        }
+        
+        async function getHint() {
+            try {
+                const response = await fetch('/api/hint?level=basic');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayHint(data.hint);
+                } else {
+                    showMessage('힌트 요청 실패: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('힌트 요청 중 오류 발생: ' + error.message, 'error');
+            }
+        }
+        
+        function displayResult(result) {
+            const outputBox = document.getElementById('outputBox');
+            const interpretationBox = document.getElementById('interpretationBox');
+            
+            // 실행 결과 표시
+            if (result.execution.success) {
+                outputBox.textContent = result.execution.output || '(출력 없음)';
+                outputBox.style.backgroundColor = '#d4edda';
+            } else {
+                outputBox.textContent = 'Error: ' + (result.execution.error || '알 수 없는 오류');
+                outputBox.style.backgroundColor = '#f8d7da';
+            }
+            
+            // 해석 결과 표시
+            if (result.interpretation && result.interpretation.statistical_analysis) {
+                let interpretationHtml = '<div class="interpretation"><h4>📊 통계 분석</h4>';
+                const stats = result.interpretation.statistical_analysis;
+                
+                for (const [key, value] of Object.entries(stats)) {
+                    interpretationHtml += `<p><strong>${key}:</strong> ${value.interpretation}</p>`;
+                }
+                
+                if (result.interpretation.learning_insights && result.interpretation.learning_insights.length > 0) {
+                    interpretationHtml += '<h5>💡 학습 인사이트</h5><ul>';
+                    result.interpretation.learning_insights.forEach(insight => {
+                        interpretationHtml += `<li>${insight}</li>`;
+                    });
+                    interpretationHtml += '</ul>';
+                }
+                
+                interpretationHtml += '</div>';
+                interpretationBox.innerHTML = interpretationHtml;
+            } else {
+                interpretationBox.innerHTML = '';
+            }
+            
+            // 성공/실패 메시지
+            if (result.standardized.step_completed) {
+                showMessage('✅ 단계를 성공적으로 완료했습니다!', 'success');
+            } else if (result.standardized.success) {
+                showMessage('코드는 실행되었지만 단계 요구사항을 완전히 충족하지 못했습니다.', 'warning');
+            }
+        }
+        
+        function displayHint(hint) {
+            const hintBox = document.getElementById('hintBox');
+            let hintHtml = '<div class="hint-box"><h4>💡 힌트</h4>';
+            
+            if (hint.practice_hint && hint.practice_hint.hint) {
+                hintHtml += `<p><strong>실습 힌트:</strong> ${hint.practice_hint.hint}</p>`;
+            }
+            
+            if (hint.additional_guidance && hint.additional_guidance.concept) {
+                hintHtml += `<p><strong>학습 개념:</strong> ${hint.additional_guidance.concept}</p>`;
+                if (hint.additional_guidance.tips) {
+                    hintHtml += '<p><strong>팁:</strong></p><ul>';
+                    hint.additional_guidance.tips.forEach(tip => {
+                        hintHtml += `<li>${tip}</li>`;
+                    });
+                    hintHtml += '</ul>';
+                }
+            }
+            
+            hintHtml += '</div>';
+            hintBox.innerHTML = hintHtml;
+        }
+        
+        async function updateProgress() {
+            try {
+                const response = await fetch('/api/session/progress');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const progress = data.progress;
+                    const progressFill = document.getElementById('progressFill');
+                    const progressText = document.getElementById('progressText');
+                    
+                    progressFill.style.width = progress.completion_percentage + '%';
+                    progressText.textContent = `${progress.completion_percentage.toFixed(1)}% 완료 (${progress.steps_completed.length}/${progress.total_steps} 단계)`;
+                }
+            } catch (error) {
+                console.error('진행률 업데이트 실패:', error);
+            }
+        }
+        
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/session/summary');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const metrics = data.summary.performance_metrics;
+                    
+                    document.getElementById('successRate').textContent = metrics.success_rate.toFixed(1) + '%';
+                    document.getElementById('totalAttempts').textContent = metrics.total_attempts;
+                    document.getElementById('hintsUsed').textContent = metrics.hints_used;
+                    document.getElementById('efficiency').textContent = metrics.efficiency_score.toFixed(0);
+                }
+            } catch (error) {
+                console.error('통계 업데이트 실패:', error);
+            }
+        }
+        
+        function showMessage(message, type) {
+            const messageBox = document.getElementById('messageBox');
+            const className = type === 'success' ? 'success-message' : 
+                            type === 'warning' ? 'hint-box' : 'error-message';
+            
+            messageBox.innerHTML = `<div class="${className}">${message}</div>`;
+            
+            // 3초 후 메시지 제거
+            setTimeout(() => {
+                messageBox.innerHTML = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

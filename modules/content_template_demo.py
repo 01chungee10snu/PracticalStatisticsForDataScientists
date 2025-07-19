@@ -1,0 +1,369 @@
+"""
+콘텐츠 템플릿 엔진 데모 스크립트
+"""
+
+import os
+import re
+from typing import Dict, List, Any, Tuple, Optional
+from enum import Enum
+
+
+class DifficultyLevel(Enum):
+    """난이도 수준"""
+    FOUNDATION = "foundation"
+    DEVELOPING = "developing"
+    PROFICIENT = "proficient"
+    ADVANCED = "advanced"
+
+
+class ContentTemplate:
+    """콘텐츠 템플릿"""
+    
+    def __init__(self, title: str, difficulty_level: str, estimated_time: int, 
+                 prerequisites: List[str] = None, sections: Dict[str, Any] = None):
+        """초기화"""
+        self.title = title
+        self.difficulty_level = difficulty_level
+        self.estimated_time = estimated_time
+        self.prerequisites = prerequisites or []
+        self.sections = sections or {}
+    
+    @classmethod
+    def create_default_template(cls, difficulty_level: str) -> 'ContentTemplate':
+        """기본 템플릿 생성"""
+        # 공통 섹션
+        common_sections = {
+            "concept_introduction": {
+                "required": True,
+                "description": "핵심 포인트와 정의",
+                "min_words": 100,
+            },
+            "visual_explanation": {
+                "required": True,
+                "description": "인터랙티브 시각화",
+                "visualization_required": True,
+            },
+            "practical_example": {
+                "required": True,
+                "description": "실습 코드와 해석",
+                "code_blocks_required": True,
+                "min_code_blocks": 1,
+            },
+            "common_misconceptions": {
+                "required": True,
+                "description": "흔한 오해와 올바른 이해",
+                "min_items": 2,
+            },
+            "self_assessment": {
+                "required": True,
+                "description": "자가 점검 문제",
+                "min_questions": 3,
+            }
+        }
+        
+        # 난이도별 설정
+        if difficulty_level == DifficultyLevel.FOUNDATION.value:
+            title = "기초 수준 콘텐츠"
+            estimated_time = 20
+        elif difficulty_level == DifficultyLevel.DEVELOPING.value:
+            title = "발전 수준 콘텐츠"
+            estimated_time = 30
+            common_sections["practical_example"]["min_code_blocks"] = 2
+            common_sections["self_assessment"]["min_questions"] = 4
+        elif difficulty_level == DifficultyLevel.PROFICIENT.value:
+            title = "숙련 수준 콘텐츠"
+            estimated_time = 45
+            common_sections["practical_example"]["min_code_blocks"] = 3
+            common_sections["advanced_concepts"] = {
+                "required": True,
+                "description": "심화 개념 설명",
+                "min_words": 200,
+            }
+            common_sections["self_assessment"]["min_questions"] = 5
+        elif difficulty_level == DifficultyLevel.ADVANCED.value:
+            title = "고급 수준 콘텐츠"
+            estimated_time = 60
+            common_sections["practical_example"]["min_code_blocks"] = 4
+            common_sections["advanced_concepts"] = {
+                "required": True,
+                "description": "심화 개념 설명",
+                "min_words": 300,
+            }
+            common_sections["research_insights"] = {
+                "required": True,
+                "description": "최신 연구 및 고급 응용",
+                "min_words": 200,
+            }
+            common_sections["self_assessment"]["min_questions"] = 6
+        else:
+            raise ValueError(f"유효하지 않은 난이도: {difficulty_level}")
+        
+        return cls(title, difficulty_level, estimated_time, [], common_sections)
+
+
+class TemplateEngine:
+    """템플릿 엔진"""
+    
+    def __init__(self):
+        """초기화"""
+        self.templates = {}
+        self._load_default_templates()
+    
+    def _load_default_templates(self):
+        """기본 템플릿 로드"""
+        for level in DifficultyLevel:
+            self.templates[level.value] = ContentTemplate.create_default_template(level.value)
+    
+    def get_template(self, difficulty_level: str) -> ContentTemplate:
+        """템플릿 가져오기"""
+        if difficulty_level not in self.templates:
+            raise ValueError(f"유효하지 않은 난이도: {difficulty_level}")
+        return self.templates[difficulty_level]
+    
+    def apply_template(self, content_data: Dict[str, Any]) -> Dict[str, Any]:
+        """템플릿 적용"""
+        if 'difficulty_level' not in content_data:
+            raise ValueError("콘텐츠 데이터에 난이도가 지정되지 않았습니다")
+        
+        difficulty_level = content_data['difficulty_level']
+        template = self.get_template(difficulty_level)
+        
+        # 템플릿 구조 적용
+        result = {
+            'title': content_data.get('title', template.title),
+            'difficulty_level': difficulty_level,
+            'estimated_time': content_data.get('estimated_time', template.estimated_time),
+            'prerequisites': content_data.get('prerequisites', template.prerequisites),
+            'sections': {}
+        }
+        
+        # 필수 섹션 확인
+        for section_name, section_config in template.sections.items():
+            if section_config.get('required', False):
+                if section_name not in content_data.get('sections', {}):
+                    result['sections'][section_name] = {
+                        'content': f"[TODO: {section_config['description']}]",
+                        'template_config': section_config
+                    }
+                else:
+                    result['sections'][section_name] = {
+                        'content': content_data['sections'][section_name].get('content', ''),
+                        'template_config': section_config
+                    }
+        
+        # 추가 섹션 포함
+        for section_name, section_data in content_data.get('sections', {}).items():
+            if section_name not in result['sections']:
+                result['sections'][section_name] = {
+                    'content': section_data.get('content', ''),
+                    'template_config': {'required': False, 'description': '사용자 정의 섹션'}
+                }
+        
+        return result
+    
+    def validate_against_template(self, content_data: Dict[str, Any]) -> Tuple[bool, List[str]]:
+        """템플릿 기준 검증"""
+        issues = []
+        
+        if 'difficulty_level' not in content_data:
+            issues.append("난이도가 지정되지 않았습니다")
+            return False, issues
+        
+        try:
+            template = self.get_template(content_data['difficulty_level'])
+        except ValueError as e:
+            issues.append(str(e))
+            return False, issues
+        
+        # 필수 섹션 검사
+        for section_name, section_config in template.sections.items():
+            if section_config.get('required', False):
+                if section_name not in content_data.get('sections', {}):
+                    issues.append(f"필수 섹션 누락: {section_name}")
+                else:
+                    section = content_data['sections'][section_name]
+                    
+                    # 최소 단어 수 검사
+                    if 'min_words' in section_config and 'content' in section:
+                        word_count = len(section['content'].split())
+                        if word_count < section_config['min_words']:
+                            issues.append(
+                                f"섹션 '{section_name}'의 단어 수가 {word_count}개로, "
+                                f"최소 요구사항인 {section_config['min_words']}개보다 적습니다"
+                            )
+                    
+                    # 코드 블록 검사
+                    if section_config.get('code_blocks_required', False):
+                        code_blocks = re.findall(r'```[\w]*\n[\s\S]*?\n```', section.get('content', ''))
+                        if not code_blocks:
+                            issues.append(f"섹션 '{section_name}'에 코드 블록이 필요합니다")
+                        elif 'min_code_blocks' in section_config and len(code_blocks) < section_config['min_code_blocks']:
+                            issues.append(
+                                f"섹션 '{section_name}'의 코드 블록이 {len(code_blocks)}개로, "
+                                f"최소 요구사항인 {section_config['min_code_blocks']}개보다 적습니다"
+                            )
+                    
+                    # 최소 항목 수 검사
+                    if 'min_items' in section_config:
+                        items = re.findall(r'^\s*[-*]\s+', section.get('content', ''), re.MULTILINE)
+                        if len(items) < section_config['min_items']:
+                            issues.append(
+                                f"섹션 '{section_name}'의 항목이 {len(items)}개로, "
+                                f"최소 요구사항인 {section_config['min_items']}개보다 적습니다"
+                            )
+                    
+                    # 최소 질문 수 검사
+                    if 'min_questions' in section_config:
+                        questions = re.findall(r'^\s*\d+\.\s+', section.get('content', ''), re.MULTILINE)
+                        if len(questions) < section_config['min_questions']:
+                            issues.append(
+                                f"섹션 '{section_name}'의 질문이 {len(questions)}개로, "
+                                f"최소 요구사항인 {section_config['min_questions']}개보다 적습니다"
+                            )
+        
+        return len(issues) == 0, issues
+    
+    def generate_markdown(self, content_data: Dict[str, Any]) -> str:
+        """마크다운 생성"""
+        md_lines = []
+        
+        # 제목
+        md_lines.append(f"# {content_data['title']}")
+        md_lines.append("")
+        
+        # 메타데이터
+        md_lines.append(f"**난이도:** {content_data['difficulty_level']}")
+        md_lines.append(f"**예상 소요 시간:** {content_data['estimated_time']}분")
+        
+        if content_data.get('prerequisites'):
+            md_lines.append("**선수 지식:**")
+            for prereq in content_data['prerequisites']:
+                md_lines.append(f"- {prereq}")
+        
+        md_lines.append("")
+        
+        # 섹션
+        for section_name, section_data in content_data['sections'].items():
+            # 섹션 제목 (snake_case를 Title Case로 변환)
+            section_title = ' '.join(word.capitalize() for word in section_name.split('_'))
+            md_lines.append(f"## {section_title}")
+            md_lines.append("")
+            
+            # 섹션 내용
+            if isinstance(section_data, dict):
+                content = section_data.get('content', '')
+            else:
+                content = str(section_data)
+            
+            md_lines.append(content)
+            md_lines.append("")
+        
+        return '\n'.join(md_lines)
+
+
+def main():
+    """메인 함수"""
+    print("=== 콘텐츠 템플릿 엔진 데모 ===")
+    
+    # 템플릿 엔진 생성
+    engine = TemplateEngine()
+    
+    # 각 난이도별 템플릿 정보 출력
+    print("1. 난이도별 템플릿 정보:")
+    print("=" * 50)
+    for level in DifficultyLevel:
+        template = engine.get_template(level.value)
+        print(f"\n[{level.value}] 템플릿:")
+        print(f"제목: {template.title}")
+        print(f"예상 소요 시간: {template.estimated_time}분")
+        print(f"필수 섹션: {[name for name, config in template.sections.items() if config.get('required', False)]}")
+    
+    # 콘텐츠 데이터 예제
+    content_data = {
+        'title': '파이썬 데이터 시각화 기초',
+        'difficulty_level': 'foundation',
+        'estimated_time': 25,
+        'prerequisites': ['파이썬 기초'],
+        'sections': {
+            'concept_introduction': {
+                'content': '''데이터 시각화는 데이터를 그래픽 요소로 표현하여 정보를 효과적으로 전달하는 기법입니다.
+                파이썬에서는 Matplotlib, Seaborn, Plotly 등의 라이브러리를 통해 다양한 시각화를 구현할 수 있습니다.
+                
+                시각화는 데이터 분석 과정에서 중요한 역할을 하며, 데이터의 패턴, 추세, 이상치 등을 발견하는 데 도움이 됩니다.
+                적절한 시각화 유형을 선택하는 것이 중요하며, 데이터의 특성과 전달하고자 하는 메시지에 따라 다양한 차트를 활용할 수 있습니다.'''
+            },
+            'practical_example': {
+                'content': '''Matplotlib을 사용한 기본 시각화 예제:
+
+```python
+# 필요한 라이브러리 임포트
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 데이터 생성
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
+
+# 선 그래프 그리기
+plt.figure(figsize=(8, 4))
+plt.plot(x, y, 'b-', linewidth=2, label='sin(x)')
+plt.title('사인 함수 그래프')
+plt.xlabel('x')
+plt.ylabel('sin(x)')
+plt.grid(True)
+plt.legend()
+plt.show()
+```
+
+위 코드는 사인 함수의 그래프를 그리는 예제입니다.'''
+            }
+        }
+    }
+    
+    # 템플릿 적용
+    print("\n2. 템플릿 적용:")
+    print("=" * 50)
+    result = engine.apply_template(content_data)
+    
+    print("템플릿 적용 결과:")
+    print(f"제목: {result['title']}")
+    print(f"난이도: {result['difficulty_level']}")
+    print(f"섹션 수: {len(result['sections'])}")
+    print("\n추가된 필수 섹션:")
+    for section_name, section_data in result['sections'].items():
+        if section_name not in content_data.get('sections', {}):
+            print(f"- {section_name}: {section_data['content']}")
+    
+    # 템플릿 검증
+    print("\n3. 템플릿 검증:")
+    print("=" * 50)
+    is_valid, issues = engine.validate_against_template(content_data)
+    
+    print(f"검증 결과: {'유효함' if is_valid else '유효하지 않음'}")
+    if not is_valid:
+        print("발견된 이슈:")
+        for issue in issues:
+            print(f"- {issue}")
+    
+    # 마크다운 생성
+    print("\n4. 마크다운 생성:")
+    print("=" * 50)
+    markdown = engine.generate_markdown(result)
+    
+    print("생성된 마크다운:")
+    print(markdown[:500] + "..." if len(markdown) > 500 else markdown)
+    
+    # 파일로 저장
+    output_dir = os.path.join(os.path.dirname(__file__), '..', 'docs', 'content')
+    os.makedirs(output_dir, exist_ok=True)
+    
+    output_file = os.path.join(output_dir, 'templated_content.md')
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write(markdown)
+    
+    print(f"\n마크다운 파일 저장됨: {output_file}")
+    print("\n=== 데모 완료 ===")
+
+
+if __name__ == "__main__":
+    main()
