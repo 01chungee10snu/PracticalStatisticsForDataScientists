@@ -1,785 +1,638 @@
 """
-전문 평가 및 인증 시스템
-- 적응형 평가 알고리즘
-- 실시간 난이도 조정
-- 종합적인 학습 진단
-- 전문 인증서 발급
+평가 및 피드백 시스템
+- 실시간 학습 성과 평가
+- 개인화된 피드백 생성
+- 학습 목표 달성도 추적
+- 적응형 평가 문항 생성
 """
 
 import json
-import uuid
-from datetime import datetime, timedelta
+import math
+import random
 from typing import Dict, List, Any, Optional, Tuple
+from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 from enum import Enum
-import numpy as np
-from pathlib import Path
-import hashlib
-import base64
-
-class QuestionType(Enum):
-    """문제 유형"""
-    MULTIPLE_CHOICE = "multiple_choice"
-    TRUE_FALSE = "true_false"
-    FILL_BLANK = "fill_blank"
-    CALCULATION = "calculation"
-    INTERPRETATION = "interpretation"
-    CODE_COMPLETION = "code_completion"
-    CASE_STUDY = "case_study"
-
-class DifficultyLevel(Enum):
-    """난이도 레벨"""
-    FOUNDATION = 1      # 기초
-    DEVELOPING = 2      # 발전
-    PROFICIENT = 3      # 숙련
-    ADVANCED = 4        # 고급
-    EXPERT = 5          # 전문가
 
 class AssessmentType(Enum):
-    """평가 유형"""
-    FORMATIVE = "formative"        # 형성평가 (학습 중)
-    SUMMATIVE = "summative"        # 총괄평가 (단원 마무리)
-    DIAGNOSTIC = "diagnostic"      # 진단평가 (사전 지식 확인)
-    CERTIFICATION = "certification" # 인증평가 (자격증)
+    DIAGNOSTIC = "diagnostic"      # 진단 평가
+    FORMATIVE = "formative"       # 형성 평가
+    SUMMATIVE = "summative"       # 총괄 평가
+    ADAPTIVE = "adaptive"         # 적응형 평가
+
+class QuestionType(Enum):
+    MULTIPLE_CHOICE = "multiple_choice"
+    TRUE_FALSE = "true_false"
+    SHORT_ANSWER = "short_answer"
+    CODE_COMPLETION = "code_completion"
+    INTERPRETATION = "interpretation"
+    PROBLEM_SOLVING = "problem_solving"
 
 @dataclass
 class Question:
-    """문제 데이터 구조"""
-    id: str
+    """평가 문항"""
+    question_id: str
     type: QuestionType
-    difficulty: DifficultyLevel
-    topic: str
-    subtopic: str
-    question_text: str
-    options: List[str]
+    content: str
+    options: Optional[List[str]]
     correct_answer: str
     explanation: str
-    hints: List[str]
-    tags: List[str]
-    estimated_time: int  # 예상 소요 시간 (초)
-    cognitive_level: str  # bloom's taxonomy level
-    prerequisite_concepts: List[str]
-    
-class QuestionBank:
-    """문제 은행 관리"""
-    
-    def __init__(self):
-        self.questions: Dict[str, Question] = {}
-        self.question_statistics: Dict[str, Dict] = {}
-        self._load_question_bank()
-    
-    def _load_question_bank(self):
-        """문제 은행 데이터 로드"""
-        # 실제 환경에서는 데이터베이스에서 로드
-        self._generate_sample_questions()
-    
-    def _generate_sample_questions(self):
-        """샘플 문제 생성"""
-        sample_questions = [
-            {
-                "id": "stats_basic_001",
-                "type": QuestionType.MULTIPLE_CHOICE,
-                "difficulty": DifficultyLevel.FOUNDATION,
-                "topic": "descriptive_statistics",
-                "subtopic": "measures_of_central_tendency",
-                "question_text": "다음 데이터의 평균은 얼마입니까? [2, 4, 6, 8, 10]",
-                "options": ["5", "6", "7", "8"],
-                "correct_answer": "6",
-                "explanation": "평균 = (2+4+6+8+10) ÷ 5 = 30 ÷ 5 = 6",
-                "hints": ["모든 값을 더한 후 개수로 나누세요", "2+4+6+8+10 = 30"],
-                "tags": ["mean", "average", "basic_calculation"],
-                "estimated_time": 60,
-                "cognitive_level": "application",
-                "prerequisite_concepts": ["basic_arithmetic"]
-            },
-            {
-                "id": "stats_inter_001",
-                "type": QuestionType.INTERPRETATION,
-                "difficulty": DifficultyLevel.PROFICIENT,
-                "topic": "hypothesis_testing",
-                "subtopic": "p_value_interpretation",
-                "question_text": "p-value가 0.03일 때, 유의수준 α=0.05에서 어떤 결론을 내릴 수 있습니까?",
-                "options": [
-                    "귀무가설을 기각한다",
-                    "귀무가설을 채택한다", 
-                    "대립가설을 기각한다",
-                    "결론을 내릴 수 없다"
-                ],
-                "correct_answer": "귀무가설을 기각한다",
-                "explanation": "p-value(0.03) < α(0.05)이므로 귀무가설을 기각하고 대립가설을 채택합니다.",
-                "hints": ["p-value와 유의수준을 비교하세요", "p < α일 때의 의미를 생각해보세요"],
-                "tags": ["hypothesis_testing", "p_value", "statistical_inference"],
-                "estimated_time": 120,
-                "cognitive_level": "analysis",
-                "prerequisite_concepts": ["hypothesis_testing_basics", "significance_level"]
-            },
-            {
-                "id": "stats_adv_001",
-                "type": QuestionType.CALCULATION,
-                "difficulty": DifficultyLevel.ADVANCED,
-                "topic": "regression_analysis",
-                "subtopic": "linear_regression",
-                "question_text": "다음 회귀식에서 R² = 0.85가 의미하는 바를 설명하고, 이 모델의 설명력을 평가하세요.",
-                "options": [],
-                "correct_answer": "독립변수가 종속변수 변동의 85%를 설명함. 높은 설명력을 가진 모델임.",
-                "explanation": "R²는 결정계수로, 독립변수가 종속변수의 변동을 얼마나 설명하는지 나타냅니다. 0.85는 85%의 변동을 설명함을 의미하며, 일반적으로 높은 설명력으로 평가됩니다.",
-                "hints": ["R²의 정의를 생각해보세요", "0.85는 퍼센트로 어떻게 해석됩니까?"],
-                "tags": ["regression", "r_squared", "model_evaluation"],
-                "estimated_time": 180,
-                "cognitive_level": "evaluation",
-                "prerequisite_concepts": ["correlation", "regression_basics", "variance"]
-            }
-        ]
-        
-        for q_data in sample_questions:
-            question = Question(**q_data)
-            self.questions[question.id] = question
-            self.question_statistics[question.id] = {
-                "attempts": 0,
-                "correct_attempts": 0,
-                "average_time": 0,
-                "difficulty_rating": question.difficulty.value
-            }
-    
-    def get_questions_by_criteria(
-        self, 
-        topic: Optional[str] = None,
-        difficulty: Optional[DifficultyLevel] = None,
-        question_type: Optional[QuestionType] = None,
-        tags: Optional[List[str]] = None,
-        limit: int = 10
-    ) -> List[Question]:
-        """조건에 맞는 문제 검색"""
-        filtered_questions = []
-        
-        for question in self.questions.values():
-            # 토픽 필터
-            if topic and question.topic != topic:
-                continue
-            
-            # 난이도 필터
-            if difficulty and question.difficulty != difficulty:
-                continue
-            
-            # 문제 유형 필터
-            if question_type and question.type != question_type:
-                continue
-            
-            # 태그 필터
-            if tags and not any(tag in question.tags for tag in tags):
-                continue
-            
-            filtered_questions.append(question)
-        
-        # 난이도와 통계 기반 정렬
-        filtered_questions.sort(key=lambda q: (
-            q.difficulty.value,
-            self.question_statistics[q.id]["difficulty_rating"]
-        ))
-        
-        return filtered_questions[:limit]
-    
-    def update_question_statistics(self, question_id: str, correct: bool, time_taken: int):
-        """문제 통계 업데이트"""
-        if question_id not in self.question_statistics:
-            return
-        
-        stats = self.question_statistics[question_id]
-        stats["attempts"] += 1
-        
-        if correct:
-            stats["correct_attempts"] += 1
-        
-        # 평균 시간 업데이트
-        current_avg = stats["average_time"]
-        stats["average_time"] = (current_avg * (stats["attempts"] - 1) + time_taken) / stats["attempts"]
-        
-        # 난이도 재계산 (정답률 기반)
-        success_rate = stats["correct_attempts"] / stats["attempts"]
-        if success_rate > 0.8:
-            stats["difficulty_rating"] = max(1, stats["difficulty_rating"] - 0.1)
-        elif success_rate < 0.4:
-            stats["difficulty_rating"] = min(5, stats["difficulty_rating"] + 0.1)
+    difficulty_level: float  # 0-1
+    topic: str
+    cognitive_level: str     # remember, understand, apply, analyze, evaluate, create
+    estimated_time: int      # 예상 소요 시간 (초)
 
 @dataclass
-class AssessmentResponse:
-    """평가 응답"""
+class Response:
+    """학습자 응답"""
+    response_id: str
+    user_id: str
     question_id: str
-    user_answer: str
+    answer: str
     is_correct: bool
-    time_taken: int
-    hints_used: int
-    confidence_level: int  # 1-5
-    timestamp: datetime
+    response_time: int       # 응답 시간 (초)
+    timestamp: str
+    confidence_level: Optional[float]  # 확신도 (0-1)
 
 @dataclass
-class AssessmentSession:
-    """평가 세션"""
-    session_id: str
+class AssessmentResult:
+    """평가 결과"""
+    assessment_id: str
     user_id: str
     assessment_type: AssessmentType
-    topic: str
-    start_time: datetime
-    end_time: Optional[datetime]
-    questions: List[str]  # question IDs
-    responses: List[AssessmentResponse]
-    current_question_index: int
-    score: float
-    max_score: float
-    is_completed: bool
-    adaptive_parameters: Dict[str, Any]
+    total_questions: int
+    correct_answers: int
+    score: float             # 0-100
+    completion_time: int     # 완료 시간 (초)
+    topic_scores: Dict[str, float]  # 주제별 점수
+    cognitive_scores: Dict[str, float]  # 인지 수준별 점수
+    strengths: List[str]
+    weaknesses: List[str]
+    recommendations: List[str]
+    timestamp: str
 
-class AdaptiveAssessmentEngine:
-    """적응형 평가 엔진"""
-    
-    def __init__(self, question_bank: QuestionBank):
-        self.question_bank = question_bank
-        self.active_sessions: Dict[str, AssessmentSession] = {}
-        self.completed_sessions: List[AssessmentSession] = []
+class AssessmentSystem:
+    def __init__(self):
+        self.questions: Dict[str, Question] = {}
+        self.responses: List[Response] = []
+        self.assessment_results: Dict[str, AssessmentResult] = {}
+        self.user_profiles: Dict[str, Dict] = {}
+        self.question_bank = self._initialize_question_bank()
         
-        # CAT (Computer Adaptive Testing) 매개변수
-        self.cat_parameters = {
-            "initial_difficulty": 3,        # 초기 난이도
-            "difficulty_adjustment": 0.5,   # 난이도 조정 폭
-            "min_questions": 5,             # 최소 문제 수
-            "max_questions": 20,            # 최대 문제 수
-            "precision_threshold": 0.3,     # 정밀도 임계값
-            "confidence_interval": 0.95     # 신뢰구간
+    def _initialize_question_bank(self) -> Dict[str, List[Question]]:
+        """문항 은행 초기화"""
+        return {
+            'descriptive_statistics': self._create_descriptive_stats_questions(),
+            'probability': self._create_probability_questions(),
+            'hypothesis_testing': self._create_hypothesis_testing_questions(),
+            'regression': self._create_regression_questions(),
+            'python_basics': self._create_python_questions()
         }
     
-    def start_assessment(
-        self, 
-        user_id: str, 
-        assessment_type: AssessmentType,
-        topic: str,
-        initial_difficulty: Optional[int] = None
-    ) -> str:
-        """평가 시작"""
-        session_id = str(uuid.uuid4())
+    def _create_descriptive_stats_questions(self) -> List[Question]:
+        """기술통계 문항 생성"""
+        questions = []
         
-        # 초기 난이도 설정
-        if initial_difficulty is None:
-            initial_difficulty = self._estimate_user_ability(user_id, topic)
+        # 기본 개념 문항
+        questions.append(Question(
+            question_id="desc_stats_001",
+            type=QuestionType.MULTIPLE_CHOICE,
+            content="다음 중 중심경향성을 나타내는 통계량이 아닌 것은?",
+            options=["평균", "중앙값", "최빈값", "표준편차"],
+            correct_answer="표준편차",
+            explanation="표준편차는 산포도를 나타내는 통계량입니다. 중심경향성은 평균, 중앙값, 최빈값으로 측정됩니다.",
+            difficulty_level=0.3,
+            topic="descriptive_statistics",
+            cognitive_level="remember",
+            estimated_time=30
+        ))
         
-        # 첫 번째 문제 선택
-        first_question = self._select_next_question(
-            topic, 
-            DifficultyLevel(initial_difficulty),
-            []  # 이미 출제된 문제 없음
-        )
+        # 적용 문항
+        questions.append(Question(
+            question_id="desc_stats_002",
+            type=QuestionType.CODE_COMPLETION,
+            content="다음 데이터의 평균을 계산하는 Python 코드를 완성하세요.\ndata = [1, 2, 3, 4, 5]\nmean = ____",
+            options=None,
+            correct_answer="sum(data) / len(data)",
+            explanation="평균은 모든 값의 합을 개수로 나눈 값입니다. Python에서는 sum()과 len() 함수를 사용할 수 있습니다.",
+            difficulty_level=0.4,
+            topic="descriptive_statistics",
+            cognitive_level="apply",
+            estimated_time=60
+        ))
         
-        session = AssessmentSession(
-            session_id=session_id,
-            user_id=user_id,
-            assessment_type=assessment_type,
-            topic=topic,
-            start_time=datetime.now(),
-            end_time=None,
-            questions=[first_question.id] if first_question else [],
-            responses=[],
-            current_question_index=0,
-            score=0.0,
-            max_score=0.0,
-            is_completed=False,
-            adaptive_parameters={
-                "current_difficulty": initial_difficulty,
-                "ability_estimate": initial_difficulty,
-                "ability_precision": 1.0,
-                "question_count": 0
-            }
-        )
+        # 해석 문항
+        questions.append(Question(
+            question_id="desc_stats_003",
+            type=QuestionType.INTERPRETATION,
+            content="어떤 데이터의 평균이 50, 중앙값이 45일 때, 이 분포의 특성을 설명하세요.",
+            options=None,
+            correct_answer="우측으로 치우친 분포 (positive skew)",
+            explanation="평균이 중앙값보다 클 때는 우측으로 치우친 분포입니다. 극값이 평균을 끌어올리기 때문입니다.",
+            difficulty_level=0.6,
+            topic="descriptive_statistics",
+            cognitive_level="analyze",
+            estimated_time=90
+        ))
         
-        self.active_sessions[session_id] = session
-        return session_id
+        return questions
     
-    def submit_response(
-        self, 
-        session_id: str, 
-        user_answer: str,
-        time_taken: int,
-        hints_used: int = 0,
-        confidence_level: int = 3
-    ) -> Dict[str, Any]:
-        """답안 제출 및 다음 문제 선택"""
-        if session_id not in self.active_sessions:
-            return {"error": "세션을 찾을 수 없습니다"}
+    def _create_probability_questions(self) -> List[Question]:
+        """확률 문항 생성"""
+        questions = []
         
-        session = self.active_sessions[session_id]
+        questions.append(Question(
+            question_id="prob_001",
+            type=QuestionType.MULTIPLE_CHOICE,
+            content="동전을 두 번 던질 때, 적어도 한 번은 앞면이 나올 확률은?",
+            options=["1/4", "1/2", "3/4", "1"],
+            correct_answer="3/4",
+            explanation="전체 경우의 수는 4가지(HH, HT, TH, TT)이고, 적어도 한 번 앞면이 나오는 경우는 3가지입니다.",
+            difficulty_level=0.5,
+            topic="probability",
+            cognitive_level="apply",
+            estimated_time=45
+        ))
         
-        if session.current_question_index >= len(session.questions):
-            return {"error": "더 이상 문제가 없습니다"}
+        return questions
+    
+    def _create_hypothesis_testing_questions(self) -> List[Question]:
+        """가설검정 문항 생성"""
+        questions = []
         
-        current_question_id = session.questions[session.current_question_index]
-        question = self.question_bank.questions[current_question_id]
+        questions.append(Question(
+            question_id="hyp_test_001",
+            type=QuestionType.TRUE_FALSE,
+            content="p-값이 0.05보다 작으면 항상 귀무가설을 기각해야 한다.",
+            options=["참", "거짓"],
+            correct_answer="거짓",
+            explanation="p-값이 유의수준보다 작을 때 귀무가설을 기각하지만, 유의수준은 연구자가 미리 설정해야 하며 항상 0.05일 필요는 없습니다.",
+            difficulty_level=0.7,
+            topic="hypothesis_testing",
+            cognitive_level="evaluate",
+            estimated_time=60
+        ))
         
-        # 정답 확인
-        is_correct = self._check_answer(question, user_answer)
+        return questions
+    
+    def _create_regression_questions(self) -> List[Question]:
+        """회귀분석 문항 생성"""
+        questions = []
         
-        # 응답 기록
-        response = AssessmentResponse(
-            question_id=current_question_id,
-            user_answer=user_answer,
-            is_correct=is_correct,
-            time_taken=time_taken,
-            hints_used=hints_used,
-            confidence_level=confidence_level,
-            timestamp=datetime.now()
-        )
-        session.responses.append(response)
+        questions.append(Question(
+            question_id="reg_001",
+            type=QuestionType.PROBLEM_SOLVING,
+            content="회귀식 y = 2x + 3에서 x가 1 증가할 때 y의 변화량은?",
+            options=None,
+            correct_answer="2",
+            explanation="회귀계수(기울기)는 독립변수가 1단위 증가할 때 종속변수의 변화량을 나타냅니다.",
+            difficulty_level=0.4,
+            topic="regression",
+            cognitive_level="understand",
+            estimated_time=30
+        ))
         
-        # 점수 업데이트
-        question_score = self._calculate_question_score(question, response)
-        session.score += question_score
-        session.max_score += 100  # 각 문제 만점
+        return questions
+    
+    def _create_python_questions(self) -> List[Question]:
+        """Python 문항 생성"""
+        questions = []
         
-        # 문제 통계 업데이트
-        self.question_bank.update_question_statistics(
-            current_question_id, is_correct, time_taken
-        )
+        questions.append(Question(
+            question_id="python_001",
+            type=QuestionType.CODE_COMPLETION,
+            content="pandas DataFrame에서 'age' 컬럼의 평균을 구하는 코드를 완성하세요.\ndf.____.mean()",
+            options=None,
+            correct_answer="['age']",
+            explanation="DataFrame에서 특정 컬럼을 선택할 때는 대괄호를 사용합니다. df['age'].mean()이 정답입니다.",
+            difficulty_level=0.3,
+            topic="python_basics",
+            cognitive_level="apply",
+            estimated_time=45
+        ))
         
-        # 능력 추정치 업데이트 (CAT)
-        self._update_ability_estimate(session, response)
+        return questions
+    
+    def create_adaptive_assessment(self, user_id: str, topic: str, target_questions: int = 10) -> List[Question]:
+        """적응형 평가 생성"""
+        if user_id not in self.user_profiles:
+            # 새 사용자는 중간 난이도부터 시작
+            estimated_ability = 0.5
+        else:
+            # 기존 사용자는 이전 성과를 바탕으로 능력 추정
+            estimated_ability = self._estimate_user_ability(user_id, topic)
         
-        # 다음 문제 결정
-        next_question = None
-        session_complete = False
+        selected_questions = []
+        current_ability = estimated_ability
         
-        if self._should_continue_assessment(session):
-            next_question = self._select_next_question(
-                session.topic,
-                DifficultyLevel(int(session.adaptive_parameters["current_difficulty"])),
-                session.questions
+        # 첫 번째 문항은 추정 능력 수준에 맞춰 선택
+        first_question = self._select_question_by_difficulty(topic, current_ability)
+        if first_question:
+            selected_questions.append(first_question)
+        
+        # 나머지 문항들을 적응적으로 선택
+        for i in range(1, target_questions):
+            if len(selected_questions) == 0:
+                break
+                
+            # 이전 응답을 바탕으로 능력 재추정
+            last_question = selected_questions[-1]
+            # 실제 구현에서는 사용자의 실제 응답을 사용해야 함
+            # 여기서는 시뮬레이션을 위해 임의의 응답 생성
+            simulated_correct = random.random() < current_ability
+            
+            current_ability = self._update_ability_estimate(
+                current_ability, last_question.difficulty_level, simulated_correct
             )
             
-            if next_question:
-                session.questions.append(next_question.id)
-            else:
-                session_complete = True
-        else:
-            session_complete = True
+            # 업데이트된 능력에 맞는 다음 문항 선택
+            next_question = self._select_question_by_difficulty(topic, current_ability)
+            if next_question and next_question.question_id not in [q.question_id for q in selected_questions]:
+                selected_questions.append(next_question)
         
-        if session_complete:
-            session.is_completed = True
-            session.end_time = datetime.now()
-            self.completed_sessions.append(session)
-            del self.active_sessions[session_id]
-        else:
-            session.current_question_index += 1
-        
-        # 응답 생성
-        result = {
-            "correct": is_correct,
-            "explanation": question.explanation,
-            "score": question_score,
-            "total_score": session.score,
-            "progress": (session.current_question_index + 1) / len(session.questions),
-            "session_complete": session_complete
-        }
-        
-        if next_question and not session_complete:
-            result["next_question"] = {
-                "id": next_question.id,
-                "type": next_question.type.value,
-                "question_text": next_question.question_text,
-                "options": next_question.options,
-                "estimated_time": next_question.estimated_time
-            }
-        
-        if session_complete:
-            result["final_results"] = self._generate_final_results(session)
-        
-        return result
+        return selected_questions
     
-    def _estimate_user_ability(self, user_id: str, topic: str) -> int:
+    def _estimate_user_ability(self, user_id: str, topic: str) -> float:
         """사용자 능력 추정"""
-        # 실제 환경에서는 과거 성과 데이터 분석
-        # 여기서는 중간 난이도로 시작
-        return self.cat_parameters["initial_difficulty"]
+        user_responses = [r for r in self.responses if r.user_id == user_id]
+        
+        if not user_responses:
+            return 0.5  # 기본값
+        
+        # 해당 주제의 최근 응답들을 분석
+        topic_responses = []
+        for response in user_responses:
+            if response.question_id in self.questions:
+                question = self.questions[response.question_id]
+                if question.topic == topic:
+                    topic_responses.append(response)
+        
+        if not topic_responses:
+            return 0.5
+        
+        # 최근 10개 응답의 가중평균으로 능력 추정
+        recent_responses = topic_responses[-10:]
+        total_weight = 0
+        weighted_score = 0
+        
+        for i, response in enumerate(recent_responses):
+            weight = i + 1  # 최근 응답일수록 높은 가중치
+            question = self.questions[response.question_id]
+            
+            if response.is_correct:
+                score = question.difficulty_level + 0.1  # 정답이면 난이도보다 약간 높게
+            else:
+                score = question.difficulty_level - 0.1  # 오답이면 난이도보다 약간 낮게
+            
+            weighted_score += score * weight
+            total_weight += weight
+        
+        estimated_ability = weighted_score / total_weight
+        return max(0.1, min(0.9, estimated_ability))
     
-    def _select_next_question(
-        self, 
-        topic: str, 
-        target_difficulty: DifficultyLevel,
-        used_questions: List[str]
-    ) -> Optional[Question]:
-        """다음 문제 선택 (CAT 알고리즘)"""
-        available_questions = self.question_bank.get_questions_by_criteria(
-            topic=topic,
-            difficulty=target_difficulty,
-            limit=50
-        )
-        
-        # 이미 사용된 문제 제외
-        available_questions = [
-            q for q in available_questions if q.id not in used_questions
-        ]
-        
-        if not available_questions:
-            # 다른 난이도에서 문제 찾기
-            for diff in DifficultyLevel:
-                if diff == target_difficulty:
-                    continue
-                
-                backup_questions = self.question_bank.get_questions_by_criteria(
-                    topic=topic,
-                    difficulty=diff,
-                    limit=10
-                )
-                
-                backup_questions = [
-                    q for q in backup_questions if q.id not in used_questions
-                ]
-                
-                if backup_questions:
-                    available_questions = backup_questions
-                    break
-        
-        if not available_questions:
+    def _select_question_by_difficulty(self, topic: str, target_difficulty: float) -> Optional[Question]:
+        """난이도에 맞는 문항 선택"""
+        if topic not in self.question_bank:
             return None
         
-        # 정보량이 최대인 문제 선택 (IRT 기반)
-        best_question = self._select_most_informative_question(available_questions)
+        available_questions = self.question_bank[topic]
+        
+        # 목표 난이도와 가장 가까운 문항 찾기
+        best_question = None
+        min_diff = float('inf')
+        
+        for question in available_questions:
+            diff = abs(question.difficulty_level - target_difficulty)
+            if diff < min_diff:
+                min_diff = diff
+                best_question = question
+        
         return best_question
     
-    def _select_most_informative_question(self, questions: List[Question]) -> Question:
-        """가장 정보량이 많은 문제 선택"""
-        # 단순화된 구현: 난이도와 통계를 고려한 선택
-        scored_questions = []
+    def _update_ability_estimate(self, current_ability: float, question_difficulty: float, is_correct: bool) -> float:
+        """능력 추정치 업데이트 (간단한 베이지안 업데이트)"""
+        learning_rate = 0.1
         
-        for question in questions:
-            stats = self.question_bank.question_statistics[question.id]
-            
-            # 정보량 계산 (단순화된 버전)
-            discrimination = 1.0  # 실제로는 IRT 매개변수 사용
-            information = discrimination ** 2 * 0.25  # Fisher Information
-            
-            # 문제 다양성 보너스
-            diversity_bonus = 1.0 / (stats["attempts"] + 1)
-            
-            total_score = information + diversity_bonus
-            scored_questions.append((question, total_score))
-        
-        # 가장 높은 점수의 문제 선택
-        scored_questions.sort(key=lambda x: x[1], reverse=True)
-        return scored_questions[0][0]
-    
-    def _check_answer(self, question: Question, user_answer: str) -> bool:
-        """답안 확인"""
-        if question.type == QuestionType.MULTIPLE_CHOICE:
-            return user_answer.strip().lower() == question.correct_answer.strip().lower()
-        elif question.type == QuestionType.TRUE_FALSE:
-            return user_answer.strip().lower() in ['true', 'false'] and \
-                   user_answer.strip().lower() == question.correct_answer.strip().lower()
-        elif question.type == QuestionType.CALCULATION:
-            # 숫자 답안의 경우 허용 오차 범위 내 정답 인정
-            try:
-                user_num = float(user_answer.strip())
-                correct_num = float(question.correct_answer.strip())
-                return abs(user_num - correct_num) < 0.01
-            except ValueError:
-                return False
+        if is_correct:
+            # 정답이면 능력 추정치를 문항 난이도 방향으로 조정
+            if question_difficulty > current_ability:
+                new_ability = current_ability + learning_rate * (question_difficulty - current_ability)
+            else:
+                new_ability = current_ability + learning_rate * 0.05  # 약간 증가
         else:
-            # 기타 유형은 키워드 기반 채점 (실제로는 더 정교한 NLP 필요)
-            user_keywords = set(user_answer.lower().split())
-            correct_keywords = set(question.correct_answer.lower().split())
-            overlap = len(user_keywords.intersection(correct_keywords))
-            return overlap / len(correct_keywords) > 0.7
+            # 오답이면 능력 추정치를 낮춤
+            if question_difficulty < current_ability:
+                new_ability = current_ability - learning_rate * (current_ability - question_difficulty)
+            else:
+                new_ability = current_ability - learning_rate * 0.05  # 약간 감소
+        
+        return max(0.1, min(0.9, new_ability))
     
-    def _calculate_question_score(self, question: Question, response: AssessmentResponse) -> float:
-        """문제별 점수 계산"""
-        base_score = 100 if response.is_correct else 0
+    def evaluate_response(self, user_id: str, question_id: str, user_answer: str, response_time: int) -> Dict[str, Any]:
+        """응답 평가"""
+        if question_id not in self.questions:
+            raise ValueError(f"Question {question_id} not found")
         
-        # 난이도 보너스
-        difficulty_multiplier = 1.0 + (question.difficulty.value - 1) * 0.2
+        question = self.questions[question_id]
         
-        # 시간 보너스/페널티
-        expected_time = question.estimated_time
-        time_ratio = response.time_taken / expected_time
+        # 정답 여부 판단
+        is_correct = self._check_answer_correctness(question, user_answer)
         
-        if time_ratio < 0.5:  # 매우 빠른 답변
-            time_multiplier = 1.2
-        elif time_ratio < 1.0:  # 적절한 시간
-            time_multiplier = 1.1
-        elif time_ratio < 2.0:  # 조금 느린 답변
-            time_multiplier = 1.0
-        else:  # 매우 느린 답변
-            time_multiplier = 0.9
-        
-        # 힌트 사용 페널티
-        hint_penalty = 1.0 - (response.hints_used * 0.1)
-        
-        final_score = base_score * difficulty_multiplier * time_multiplier * hint_penalty
-        return max(0, min(100, final_score))
-    
-    def _update_ability_estimate(self, session: AssessmentSession, response: AssessmentResponse):
-        """능력 추정치 업데이트 (CAT)"""
-        # 단순화된 능력 추정 업데이트
-        current_ability = session.adaptive_parameters["ability_estimate"]
-        
-        if response.is_correct:
-            # 정답인 경우 능력 추정치 상향 조정
-            adjustment = self.cat_parameters["difficulty_adjustment"]
-            new_ability = min(5, current_ability + adjustment)
-        else:
-            # 오답인 경우 능력 추정치 하향 조정
-            adjustment = self.cat_parameters["difficulty_adjustment"]
-            new_ability = max(1, current_ability - adjustment)
-        
-        session.adaptive_parameters["ability_estimate"] = new_ability
-        session.adaptive_parameters["current_difficulty"] = int(round(new_ability))
-        session.adaptive_parameters["question_count"] += 1
-        
-        # 정밀도 개선 (더 많은 문제를 풀수록 정밀도 향상)
-        precision_improvement = 0.1
-        current_precision = session.adaptive_parameters["ability_precision"]
-        session.adaptive_parameters["ability_precision"] = max(
-            self.cat_parameters["precision_threshold"],
-            current_precision - precision_improvement
+        # 응답 기록 생성
+        response = Response(
+            response_id=f"resp_{user_id}_{question_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            user_id=user_id,
+            question_id=question_id,
+            answer=user_answer,
+            is_correct=is_correct,
+            response_time=response_time,
+            timestamp=datetime.now().isoformat(),
+            confidence_level=None  # 추후 구현
         )
-    
-    def _should_continue_assessment(self, session: AssessmentSession) -> bool:
-        """평가 계속 여부 결정"""
-        question_count = session.adaptive_parameters["question_count"]
-        precision = session.adaptive_parameters["ability_precision"]
         
-        # 최소 문제 수 미달
-        if question_count < self.cat_parameters["min_questions"]:
-            return True
+        self.responses.append(response)
         
-        # 최대 문제 수 도달
-        if question_count >= self.cat_parameters["max_questions"]:
-            return False
-        
-        # 정밀도 기준 달성
-        if precision <= self.cat_parameters["precision_threshold"]:
-            return False
-        
-        return True
-    
-    def _generate_final_results(self, session: AssessmentSession) -> Dict[str, Any]:
-        """최종 결과 생성"""
-        total_questions = len(session.responses)
-        correct_answers = sum(1 for r in session.responses if r.is_correct)
-        
-        accuracy = correct_answers / total_questions if total_questions > 0 else 0
-        avg_time = np.mean([r.time_taken for r in session.responses]) if session.responses else 0
-        
-        # 능력 수준 판정
-        ability_estimate = session.adaptive_parameters["ability_estimate"]
-        if ability_estimate >= 4.5:
-            ability_level = "전문가"
-        elif ability_estimate >= 3.5:
-            ability_level = "고급"
-        elif ability_estimate >= 2.5:
-            ability_level = "중급"
-        elif ability_estimate >= 1.5:
-            ability_level = "초급"
-        else:
-            ability_level = "기초"
-        
-        # 강약점 분석
-        topic_performance = self._analyze_topic_performance(session)
-        
-        # 학습 권장사항
-        recommendations = self._generate_recommendations(session)
+        # 피드백 생성
+        feedback = self._generate_feedback(question, user_answer, is_correct, response_time)
         
         return {
-            "session_id": session.session_id,
-            "total_score": session.score,
-            "max_possible_score": session.max_score,
-            "percentage": (session.score / session.max_score * 100) if session.max_score > 0 else 0,
-            "accuracy": accuracy * 100,
-            "total_questions": total_questions,
-            "correct_answers": correct_answers,
-            "average_time": avg_time,
-            "ability_level": ability_level,
-            "ability_estimate": ability_estimate,
-            "topic_performance": topic_performance,
-            "recommendations": recommendations,
-            "completion_time": (session.end_time - session.start_time).total_seconds() / 60,
-            "certification_eligible": self._check_certification_eligibility(session)
+            'is_correct': is_correct,
+            'feedback': feedback,
+            'explanation': question.explanation,
+            'response_id': response.response_id
         }
     
-    def _analyze_topic_performance(self, session: AssessmentSession) -> Dict[str, Any]:
-        """주제별 성과 분석"""
-        topic_stats = {}
+    def _check_answer_correctness(self, question: Question, user_answer: str) -> bool:
+        """정답 여부 확인"""
+        correct_answer = question.correct_answer.strip().lower()
+        user_answer = user_answer.strip().lower()
         
-        for response in session.responses:
-            question = self.question_bank.questions[response.question_id]
-            subtopic = question.subtopic
-            
-            if subtopic not in topic_stats:
-                topic_stats[subtopic] = {
-                    "total": 0,
-                    "correct": 0,
-                    "avg_time": 0,
-                    "times": []
-                }
-            
-            topic_stats[subtopic]["total"] += 1
-            if response.is_correct:
-                topic_stats[subtopic]["correct"] += 1
-            topic_stats[subtopic]["times"].append(response.time_taken)
-        
-        # 평균 시간 계산
-        for subtopic in topic_stats:
-            times = topic_stats[subtopic]["times"]
-            topic_stats[subtopic]["avg_time"] = np.mean(times) if times else 0
-            topic_stats[subtopic]["accuracy"] = (
-                topic_stats[subtopic]["correct"] / topic_stats[subtopic]["total"] * 100
-            ) if topic_stats[subtopic]["total"] > 0 else 0
-            del topic_stats[subtopic]["times"]  # 불필요한 데이터 제거
-        
-        return topic_stats
-    
-    def _generate_recommendations(self, session: AssessmentSession) -> List[str]:
-        """학습 권장사항 생성"""
-        recommendations = []
-        ability = session.adaptive_parameters["ability_estimate"]
-        topic_performance = self._analyze_topic_performance(session)
-        
-        # 능력 수준 기반 권장사항
-        if ability < 2.0:
-            recommendations.append("기초 개념 학습에 더 많은 시간을 투자하세요")
-            recommendations.append("단계별 튜토리얼을 활용하여 기초를 다지세요")
-        elif ability < 3.0:
-            recommendations.append("중급 수준의 연습문제를 통해 실력을 향상시키세요")
-            recommendations.append("개념 간의 연결고리를 이해하는 데 집중하세요")
-        elif ability < 4.0:
-            recommendations.append("고급 주제에 도전해보세요")
-            recommendations.append("실제 데이터를 활용한 프로젝트를 시도해보세요")
+        if question.type == QuestionType.MULTIPLE_CHOICE:
+            return user_answer == correct_answer
+        elif question.type == QuestionType.TRUE_FALSE:
+            return user_answer in ['참', '거짓', 'true', 'false'] and user_answer == correct_answer
+        elif question.type == QuestionType.CODE_COMPLETION:
+            # 코드 답안은 더 유연한 검사 필요
+            return self._check_code_answer(correct_answer, user_answer)
+        elif question.type == QuestionType.SHORT_ANSWER:
+            # 키워드 기반 검사
+            return self._check_short_answer(correct_answer, user_answer)
         else:
-            recommendations.append("전문가 수준의 고급 과제에 도전하세요")
-            recommendations.append("다른 학습자들을 멘토링해보세요")
+            return user_answer == correct_answer
+    
+    def _check_code_answer(self, correct: str, user_answer: str) -> bool:
+        """코드 답안 검사"""
+        # 공백과 대소문자 무시하고 비교
+        correct_normalized = ''.join(correct.split()).lower()
+        user_normalized = ''.join(user_answer.split()).lower()
         
-        # 주제별 성과 기반 권장사항
-        weak_topics = [
-            topic for topic, stats in topic_performance.items()
-            if stats["accuracy"] < 60
-        ]
+        return correct_normalized == user_normalized
+    
+    def _check_short_answer(self, correct: str, user_answer: str) -> bool:
+        """단답형 답안 검사"""
+        correct_keywords = set(correct.split())
+        user_keywords = set(user_answer.split())
         
-        if weak_topics:
-            recommendations.append(f"다음 주제들을 집중적으로 학습하세요: {', '.join(weak_topics)}")
+        # 키워드의 80% 이상 일치하면 정답으로 인정
+        intersection = correct_keywords.intersection(user_keywords)
+        return len(intersection) / len(correct_keywords) >= 0.8
+    
+    def _generate_feedback(self, question: Question, user_answer: str, is_correct: bool, response_time: int) -> Dict[str, Any]:
+        """개인화된 피드백 생성"""
+        feedback = {
+            'correctness': 'correct' if is_correct else 'incorrect',
+            'message': '',
+            'hints': [],
+            'next_steps': [],
+            'time_feedback': ''
+        }
+        
+        # 정답/오답에 따른 메시지
+        if is_correct:
+            feedback['message'] = "정답입니다! 잘하셨습니다."
+            
+            # 응답 시간에 따른 추가 피드백
+            if response_time < question.estimated_time * 0.7:
+                feedback['time_feedback'] = "빠르고 정확한 답변이었습니다."
+            elif response_time > question.estimated_time * 1.5:
+                feedback['time_feedback'] = "정답이지만 시간이 좀 걸렸네요. 연습을 통해 속도를 높여보세요."
+        else:
+            feedback['message'] = "아쉽게도 틀렸습니다. 다시 한번 생각해보세요."
+            
+            # 문항 유형별 힌트 제공
+            feedback['hints'] = self._generate_hints(question, user_answer)
+        
+        # 다음 단계 제안
+        feedback['next_steps'] = self._suggest_next_steps(question, is_correct)
+        
+        return feedback
+    
+    def _generate_hints(self, question: Question, user_answer: str) -> List[str]:
+        """힌트 생성"""
+        hints = []
+        
+        if question.type == QuestionType.MULTIPLE_CHOICE:
+            hints.append("각 선택지를 다시 한번 검토해보세요.")
+            hints.append(f"이 문제는 '{question.topic}' 주제와 관련이 있습니다.")
+        
+        elif question.type == QuestionType.CODE_COMPLETION:
+            hints.append("Python 문법을 다시 확인해보세요.")
+            hints.append("함수 이름과 괄호를 정확히 사용했는지 확인하세요.")
+        
+        elif question.type == QuestionType.INTERPRETATION:
+            hints.append("데이터의 특성을 단계별로 분석해보세요.")
+            hints.append("수치들 간의 관계를 생각해보세요.")
+        
+        return hints
+    
+    def _suggest_next_steps(self, question: Question, is_correct: bool) -> List[str]:
+        """다음 단계 제안"""
+        next_steps = []
+        
+        if is_correct:
+            if question.difficulty_level < 0.7:
+                next_steps.append("더 어려운 문제에 도전해보세요.")
+            next_steps.append(f"{question.topic} 관련 심화 학습을 진행해보세요.")
+        else:
+            next_steps.append(f"{question.topic} 기본 개념을 다시 복습해보세요.")
+            if question.difficulty_level > 0.5:
+                next_steps.append("더 쉬운 문제부터 차근차근 풀어보세요.")
+            next_steps.append("관련 예제를 더 많이 연습해보세요.")
+        
+        return next_steps
+    
+    def generate_assessment_report(self, user_id: str, assessment_id: str) -> AssessmentResult:
+        """평가 보고서 생성"""
+        # 해당 평가의 응답들 수집
+        assessment_responses = [r for r in self.responses 
+                              if r.user_id == user_id and assessment_id in r.response_id]
+        
+        if not assessment_responses:
+            raise ValueError(f"No responses found for assessment {assessment_id}")
+        
+        # 기본 통계 계산
+        total_questions = len(assessment_responses)
+        correct_answers = sum(1 for r in assessment_responses if r.is_correct)
+        score = (correct_answers / total_questions) * 100
+        
+        # 주제별 점수 계산
+        topic_scores = self._calculate_topic_scores(assessment_responses)
+        
+        # 인지 수준별 점수 계산
+        cognitive_scores = self._calculate_cognitive_scores(assessment_responses)
+        
+        # 강점과 약점 분석
+        strengths, weaknesses = self._analyze_strengths_weaknesses(topic_scores, cognitive_scores)
+        
+        # 개선 권장사항 생성
+        recommendations = self._generate_recommendations(weaknesses, user_id)
+        
+        # 완료 시간 계산
+        completion_time = sum(r.response_time for r in assessment_responses)
+        
+        result = AssessmentResult(
+            assessment_id=assessment_id,
+            user_id=user_id,
+            assessment_type=AssessmentType.FORMATIVE,  # 기본값
+            total_questions=total_questions,
+            correct_answers=correct_answers,
+            score=score,
+            completion_time=completion_time,
+            topic_scores=topic_scores,
+            cognitive_scores=cognitive_scores,
+            strengths=strengths,
+            weaknesses=weaknesses,
+            recommendations=recommendations,
+            timestamp=datetime.now().isoformat()
+        )
+        
+        self.assessment_results[assessment_id] = result
+        return result
+    
+    def _calculate_topic_scores(self, responses: List[Response]) -> Dict[str, float]:
+        """주제별 점수 계산"""
+        topic_scores = {}
+        topic_counts = {}
+        
+        for response in responses:
+            if response.question_id in self.questions:
+                question = self.questions[response.question_id]
+                topic = question.topic
+                
+                if topic not in topic_scores:
+                    topic_scores[topic] = 0
+                    topic_counts[topic] = 0
+                
+                if response.is_correct:
+                    topic_scores[topic] += 1
+                topic_counts[topic] += 1
+        
+        # 백분율로 변환
+        for topic in topic_scores:
+            if topic_counts[topic] > 0:
+                topic_scores[topic] = (topic_scores[topic] / topic_counts[topic]) * 100
+        
+        return topic_scores
+    
+    def _calculate_cognitive_scores(self, responses: List[Response]) -> Dict[str, float]:
+        """인지 수준별 점수 계산"""
+        cognitive_scores = {}
+        cognitive_counts = {}
+        
+        for response in responses:
+            if response.question_id in self.questions:
+                question = self.questions[response.question_id]
+                cognitive_level = question.cognitive_level
+                
+                if cognitive_level not in cognitive_scores:
+                    cognitive_scores[cognitive_level] = 0
+                    cognitive_counts[cognitive_level] = 0
+                
+                if response.is_correct:
+                    cognitive_scores[cognitive_level] += 1
+                cognitive_counts[cognitive_level] += 1
+        
+        # 백분율로 변환
+        for level in cognitive_scores:
+            if cognitive_counts[level] > 0:
+                cognitive_scores[level] = (cognitive_scores[level] / cognitive_counts[level]) * 100
+        
+        return cognitive_scores
+    
+    def _analyze_strengths_weaknesses(self, topic_scores: Dict[str, float], 
+                                    cognitive_scores: Dict[str, float]) -> Tuple[List[str], List[str]]:
+        """강점과 약점 분석"""
+        strengths = []
+        weaknesses = []
+        
+        # 주제별 분석
+        for topic, score in topic_scores.items():
+            if score >= 80:
+                strengths.append(f"{topic} 영역에서 우수한 성과")
+            elif score < 60:
+                weaknesses.append(f"{topic} 영역 보완 필요")
+        
+        # 인지 수준별 분석
+        for level, score in cognitive_scores.items():
+            if score >= 80:
+                strengths.append(f"{level} 수준의 사고 능력 우수")
+            elif score < 60:
+                weaknesses.append(f"{level} 수준의 사고 능력 향상 필요")
+        
+        return strengths, weaknesses
+    
+    def _generate_recommendations(self, weaknesses: List[str], user_id: str) -> List[str]:
+        """개선 권장사항 생성"""
+        recommendations = []
+        
+        for weakness in weaknesses:
+            if "descriptive_statistics" in weakness:
+                recommendations.append("기술통계량 개념을 다시 학습하고 실습 문제를 더 풀어보세요.")
+            elif "probability" in weakness:
+                recommendations.append("확률 기초 개념을 복습하고 다양한 예제를 연습하세요.")
+            elif "hypothesis_testing" in weakness:
+                recommendations.append("가설검정의 단계별 과정을 체계적으로 학습하세요.")
+            elif "remember" in weakness:
+                recommendations.append("기본 개념과 용어를 암기하는 학습에 집중하세요.")
+            elif "apply" in weakness:
+                recommendations.append("이론을 실제 문제에 적용하는 연습을 늘리세요.")
+            elif "analyze" in weakness:
+                recommendations.append("데이터를 분석하고 해석하는 능력을 기르세요.")
+        
+        # 일반적인 권장사항
+        if len(weaknesses) > 3:
+            recommendations.append("기초부터 차근차근 다시 학습하는 것을 권장합니다.")
         
         return recommendations
-    
-    def _check_certification_eligibility(self, session: AssessmentSession) -> bool:
-        """인증 자격 확인"""
-        if session.assessment_type != AssessmentType.CERTIFICATION:
-            return False
-        
-        # 인증 기준: 80% 이상 정확도 + 평균 이상 능력 추정치
-        accuracy = sum(1 for r in session.responses if r.is_correct) / len(session.responses)
-        ability = session.adaptive_parameters["ability_estimate"]
-        
-        return accuracy >= 0.8 and ability >= 3.0
 
-class CertificationManager:
-    """인증 관리 시스템"""
+# 사용 예제
+if __name__ == "__main__":
+    assessment_system = AssessmentSystem()
     
-    def __init__(self):
-        self.certificates: Dict[str, Dict] = {}
-        self.certificate_templates = self._load_certificate_templates()
+    # 문항을 문항 은행에 등록
+    for topic, questions in assessment_system.question_bank.items():
+        for question in questions:
+            assessment_system.questions[question.question_id] = question
     
-    def _load_certificate_templates(self) -> Dict[str, Dict]:
-        """인증서 템플릿 로드"""
-        return {
-            "basic_statistics": {
-                "name": "기초 통계학 인증",
-                "description": "기초 통계 개념과 기술통계학 숙달 인증",
-                "requirements": {"min_score": 80, "min_ability": 2.0},
-                "validity_days": 365
-            },
-            "advanced_statistics": {
-                "name": "고급 통계학 인증",
-                "description": "고급 통계 분석 및 추론통계학 전문성 인증",
-                "requirements": {"min_score": 85, "min_ability": 4.0},
-                "validity_days": 730
-            },
-            "data_science": {
-                "name": "데이터 사이언스 인증",
-                "description": "종합적인 데이터 분석 및 머신러닝 역량 인증",
-                "requirements": {"min_score": 90, "min_ability": 4.5},
-                "validity_days": 730
-            }
-        }
+    # 적응형 평가 생성
+    adaptive_questions = assessment_system.create_adaptive_assessment('user123', 'descriptive_statistics', 5)
+    print(f"생성된 적응형 평가 문항 수: {len(adaptive_questions)}")
     
-    def issue_certificate(
-        self, 
-        user_id: str, 
-        session: AssessmentSession,
-        certificate_type: str
-    ) -> Optional[Dict[str, Any]]:
-        """인증서 발급"""
-        if not session.is_completed or certificate_type not in self.certificate_templates:
-            return None
-        
-        template = self.certificate_templates[certificate_type]
-        requirements = template["requirements"]
-        
-        # 요구사항 확인
-        final_results = session  # 실제로는 final_results를 별도 계산
-        score_percentage = (session.score / session.max_score * 100) if session.max_score > 0 else 0
-        ability = session.adaptive_parameters["ability_estimate"]
-        
-        if (score_percentage >= requirements["min_score"] and 
-            ability >= requirements["min_ability"]):
-            
-            # 인증서 생성
-            certificate_id = self._generate_certificate_id(user_id, certificate_type)
-            issue_date = datetime.now()
-            expiry_date = issue_date + timedelta(days=template["validity_days"])
-            
-            certificate = {
-                "id": certificate_id,
-                "user_id": user_id,
-                "certificate_type": certificate_type,
-                "name": template["name"],
-                "description": template["description"],
-                "issue_date": issue_date.isoformat(),
-                "expiry_date": expiry_date.isoformat(),
-                "score": score_percentage,
-                "ability_level": ability,
-                "session_id": session.session_id,
-                "verification_hash": self._generate_verification_hash(certificate_id, user_id),
-                "is_valid": True
-            }
-            
-            self.certificates[certificate_id] = certificate
-            return certificate
-        
-        return None
+    # 응답 평가 시뮬레이션
+    for question in adaptive_questions[:2]:
+        result = assessment_system.evaluate_response(
+            'user123', 
+            question.question_id, 
+            question.correct_answer,  # 정답으로 시뮬레이션
+            30
+        )
+        print(f"문항 {question.question_id}: {result['feedback']['message']}")
     
-    def _generate_certificate_id(self, user_id: str, certificate_type: str) -> str:
-        """인증서 ID 생성"""
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        return f"CERT_{certificate_type.upper()}_{user_id}_{timestamp}"
-    
-    def _generate_verification_hash(self, certificate_id: str, user_id: str) -> str:
-        """검증 해시 생성"""
-        data = f"{certificate_id}_{user_id}_{datetime.now().isoformat()}"
-        hash_object = hashlib.sha256(data.encode())
-        return base64.urlsafe_b64encode(hash_object.digest()).decode()[:16]
-    
-    def verify_certificate(self, certificate_id: str) -> Optional[Dict[str, Any]]:
-        """인증서 검증"""
-        certificate = self.certificates.get(certificate_id)
-        
-        if not certificate:
-            return None
-        
-        # 만료일 확인
-        expiry_date = datetime.fromisoformat(certificate["expiry_date"])
-        is_expired = datetime.now() > expiry_date
-        
-        return {
-            "certificate": certificate,
-            "is_valid": certificate["is_valid"] and not is_expired,
-            "is_expired": is_expired,
-            "verification_time": datetime.now().isoformat()
-        }
-
-# 전역 인스턴스
-question_bank = QuestionBank()
-assessment_engine = AdaptiveAssessmentEngine(question_bank)
-certification_manager = CertificationManager()
+    # 평가 보고서 생성
+    try:
+        report = assessment_system.generate_assessment_report('user123', 'test_assessment')
+        print(f"평가 점수: {report.score:.1f}점")
+        print(f"강점: {report.strengths}")
+        print(f"약점: {report.weaknesses}")
+    except ValueError as e:
+        print(f"보고서 생성 실패: {e}")
