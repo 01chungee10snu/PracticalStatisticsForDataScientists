@@ -39,7 +39,7 @@ webbrowser.open('https://example.com')
 
 ### 추가 예시
 - 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.
 
 ### 연습 문제
 1. 연구 결과를 대중에게 전달할 때 메시지를 단순화하는 방법을 논하세요.
@@ -48,4 +48,4 @@ webbrowser.open('https://example.com')
 
 [정답 보기](../answers.md)
 
-[목차로 돌아가기](../overview.md)
+[목차로 돌아가기](../index.md)

@@ -58,4 +58,4 @@ loadings = pd.DataFrame(fa.components_.T, columns=['Factor1', 'Factor2'])
 
 ### 추가 예시
 - 요인 분석 계산을 스프레드시트와 파이썬으로 비교해 보는 실습을 권장합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.

@@ -42,7 +42,7 @@ print('노드 수:', G.number_of_nodes())
 
 ### 추가 예시
 - 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.
 
 ### 연습 문제
 1. 체계적 문헌 검토 절차의 핵심 단계를 정리하세요.
@@ -51,4 +51,4 @@ print('노드 수:', G.number_of_nodes())
 
 [정답 보기](../answers.md)
 
-[목차로 돌아가기](../overview.md)
+[목차로 돌아가기](../index.md)

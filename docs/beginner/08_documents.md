@@ -40,7 +40,7 @@ df.to_csv('docs_backup/sample.csv', index=False)
 
 ### 추가 예시
 - 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.
 
 ### 연습 문제
 1. 문서 자료의 신뢰도를 평가할 때 고려해야 할 요소를 세 가지 이상 서술하세요.
@@ -49,4 +49,4 @@ df.to_csv('docs_backup/sample.csv', index=False)
 
 [정답 보기](../answers.md)
 
-[목차로 돌아가기](../overview.md)
+[목차로 돌아가기](../index.md)

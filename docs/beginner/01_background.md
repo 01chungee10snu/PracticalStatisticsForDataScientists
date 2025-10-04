@@ -64,7 +64,7 @@ print(summary.head())
 
 ### 추가 예시
 - 실제 연구 사례를 간단히 요약하며 수집 절차를 설명합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.
 
 ### 연습 문제
 1. 사례 연구가 다른 질적 연구와 구별되는 핵심 요소를 서술하세요.
@@ -73,4 +73,4 @@ print(summary.head())
 
 [정답 보기](../answers.md)
 
-[목차로 돌아가기](../overview.md)
+[목차로 돌아가기](../index.md)

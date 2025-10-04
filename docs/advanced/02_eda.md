@@ -81,7 +81,7 @@ print('주성분 설명 분산 비율:', pca.explained_variance_ratio_)
 
 ### 추가 예시
 - 실무 데이터를 활용해 핵심 개념을 적용하는 연습을 제안합니다.
-더 자세한 통합 요약은 [overview.md](../overview.md)에서 확인할 수 있습니다.
+더 자세한 통합 요약은 [index.md](../index.md)에서 확인할 수 있습니다.
 
 ### 연습 문제
 1. EDA가 통계 분석 초기 단계에서 중요한 이유를 구체적인 예를 들어 설명하세요.
@@ -90,4 +90,4 @@ print('주성분 설명 분산 비율:', pca.explained_variance_ratio_)
 
 [정답 보기](../answers.md)
 
-[목차로 돌아가기](../overview.md)
+[목차로 돌아가기](../index.md)
