@@ -505,7 +505,7 @@ $$
 
 | 이산형(PMF)                                                                                     | 연속형(PDF)                                                                                   |
 | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| ![PMF 예시](https://upload.wikimedia.org/wikipedia/commons/1/1a/Binomial_distribution_pmf.svg) | ![PDF 예시](https://upload.wikimedia.org/wikipedia/commons/7/74/Normal_Distribution_PDF.svg) |
+| ![PMF 예시](https://upload.wikimedia.org/wikipedia/commons/7/75/Binomial_distribution_pmf.svg) | ![PDF 예시](https://upload.wikimedia.org/wikipedia/commons/7/74/Normal_Distribution_PDF.svg) |
 
 > 출처: Wikimedia Commons
 
@@ -522,7 +522,7 @@ $$
 * **매개변수:** 성공확률 $p\in[0,1]$
 * **기대값/분산:** $E[X]=p,;Var(X)=p(1-p)$
 * **용례:** 단일 시도(성공/실패), 클릭 여부, 합격/불합격
-* **시각:** ![Bernoulli PMF](https://upload.wikimedia.org/wikipedia/commons/f/fd/Bernoulli_pmf.svg)
+* **시각:** ![Bernoulli PMF](https://upload.wikimedia.org/wikipedia/commons/b/b6/PMF_and_CDF_of_a_bernouli_distribution.png)
 
 > 💬 **이름 주석 – “베르누이”**
 > **야코프(야곱) 베르누이(Jacob Bernoulli, 1655–1705)**: 확률·대수의 기초 공헌. 베르누이 시행(성공/실패) 개념을 정립.
@@ -538,7 +538,7 @@ $$
 * **매개변수:** 시행 수 $n$, 성공확률 $p$
 * **기대값/분산:** $E[X]=np,;Var(X)=np(1-p)$
 * **용례:** $n$번 독립 베르누이 시행의 성공 횟수(AB테스트 성공 수)
-* **시각:** ![Binomial PMF](https://upload.wikimedia.org/wikipedia/commons/1/1a/Binomial_distribution_pmf.svg)
+* **시각:** ![Binomial PMF](https://upload.wikimedia.org/wikipedia/commons/7/75/Binomial_distribution_pmf.svg)
 
 > 💬 **기호 주석**
 > $\binom{n}{k}=\dfrac{n!}{k!(n-k)!}$는 조합(순서 무시). $!$는 팩토리얼.
@@ -576,7 +576,7 @@ $$
 * **매개변수:** 구간 경계 $a<b$
 * **기대값/분산:** $E[X]=\dfrac{a+b}{2},;Var(X)=\dfrac{(b-a)^2}{12}$
 * **용례:** 무작위 초기값, 난수 테스트
-* **시각:** ![Uniform PDF](https://upload.wikimedia.org/wikipedia/commons/9/96/Uniform_distribution_PDF.svg)
+* **시각:** ![Uniform PDF](https://upload.wikimedia.org/wikipedia/commons/9/96/Uniform_Distribution_PDF_SVG.svg)
 
 ---
 
@@ -624,7 +624,7 @@ $$
 * **기대값/분산:** $E[X]=\dfrac{k}{\lambda},;Var(X)=\dfrac{k}{\lambda^2}$
 * **관계:** $k$개의 독립 지수($\lambda$) 합의 분포
 * **용례:** 수명·신뢰성·보험 청구 간격
-* **시각:** ![Gamma PDF](https://upload.wikimedia.org/wikipedia/commons/f/f3/Gamma_distribution_pdf.svg)
+* **시각:** ![Gamma PDF](https://upload.wikimedia.org/wikipedia/commons/e/e6/Gamma_distribution_pdf.svg)
 
 > 💬 **기호 주석 – $\Gamma(\cdot)$**
 > 감마함수: $\Gamma(k)=\int_0^\infty t^{k-1}e^{-t},dt$, 정수 $n$에 대해 $\Gamma(n)=(n-1)!$.
@@ -640,7 +640,7 @@ $$
 * **매개변수:** 자유도 $k\in\mathbb{N}$
 * **기대값/분산:** $E[X]=k,;Var(X)=2k$
 * **용례:** 분산 추정, 적합도/독립성 검정의 검정통계량
-* **시각:** ![Chi-square PDF](https://upload.wikimedia.org/wikipedia/commons/1/16/Chi-square_distribution_pdf.svg)
+* **시각:** ![Chi-square PDF](https://upload.wikimedia.org/wikipedia/commons/3/35/Chi-square_pdf.svg)
 
 > 💬 **용어 주석 – 자유도(df)**
 > 통계량이 자유롭게 변할 수 있는 **독립 정보의 수**. 표본제약(평균 등)으로 줄어듦.
@@ -672,7 +672,7 @@ $$
 
 * **매개변수:** 자유도 $d_1,d_2\in\mathbb{N}$
 * **용례:** 분산분석(ANOVA), 회귀 총체 적합도 검정(전체 $R^2$ 유의성)
-* **시각:** ![F PDF](https://upload.wikimedia.org/wikipedia/commons/4/4d/F_distribution_pdf.svg)
+* **시각:** ![F PDF](https://upload.wikimedia.org/wikipedia/commons/7/74/F-distribution_pdf.svg)
 
 > 💬 **이름 주석 – Fisher–Snedecor**
 > **로널드 A. 피셔(R. A. Fisher, 1890–1962)**, **조지 W. 스네데커(George W. Snedecor, 1881–1974)**가 발전·보급.
@@ -788,21 +788,21 @@ $$
 
 ### (1) 샘플 평균 분포의 정규화 수렴(애니메이션)
 
-![CLT in action](https://upload.wikimedia.org/wikipedia/commons/0/05/Clt_in_action.gif)
+![CLT in action](https://upload.wikimedia.org/wikipedia/commons/c/cd/Clt_in_action.gif)
 
 > 균등·왜도·이산 등 다양한 원 분포라도, **표본크기 $n$ 증가**에 따라
 > **표본평균의 분포가 정규 형태로 수렴**하는 모습을 보여주는 GIF. ([위키미디어 공용판][3])
 
 ### (2) 주사위 합의 분포가 종모양으로 (이산 → 연속 근사)
 
-![Dice sum CLT](https://upload.wikimedia.org/wikipedia/commons/2/2b/Dice_sum_central_limit_theorem.svg)
+![Dice sum CLT](https://upload.wikimedia.org/wikipedia/commons/8/8c/Dice_sum_central_limit_theorem.svg)
 
 > 여러 개의 공정한 주사위를 던져 **합/평균**을 보면,
 > $n$이 커질수록 **종(bell) 모양**에 가까워짐(정규 근사 향상). ([위키미디어 공용판][4])
 
 ### (3) 평균의 견고성 한계(반례 직관: 코시 분포)
 
-![Mean estimator consistency – Cauchy](https://upload.wikimedia.org/wikipedia/commons/5/52/Mean_estimator_consistency.gif)
+![Mean estimator consistency – Cauchy](https://upload.wikimedia.org/wikipedia/commons/a/aa/Mean_estimator_consistency.gif)
 
 > **코시(Cauchy)**처럼 **분산이 무한**인 분포는 CLT의 핵심 가정(유한 분산)을 위반 →
 > **표본평균이 안정적으로 수렴하지 않음**(두꺼운 꼬리). ([위키미디어 공용판][5])
@@ -848,7 +848,7 @@ $$
 
 ### (2) 구조 그림 (임베드)
 
-![Bootstrap Illustration](https://upload.wikimedia.org/wikipedia/commons/9/98/Illustration_bootstrap.svg)
+![Bootstrap Illustration](https://upload.wikimedia.org/wikipedia/commons/4/4a/Illustration_bootstrap.svg)
 
 > 한 표본에서 **재표본 여러 번** → 통계량 분포를 **경험적으로** 얻음. ([위키미디어 공용판][6])
 
