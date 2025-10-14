@@ -1117,3 +1117,285 @@ $$
 
 ---
 
+아래는 **GitHub 호환 Markdown** 형식으로,
+
+> ✅ 개념 단위 완결 · ✅ 모든 기호/용어 풍부한 주석 · ✅ 최대 5단계 계층 · ✅ 수식 `$...$`/`$$...$$` · ✅ 시각화(직접 제작 이미지 + 공개 이미지 임베드)
+> 를 반영한 **〈확률분포와 가설검정〉**입니다.
+> (직접 제작한 그림은 아래 경로에서 다운로드하여 GitHub에 업로드해 쓰면 됩니다:
+> [Right-tail p-value](sandbox:/mnt/data/normal_pvalue_right.png) · [Two-tailed p-value](sandbox:/mnt/data/normal_pvalue_two_tailed.png) · [t vs normal](sandbox:/mnt/data/t_vs_normal.png) · [Power curve](sandbox:/mnt/data/power_curve_ztest.png) · [Chi-square tail](sandbox:/mnt/data/chi_square_right_tail.png) · [F tail](sandbox:/mnt/data/f_right_tail.png) · [t one/two tails](sandbox:/mnt/data/t_one_two_tailed.png))
+
+---
+
+# 🧪 확률분포와 가설검정 (Distributions & Hypothesis Testing)
+
+## 1️⃣ 확률분포: 검정의 재료 (What are we integrating over?)
+
+### (1) 정의
+
+* **확률분포(Probability Distribution)**는 **확률변수 $X$**가 취할 수 있는 값과 그 **가능성**의 관계를 나타내는 수학적 기술.
+
+  * **이산형**: **확률질량함수(PMF)** $p(x)=P(X=x)$ — 막대그래프(질량)
+  * **연속형**: **확률밀도함수(PDF)** $f(x)\ge0$, $\int f(x),dx=1$ — 곡선(면적=확률)
+  * **누적분포함수(CDF)** $F(x)=P(X\le x)$ — 누적확률
+
+> 💬 **기호·용어 주석**
+>
+> * $X$: 확률변수(결과를 수로 대응시키는 함수).
+> * $p(x), f(x)$: 각각 이산/연속에서의 분포 표현.
+> * $F(x)$: 임계값 $x$ 이하 누적확률.
+> * “면적 = 확률”: 연속형에서 **곡선 아래 면적**이 확률.
+
+### (2) 대표 분포와 시각
+
+| 분포                   | 유형 | 의미                  | 시각                                                                                                     |
+| -------------------- | -- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| 정규 $N(\mu,\sigma^2)$ | 연속 | 자연·오차·평균의 한계분포      | ![Normal PDF](https://upload.wikimedia.org/wikipedia/commons/7/74/Normal_Distribution_PDF.svg)         |
+| t(df)                | 연속 | 소표본, 분산 미지일 때 평균 추론 | ![t PDF](https://upload.wikimedia.org/wikipedia/commons/4/41/Student_t_pdf.svg)                        |
+| $\chi^2(k)$          | 연속 | 분산·적합도·독립성 검정       | ![Chi-square PDF](https://upload.wikimedia.org/wikipedia/commons/1/16/Chi-square_distribution_pdf.svg) |
+| $F(d_1,d_2)$         | 연속 | 분산비, ANOVA          | ![F PDF](https://upload.wikimedia.org/wikipedia/commons/4/4d/F_distribution_pdf.svg)                   |
+
+---
+
+## 2️⃣ 가설검정의 구조 (How do we decide?)
+
+### (1) 문제 세팅
+
+* **귀무가설 $H_0$**: “차이 없음/효과 없음” 같은 **기본 가설**
+* **대립가설 $H_1$**: 우리가 **찾고자 하는 효과/차이**
+* **검정통계량 $T$**: 데이터로 계산하는 요약값(예: $Z$, $t$, $\chi^2$, $F$)
+* **유의수준 $\alpha$**: 1종 오류(틀린 기각)의 허용 확률(보통 0.05)
+
+> 💬 **핵심 원리**
+>
+> * $H_0$가 **참이라고 가정**하고, 그 하에서 $T$의 **분포**를 사용해
+>   관측통계량 $t_{\text{obs}}$가 **얼마나 극단적인지(p-value)**를 계산.
+
+### (2) p-값(p-value)의 정의와 시각
+
+* **정의(우측단일 예)**:
+  $$
+  p\text{-value} = P\big(T \ge t_{\text{obs}} ,\big|, H_0 \big)
+  $$
+* **p-값 개념 시각화**:
+  ![P-value concept](https://upload.wikimedia.org/wikipedia/commons/3/3a/P-value_in_statistical_significance_testing.svg)
+
+  > 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:P-value_in_statistical_significance_testing.svg) - p-값은 귀무가설 하에서 관측값보다 극단적인 결과가 나올 확률
+
+* **양측검정(two-tailed)**:
+  $$
+  p\text{-value} = P\big(|T| \ge |t_{\text{obs}}| ,\big|, H_0 \big)
+  $$
+
+> 💬 **해석 경고**
+>
+> * p-값은 “$H_0$가 참일 **확률**”이 **아님**.
+> * p-값은 “$H_0$가 참이라면 지금처럼 **극단적 데이터**가 나올 **확률**”.
+> * 작을수록 “$H_0$하에서 보기 드문 데이터” → 귀무가설 **기각** 근거가 됨(단, 효과크기/검정력 별도 확인 필요).
+
+### (3) 단측/양측 설정 차이 (t-분포 예)
+
+![One and two-tailed tests](https://upload.wikimedia.org/wikipedia/commons/4/42/Visualization_of_a_one-_and_two-tailed_test.svg)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Visualization_of_a_one-_and_two-tailed_test.svg) - 단측검정(왼쪽)과 양측검정(오른쪽) 비교
+
+> 💬 **단측 vs 양측**
+>
+> * **단측검정**: 한 방향으로만 극단값을 검정 (예: μ > μ₀ 또는 μ < μ₀)
+> * **양측검정**: 양쪽 방향으로 극단값을 검정 (예: μ ≠ μ₀)
+> * 연구가설의 방향성·사전 계획이 중요 - 데이터 확인 후 방향 선택은 부적절
+
+---
+
+## 3️⃣ 대표 검정과 분포 연결 (Common tests & their null distributions)
+
+### (1) Z-검정 (모분산 $\sigma^2$ **알고 있음**)
+
+* **가정**: $X_i$ i.i.d., $\sigma$ **알고 있음**, $n$ 크면 정규 근사 가능
+* **통계량**:
+  $$
+  Z=\frac{\bar{X}-\mu_0}{\sigma/\sqrt{n}} \sim N(0,1)\ \text{under}\ H_0
+  $$
+* **의미**: 평균이 $\mu_0$와 다른가? (한/양측)
+
+### (2) t-검정 (모분산 **모름**, 소표본)
+
+* **단일 표본**:
+  $$
+  t=\frac{\bar{X}-\mu_0}{S/\sqrt{n}} \sim t_{n-1}\ \text{under}\ H_0
+  $$
+* **독립 표본(등분산 가정)**:
+  $$
+  t=\frac{\bar{X}_1-\bar{X}*2}{S_p\sqrt{1/n_1+1/n_2}}\sim t*{n_1+n_2-2}
+  $$
+  (여기서 $S_p$는 풀드 표준편차)
+
+* **t-분포 vs 정규분포 비교**:
+
+  ![t vs normal comparison](https://upload.wikimedia.org/wikipedia/commons/4/41/Student_t_pdf.svg)
+
+  > 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Student_t_pdf.svg) - 다양한 자유도(df)에 따른 t-분포와 정규분포(파란선) 비교
+
+> 💬 **주석**:
+> * t-분포는 **꼬리가 두꺼워** 소표본에서 불확실성을 더 보수적으로 반영
+> * 자유도가 증가할수록(표본크기↑) 정규분포에 수렴
+> * df ≥ 30이면 t-분포와 정규분포가 거의 유사
+
+### (3) 카이제곱 검정 ($\chi^2$)
+
+* **분산에 대한 검정**:
+  $$
+  \frac{(n-1)S^2}{\sigma_0^2}\sim \chi^2_{n-1}
+  $$
+* **독립성/적합도(교차표)**:
+  $$
+  \chi^2=\sum \frac{(\text{Observed}-\text{Expected})^2}{\text{Expected}}
+  $$
+
+> 💬 **카이제곱분포 참고**: 분포 형태는 [앞서 제시된 카이제곱 PDF 이미지](https://upload.wikimedia.org/wikipedia/commons/3/35/Chi-square_pdf.svg) 참조. 자유도가 증가할수록 대칭적 형태로 변화.
+
+### (4) F-검정 (분산비, ANOVA)
+
+* **정의**:
+  $$
+  F=\frac{(X_1/d_1)}{(X_2/d_2)},\quad X_1\sim\chi^2_{d_1},\ X_2\sim\chi^2_{d_2}
+  $$
+* **용례**: 등분산 검정, 분산분석(집단 평균 차이)
+
+> 💬 **F분포 참고**: 분포 형태는 [앞서 제시된 F PDF 이미지](https://upload.wikimedia.org/wikipedia/commons/7/74/F-distribution_pdf.svg) 참조. 두 개의 자유도(d₁, d₂)에 따라 형태가 달라짐.
+
+---
+
+## 4️⃣ 검정력(Power)과 표본크기 (Type I/Type II 오류와 효과크기의 관계)
+
+### (1) 오류의 종류와 검정력 정의
+
+| 실제 상황 \ 결정 | $H_0$ 채택 | $H_0$ 기각 |
+|---------|--------|--------|
+| **$H_0$ 참** | 올바른 결정 (1-α) | **1종 오류** (α) |
+| **$H_0$ 거짓** | **2종 오류** (β) | 올바른 결정 (1-β = **검정력**) |
+
+* **1종 오류($\alpha$)**: 참인 $H_0$를 기각 ("거짓 양성", False Positive)
+* **2종 오류($\beta$)**: 거짓인 $H_0$를 채택 ("거짓 음성", False Negative)
+* **검정력(Power)**: $1-\beta$ = **실제 효과가 있을 때 이를 올바르게 기각할 확률**
+
+> 💬 **효과크기(effect size)** $d=\dfrac{\mu_1-\mu_0}{\sigma}$: 차이를 **표준편차 단위**로 스케일링 — 실질적 중요성의 척도. Cohen의 기준: small(0.2), medium(0.5), large(0.8)
+
+### (2) 1종 오류, 2종 오류, 검정력 시각화
+
+![Type I and Type II errors](https://upload.wikimedia.org/wikipedia/commons/a/aa/Type_I_and_II_errors.jpg)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Type_I_and_II_errors.jpg) - 귀무가설(H₀)과 대립가설(H₁) 분포에서 α(1종 오류)와 β(2종 오류), 그리고 검정력(1-β) 표시
+
+### (3) 검정력 곡선의 이해
+
+![Power function](https://upload.wikimedia.org/wikipedia/commons/8/8f/ROC_space-2.png)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:ROC_space-2.png) - ROC 곡선 (민감도 vs 1-특이도). 검정력은 진양성률(True Positive Rate)과 관련
+
+> **핵심 메시지**:
+> * **표본크기 $n$↑** → 두 분포의 중첩 감소 → β↓, 검정력(1-β)↑
+> * **효과크기 $d$↑** → 두 분포의 거리↑ → β↓, 검정력↑
+> * **유의수준 α↑** → 기각역↑ → 검정력↑ (단, 1종 오류도 증가)
+> * p-값이 작아질 가능성이 높아져 유의한 결과를 얻기 쉬워짐
+
+---
+
+## 5️⃣ p-값 중심 사고를 단단히 다지기 (Do & Don’t)
+
+### (1) 올바른 해석 (Do)
+
+* “p-값은 **$H_0$가 참일 때, 현재 관측치 이상으로 극단적인 통계량이 나올 확률**.”
+* 작은 p-값 → **데이터가 $H_0$와 상충**한다는 **증거** (효과크기·신뢰구간·파워와 함께 판단).
+
+### (2) 피해야 할 해석 (Don’t)
+
+* “p-값 = $H_0$가 참일 확률” ❌
+* “p-값 = 효과의 크기” ❌ (p-값은 **크기 정보**가 아니라 **희귀성** 정보)
+* “p<0.05면 실질적으로 중요하다” ❌ (효과크기, 표본크기, 맥락 필수)
+
+### (3) 함께 볼 것
+
+* **신뢰구간(CI)**: 효과크기의 **범위** 제시 → 추론의 풍부화
+* **파워분석**: 연구 설계 단계에서 **필요 표본크기** 산출
+
+---
+
+## 6️⃣ 실전 체크리스트 (One-pass)
+
+1. **가설 명확화**: $H_0$, $H_1$(단/양측).
+2. **검정통계량 선택**: 평균/비율/분산/다집단? 대응표본?
+3. **분포와 가정 확인**: 정규성/독립/등분산/표본크기.
+4. **p-값 계산·보고**: $p$와 함께 **효과크기·CI** 병기.
+5. **해석**: 통계적 유의성 ↔ 실질적 의미, 파워/재현가능성까지 고려.
+
+---
+
+## 7️⃣ 빠른 복습 퀴즈 (한 번에 하나씩!)
+
+* Q1. p-값의 **정의 문장**을 당신의 말로 1문장으로 써보세요.
+* Q2. 양측검정에서 p-값을 면적 관점으로 설명해 보세요(그림을 떠올리며).
+* Q3. 효과크기 $d$와 표본크기 $n$이 **p-값**과 **파워**에 주는 영향은?
+
+---
+
+---
+
+## 📋 통계분포표 (Statistical Distribution Tables)
+
+가설검정과 신뢰구간 계산에 필수적인 통계표들을 제공합니다.
+
+### 표준정규분포표 (Z-table)
+- **[표준정규분포표 - 한국어 위키백과](https://ko.wikipedia.org/wiki/표준정규분포표)** - 정규 분포의 누적 분포 함수 값(Φ 값) 표
+- **[정규분포표 - Chip One Stop](https://www.chip1stop.com/sp/knowledge/019_normal-distribution-table_ko)** - 표준정규분포 누적확률표 (양측, 단측)
+- **[Khan Academy Korea - Z-table 사용법](https://ko.khanacademy.org/math/statistics-probability/modeling-distributions-of-data/normal-distribution-calculation/v/z-table-for-proportion-above)** - 비디오 강의
+
+### t분포표 (t-table)
+- **[T분포표 - 한국어 위키백과](https://ko.wikipedia.org/wiki/T분포표)** - 자유도별 t 임계값 표 (일측/양측)
+- t분포는 자유도 ν(df)에 따라 임계값이 달라지며, 소표본 평균 검정에 사용
+
+### 카이제곱분포표 (χ²-table)
+- **[카이제곱 분포 - 한국어 위키백과](https://ko.wikipedia.org/wiki/카이제곱_분포)** - 카이제곱 분포 이론과 임계값
+- **[카이제곱분포 - 나무위키](https://namu.wiki/w/카이제곱분포)** - 자유도별 카이제곱 값 표
+- 분산 검정, 적합도 검정, 독립성 검정에 활용
+
+### F분포표 (F-table)
+- **[F 분포 - 한국어 위키백과](https://ko.wikipedia.org/wiki/F_분포)** - F 분포 이론 및 임계값
+- **[F분포표 (α=0.05)](http://www.hocsi.com/f-dis_table_005_free.htm)** - 다양한 유의수준의 F 임계값
+- **[확률분포표 모음](http://www.q-engineering.pe.kr/table_probability.htm)** - Z, t, χ², F 분포표 통합
+- **[F 분포 계산기](http://www.estat.me/estat/eLearning/kr/eStatU/example/080200.html)** - 인터랙티브 F 분포 계산
+
+> 💬 **사용 방법**
+>
+> 1. **유의수준 α** 설정 (보통 0.05 또는 0.01)
+> 2. **검정 방향** 결정 (단측/양측)
+> 3. **자유도** 확인 (표본크기, 모형 복잡도에 따라)
+> 4. 해당 표에서 **임계값** 찾기
+> 5. **검정통계량**과 비교하여 귀무가설 기각 여부 결정
+
+---
+
+## 📚 추가 학습 자료 (한국어) - 가설검정
+
+### 🎯 개념 설명 및 시각화
+- **[공돌이의 수학정리노트 - p-value의 의미](https://angeloyeo.github.io/2020/03/29/p_value.html)** - p-값 개념과 시각적 설명
+- **[기초통계학 - 가설검정과 p-value](https://soohee410.github.io/stat2)** - 직관적 이해와 그림 설명
+- **[First Penguin School - 갈아먹는 통계 기초](https://blog.firstpenguine.school/37)** - 가설, 검정, p-value 기초
+- **[Minitab 블로그 - P값을 올바르게 해석하는 방법](https://blog.minitab.com/ko/adventures-in-statistics-2/how-to-correctly-interpret-p-values)** - 실무 해석 가이드
+
+### 🔬 1종/2종 오류와 검정력
+- **[Minitab - 제1종 오류 및 제2종 오류의 정의](https://support.minitab.com/ko-kr/minitab/help-and-how-to/statistics/basic-statistics/supporting-topics/basics/type-i-and-type-ii-error/)** - 오류 유형 설명
+- **[Khan Academy Korea - 1종 오류](https://ko.khanacademy.org/math/statistics-probability/significance-tests-one-sample/error-probabilities-and-power/v/type-1-errors)** - 비디오 강의
+- **[위키백과 - 1종 오류와 2종 오류](https://ko.wikipedia.org/wiki/1종_오류와_2종_오류)** - 이론 및 사례
+- **[WikiDocs - A/B 테스트 정복하기](https://wikidocs.net/198387)** - 단측검정, 양측검정 개념
+
+### 📊 시각화 도구
+- **[Wikimedia Commons - Hypothesis Testing Category](https://commons.wikimedia.org/wiki/Category:Hypothesis_testing)** - 가설검정 관련 다이어그램 모음 (49개 파일)
+- **[Interactive NHST Visualization](https://rpsychologist.com/d3/nhst/)** - 검정력과 유의성 검정 대화형 시각화 (영문)
+- **[Hypothesis Test Graph Generator](https://www.imathas.com/stattools/norm.html)** - 정규분포 기반 검정 그래프 생성기
+
+### 📖 심화 학습
+- **[의학통계 - 가설검정](http://bigdata.dongguk.ac.kr/lectures/med_stat/_book/가설검정.html)** - 동국대 빅데이터 강의 자료
+- **[goteodata.kr - 가설검정](https://www.goteodata.kr/70)** - 상세한 수학적 표기와 예제
+- **[Quality Insights - 엑셀로 p-value 계산](https://www.quality-insights.co.kr/2025/07/pvalue.html)** - 실습 가이드
+
+---
