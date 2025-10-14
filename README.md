@@ -233,6 +233,21 @@
 | 회귀계수 | $\beta_0$, $\beta_1$   | 변수 간 관계의 강도        |
 | p-값  | $p$                    | 귀무가설하에서 결과가 나올 확률  |
 
+---
+
+## 📚 추가 학습 자료 (한국어)
+
+### 🎓 온라인 강의
+- **[KOCW 기초통계학](http://www.kocw.net/home/m/search/kemView.do?kemId=1052562)** - 여인권 교수 강의
+- **[K-MOOC 통계학의 이해 I](https://www.kmooc.kr/view/course/detail/6760)** - 숙명여대, 표본 수집과 확률분포 학습
+- **[한밭대 통계학개론](http://www.kocw.net/home/cview.do?mty=p&kemId=1215315)** - 임준묵 교수, 통계 패키지 실습 포함
+
+### 🔗 인터랙티브 시뮬레이션
+- **[PhET 수학 및 통계 시뮬레이션](https://phet.colorado.edu/ko/simulations/filter?subjects=math-and-statistics&type=html)** - 콜로라도대학교의 무료 대화형 시뮬레이션
+- **[자바실험실(Javalab)](https://javalab.org/en/)** - 다양한 과학/수학 가상 실험
+
+### 📖 웹 학습 자료
+- **[데이터 사이언스 스쿨](https://datascienceschool.net/)** - 파이썬 기반 통계학 튜토리얼
 
 ---
 
@@ -702,6 +717,23 @@ $$
 
 ---
 
+## 📚 추가 학습 자료 (한국어) - 확률분포
+
+### 🎯 공돌이의 수학정리노트 (시각화 포함)
+- **[이항 분포](https://angeloyeo.github.io/2021/04/23/binomial_distribution.html)** - 베르누이 시행과 이항분포의 관계
+- **[포아송 분포](https://angeloyeo.github.io/2021/04/26/Poisson_distribution.html)** - 드문 사건의 모델링
+- **[기하 분포](https://angeloyeo.github.io/2021/04/28/geometric_distribution.html)** - 첫 성공까지의 시행 횟수
+- **[정규분포의 공식 유도](https://angeloyeo.github.io/2020/09/14/normal_distribution_derivation.html)** - 가우스 분포 수식 유도 과정
+- **[카이제곱 분포와 검정](https://angeloyeo.github.io/2021/12/13/chi_square.html)** - 카이제곱 분포와 적합도 검정
+- **[최대우도법(MLE)](https://angeloyeo.github.io/2020/07/17/MLE.html)** - 확률분포 매개변수 추정
+
+### 📖 웹 자료
+- **[데이터 사이언스 스쿨 - 베르누이분포와 이항분포](https://datascienceschool.net/02%20mathematics/08.02%20베르누이분포와%20이항분포.html)** - 분류문제에서의 활용
+- **[Khan Academy Korea - 베르누이 분포](https://ko.khanacademy.org/math/statistics-probability/random-variables-stats-library/binomial-mean-standard-dev-formulas/v/mean-and-variance-of-bernoulli-distribution-example)** - 평균과 분산 예제 동영상
+- **[Wikidocs - 베르누이분포와 이항분포](https://wikidocs.net/198620)** - 확률 다루기 기초
+
+---
+
 # 📦 표본분포와 중심극한정리 (Sampling Distributions & CLT)
 
 ## 1️⃣ 표본분포(Sampling Distribution)
@@ -1025,6 +1057,25 @@ $$
 3. **표본크기**: 왜도·첨도 크면 **더 큰 $n$**. Berry–Esseen 감으로 정규 근사 품질 가늠.
 4. **소표본**: 정규성 진단 후 **정확 분포(t/χ²/F)** 또는 **비모수/부트스트랩** 고려.
 5. **의존 자료**: 블록부트스트랩, Newey–West(시계열) 등 **의존성 대응 추정** 사용.
+
+---
+
+## 📚 추가 학습 자료 (한국어) - 중심극한정리
+
+### 🎯 공돌이의 수학정리노트 (시각화 + 증명)
+- **[중심극한정리의 의미](https://angeloyeo.github.io/2020/09/15/CLT_meaning.html)** - 표본평균이 정규분포를 따르는 이유, 대화형 시각화 포함
+- **[중심극한정리 증명](https://angeloyeo.github.io/2020/01/10/CLT_proof.html)** - 수학적 증명 과정과 직관적 설명
+
+### 🔬 시뮬레이션 및 인터랙티브 자료
+- **[PhET 통계 시뮬레이션](https://phet.colorado.edu/ko/simulations/filter?subjects=math-and-statistics&type=html)** - 표본분포 및 CLT 시각화
+- **[JoVE Science Education - 중심극한정리](https://www.jove.com/kr/science-education/v/13583/central-limit-theorem)** - 표본평균 히스토그램 생성 비디오
+
+### 📖 웹 자료
+- **[인투더데이터 - 중심극한정리](https://intothedata.com/02.scholar_category/statistics/central_limit_theorem/)** - 데이터과학 위키
+- **[마인드스케일 - 중심극한정리](https://www.mindscale.kr/docs/probability/central-limit-theorem)** - 확률 통계 기초
+
+### 📄 학술 자료
+- **[중심극한정리 관련 연구](https://scienceon.kisti.re.kr/srch/selectPORSrchArticle.do?cn=DIKO0011382259)** - 컴퓨터 시뮬레이션(EXCEL, SAS)을 통한 검증
 
 ---
 
