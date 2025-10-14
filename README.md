@@ -196,6 +196,21 @@
 > * **$n$ (표본크기)**: "number"의 첫 글자. 표본의 개수를 나타내는 가장 직관적인 표기.
 > * **$N$ (모집단크기)**: 대문자 N으로 전체(total) 모집단을 의미. 표본(소문자 n)과 구분.
 
+### 신뢰구간의 의미 시각화
+
+![Confidence intervals for different levels](https://upload.wikimedia.org/wikipedia/commons/f/f4/Confidence_intervals_for_different_confidence_levels.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Confidence_intervals_for_different_confidence_levels.gif) - 서로 다른 신뢰수준(90%, 95%, 99%)에서의 신뢰구간 비교
+
+> 💬 **신뢰구간의 해석**
+>
+> * **신뢰수준(Confidence Level)**: 반복 표본추출 시 신뢰구간이 모수를 포함할 확률
+>   - 95% 신뢰수준 = "100번 표본추출하면 약 95번은 구간 안에 모수가 포함"
+> * **구간의 폭**: 신뢰수준이 높을수록 구간이 넓어짐
+>   - 99% CI > 95% CI > 90% CI (더 확신하려면 더 넓은 범위 필요)
+> * **표본크기 효과**: $n$이 커질수록 신뢰구간이 좁아짐 ($\propto 1/\sqrt{n}$)
+> * **주의**: "모수가 이 구간에 속할 확률이 95%"가 아니라, "구간이 모수를 포함할 확률이 95%"
+
 ---
 
 ### (4) 가설검정(Hypothesis Testing)
@@ -233,6 +248,19 @@
 > 💬 **기호 어원**
 > * **$\beta$ (베타, beta)**: 그리스 알파벳 2번째 글자. 회귀에서 "계수(coefficient)"를 나타내는 전통적 표기. $\beta_0$는 0차(상수항), $\beta_1$은 1차(기울기).
 > * **$\varepsilon$ (입실론, epsilon)**: 그리스어 "error"의 첫 글자. 측정 불가능한 무작위 오차를 표현. 작은 값을 의미하는 수학 전통에도 부합.
+
+### 선형 회귀 시각화: 좌표계 회전
+
+![Linear regression rotating](https://upload.wikimedia.org/wikipedia/commons/8/84/Linear_regression%2C_rotating_coordinate_system.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Linear_regression,_rotating_coordinate_system.gif) - 좌표계를 회전시키면서 선형 회귀선의 기하학적 의미를 보여주는 애니메이션
+
+> 💬 **회귀의 기하학적 해석**
+>
+> * 회귀선은 데이터 점들로부터의 **수직 거리 제곱합을 최소화**하는 직선 (최소제곱법, OLS)
+> * 좌표계를 회전시키면 회귀선의 방향이 데이터의 **주성분 방향**과 일치함을 알 수 있음
+> * 상관계수 $r$이 클수록 데이터 점들이 회귀선 주위에 밀집
+> * 이 시각화는 회귀분석과 주성분분석(PCA)의 관계를 이해하는 데 도움
 
 ---
 
@@ -542,6 +570,27 @@ $$
 
 > 출처: Wikimedia Commons
 
+### (3) 스케일 매개변수의 효과 (Scale Parameter Effect)
+
+![Scale parameter effects](https://upload.wikimedia.org/wikipedia/commons/e/e4/Effects_of_a_scale_parameter_on_a_positive-support_probability_distribution.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Effects_of_a_scale_parameter_on_a_positive-support_probability_distribution.gif) - 스케일 매개변수가 확률분포의 형태에 미치는 영향
+
+> 💬 **스케일 매개변수(Scale Parameter)**
+>
+> * **정의**: 분포의 "퍼짐" 또는 "스케일"을 조절하는 매개변수
+> * **예시**:
+>   - 정규분포: $\sigma$ (표준편차)
+>   - 지수분포: $1/\lambda$ (평균)
+>   - 감마분포: $1/\lambda$ (스케일)
+> * **효과**:
+>   - 스케일 ↑ → 분포가 더 넓게 퍼짐 (분산 ↑)
+>   - 스케일 ↓ → 분포가 더 좁게 모임 (분산 ↓)
+>   - 분포의 **형태(shape)**는 유지되고 **크기만 변함**
+> * **위치 매개변수(Location Parameter)**와의 차이:
+>   - 위치: 분포를 좌우로 이동 (예: $\mu$)
+>   - 스케일: 분포를 확대/축소
+
 ---
 
 ## 2️⃣ 이산형 확률분포 (Discrete)
@@ -575,6 +624,30 @@ $$
 
 > 💬 **기호 주석**
 > $\binom{n}{k}=\dfrac{n!}{k!(n-k)!}$는 조합(순서 무시). $!$는 팩토리얼.
+
+### 이항분포 매개변수 변화 시각화
+
+![Binomial distribution animation](https://upload.wikimedia.org/wikipedia/commons/7/74/Binomial_distribution_for_n_%3D_4.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Binomial_distribution_for_n_%3D_4.gif) - n=4일 때 성공확률 p가 변화함에 따른 이항분포의 형태 변화
+
+> 💬 **매개변수 효과**
+>
+> * $p=0.5$일 때 대칭적 형태
+> * $p$가 0 또는 1에 가까워질수록 분포가 한쪽으로 치우침
+> * $n$이 클수록 분포가 정규분포에 가까워짐 (드무아브르-라플라스 정리)
+
+### 이항분포와 정규분포의 관계 (드무아브르-라플라스 정리)
+
+![De Moivre-Laplace theorem](https://upload.wikimedia.org/wikipedia/commons/7/79/De_moivre-laplace.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:De_moivre-laplace.gif) - 이항분포가 정규분포로 수렴하는 과정
+
+> 💬 **이항분포의 정규 근사**
+>
+> * $n$이 충분히 크고 $p$가 0.5에 가까우면, 이항분포는 정규분포로 근사 가능
+> * 근사 조건: $np \geq 5$ 그리고 $n(1-p) \geq 5$
+> * 이는 **중심극한정리(CLT)**의 특수 사례로, 드무아브르와 라플라스가 최초로 발견
 
 ---
 
@@ -627,9 +700,23 @@ $$
 * **용례:** 키/점수/오차 등 자연·측정 현상, 중심극한정리의 한계분포
 * **시각:** ![Normal PDF](https://upload.wikimedia.org/wikipedia/commons/7/74/Normal_Distribution_PDF.svg)
 
-> 💬 **이름 주석 – “정규/가우스”**
+> 💬 **이름 주석 – "정규/가우스"**
 > **아브라함 드 무아브르(Abraham de Moivre, 1667–1754)**가 초기 형태 연구,
-> **카를 F. 가우스(Carl F. Gauss, 1777–1855)**가 오차이론으로 널리 보급. “가우시안(Gaussian)”이라 부르기도 함.
+> **카를 F. 가우스(Carl F. Gauss, 1777–1855)**가 오차이론으로 널리 보급. "가우시안(Gaussian)"이라 부르기도 함.
+
+### 정규분포의 스케일 변화 시각화
+
+![Normal distribution and scales](https://upload.wikimedia.org/wikipedia/commons/3/3a/Normal_distribution_and_scales.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Normal_distribution_and_scales.gif) - 평균(μ)과 표준편차(σ)의 변화에 따른 정규분포 형태 변화
+
+> 💬 **매개변수의 효과**
+>
+> * **평균 $\mu$**: 분포의 중심 위치를 결정 (좌우 이동)
+> * **표준편차 $\sigma$**: 분포의 퍼짐 정도를 결정 (폭 조절)
+>   - $\sigma$가 작으면 → 뾰족하고 좁은 분포 (데이터가 평균 근처에 밀집)
+>   - $\sigma$가 크면 → 완만하고 넓은 분포 (데이터가 평균에서 멀리 퍼짐)
+> * **68-95-99.7 규칙**: $\mu \pm 1\sigma$ (68%), $\mu \pm 2\sigma$ (95%), $\mu \pm 3\sigma$ (99.7%)
 
 ---
 
@@ -820,6 +907,18 @@ $$
 > * **LLN**: 평균이 어디로 가는가(점수렴).
 > * **CLT**: 평균의 **분포 모양**이 어떻게 되는가(분포수렴).
 > * 두 정리는 상보적이며, 추론 통계의 핵심 기반.
+
+### (3) 큰수의 법칙 시각화 (주사위 예시)
+
+![Law of Large Numbers - Die Rolls](https://upload.wikimedia.org/wikipedia/commons/c/c9/LLN_Die_Rolls.gif)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:LLN_Die_Rolls.gif) - 주사위를 반복해서 던질 때 평균이 기댓값(3.5)에 수렴하는 과정
+
+> 💬 **시각화 해설**
+>
+> * 시행 횟수가 증가할수록 표본평균이 모평균(3.5)에 가까워짐
+> * 초기에는 변동이 크지만, $n$이 커질수록 안정화
+> * 이것이 바로 **큰수의 법칙**의 핵심: 충분히 많이 반복하면 평균이 참값에 수렴
 
 ---
 
