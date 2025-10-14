@@ -1,799 +1,556 @@
 """
-고급 오류 처리 시스템
+향상된 오류 처리 시스템
 - 사용자 친화적 오류 메시지 생성
 - 해결 방법 제안 기능
-- 맥락별 오류 분석
-- 학습 지원 오류 가이드
+- 오류 패턴 분석 및 학습 지원
 """
 
 import re
 import traceback
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-from datetime import datetime
-import json
+from typing import Dict, Any, List, Optional, Tuple
+from enum import Enum
 
-@dataclass
-class ErrorContext:
-    """오류 컨텍스트 정보"""
-    error_type: str
-    error_message: str
-    line_number: Optional[int]
-    code_snippet: str
-    user_level: str  # beginner, intermediate, advanced
-    learning_context: str  # education, practice, assessment
-    previous_errors: List[str]
+class ErrorType(Enum):
+    """오류 유형"""
+    SYNTAX_ERROR = "syntax_error"
+    NAME_ERROR = "name_error"
+    TYPE_ERROR = "type_error"
+    VALUE_ERROR = "value_error"
+    INDEX_ERROR = "index_error"
+    KEY_ERROR = "key_error"
+    ATTRIBUTE_ERROR = "attribute_error"
+    IMPORT_ERROR = "import_error"
+    ZERO_DIVISION_ERROR = "zero_division_error"
+    RUNTIME_ERROR = "runtime_error"
+    UNKNOWN_ERROR = "unknown_error"
 
-@dataclass
-class ErrorSolution:
-    """오류 해결 방안"""
-    solution_id: str
-    title: str
-    description: str
-    code_example: Optional[str]
-    difficulty: str  # easy, medium, hard
-    success_rate: float  # 0-1
-    learning_resources: List[str]
+class ErrorSeverity(Enum):
+    """오류 심각도"""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
-class ErrorPatternAnalyzer:
-    """오류 패턴 분석기"""
+class ErrorHandlingSystem:
+    """
+    향상된 오류 처리 시스템
+    사용자 친화적 오류 메시지와 해결 방법을 제공합니다.
+    """
     
     def __init__(self):
+        """초기화"""
         self.error_patterns = self._initialize_error_patterns()
-        self.common_mistakes = self._initialize_common_mistakes()
-        self.learning_progressions = self._initialize_learning_progressions()
+        self.solution_templates = self._initialize_solution_templates()
+        self.learning_tips = self._initialize_learning_tips()
+        self.error_history = []
     
-    def _initialize_error_patterns(self) -> Dict[str, Dict[str, Any]]:
+    def _initialize_error_patterns(self) -> Dict[ErrorType, List[str]]:
         """오류 패턴 초기화"""
         return {
-            'SyntaxError': {
-                'patterns': [
-                    {
-                        'pattern': r'invalid syntax.*\(',
-                        'cause': '괄호 불일치',
-                        'solutions': ['missing_parenthesis', 'extra_parenthesis']
-                    },
-                    {
-                        'pattern': r'invalid syntax.*:',
-                        'cause': '콜론 누락 또는 잘못된 위치',
-                        'solutions': ['missing_colon', 'incorrect_colon_placement']
-                    },
-                    {
-                        'pattern': r'unexpected indent',
-                        'cause': '들여쓰기 오류',
-                        'solutions': ['fix_indentation', 'consistent_indentation']
-                    },
-                    {
-                        'pattern': r'unindent does not match',
-                        'cause': '들여쓰기 불일치',
-                        'solutions': ['fix_indentation_consistency']
-                    }
+            ErrorType.SYNTAX_ERROR: [
+                r"SyntaxError: (.+)",
+                r"invalid syntax",
+                r"unexpected EOF",
+                r"unmatched",
+                r"invalid character"
+            ],
+            ErrorType.NAME_ERROR: [
+                r"NameError: name '(.+)' is not defined",
+                r"NameError: (.+)"
+            ],
+            ErrorType.TYPE_ERROR: [
+                r"TypeError: (.+)",
+                r"unsupported operand type",
+                r"can't multiply sequence",
+                r"object is not callable"
+            ],
+            ErrorType.VALUE_ERROR: [
+                r"ValueError: (.+)",
+                r"invalid literal",
+                r"could not convert",
+                r"math domain error"
+            ],
+            ErrorType.INDEX_ERROR: [
+                r"IndexError: (.+)",
+                r"list index out of range",
+                r"string index out of range"
+            ],
+            ErrorType.KEY_ERROR: [
+                r"KeyError: (.+)",
+                r"key not found"
+            ],
+            ErrorType.ATTRIBUTE_ERROR: [
+                r"AttributeError: (.+)",
+                r"has no attribute",
+                r"object has no attribute"
+            ],
+            ErrorType.IMPORT_ERROR: [
+                r"ImportError: (.+)",
+                r"ModuleNotFoundError: (.+)",
+                r"No module named"
+            ],
+            ErrorType.ZERO_DIVISION_ERROR: [
+                r"ZeroDivisionError: (.+)",
+                r"division by zero"
+            ]
+        }
+    
+    def _initialize_solution_templates(self) -> Dict[ErrorType, Dict[str, Any]]:
+        """해결 방법 템플릿 초기화"""
+        return {
+            ErrorType.SYNTAX_ERROR: {
+                "title": "문법 오류",
+                "description": "Python 코드 문법에 문제가 있습니다.",
+                "solutions": [
+                    "괄호, 따옴표, 콜론이 올바르게 짝을 이루는지 확인하세요.",
+                    "들여쓰기가 일관되게 되어있는지 확인하세요.",
+                    "문자열 안에 따옴표를 사용할 때는 이스케이프(\\) 또는 다른 종류의 따옴표를 사용하세요.",
+                    "함수나 조건문 뒤에 콜론(:)을 빠뜨리지 않았는지 확인하세요."
                 ],
-                'general_advice': '파이썬 문법 규칙을 확인하세요'
+                "examples": [
+                    '# 올바른 문자열 사용법\ntext1 = "그는 \\"안녕\\"이라고 말했다."\ntext2 = \'그는 "안녕"이라고 말했다.\'',
+                    '# 올바른 함수 정의\ndef my_function():\n    return "Hello"'
+                ],
+                "severity": ErrorSeverity.HIGH
             },
-            'NameError': {
-                'patterns': [
-                    {
-                        'pattern': r"name '(\w+)' is not defined",
-                        'cause': '정의되지 않은 변수 사용',
-                        'solutions': ['define_variable', 'check_spelling', 'import_module']
-                    }
+            ErrorType.NAME_ERROR: {
+                "title": "정의되지 않은 변수/함수",
+                "description": "사용하려는 변수나 함수가 정의되지 않았습니다.",
+                "solutions": [
+                    "변수명이 올바르게 입력되었는지 확인하세요 (대소문자 구분).",
+                    "필요한 라이브러리를 import 했는지 확인하세요.",
+                    "변수를 먼저 선언했는지 확인하세요.",
+                    "함수나 변수의 스코프(범위)를 확인하세요."
                 ],
-                'general_advice': '변수를 사용하기 전에 정의했는지 확인하세요'
+                "examples": [
+                    '# 올바른 변수 사용법\nmy_variable = 10  # 변수 먼저 정의\nprint(my_variable)  # 그 후 사용',
+                    '# 올바른 라이브러리 import\nimport numpy as np\ndata = np.array([1, 2, 3])'
+                ],
+                "severity": ErrorSeverity.MEDIUM
             },
-            'TypeError': {
-                'patterns': [
-                    {
-                        'pattern': r"unsupported operand type.*'(\w+)'.*'(\w+)'",
-                        'cause': '호환되지 않는 데이터 타입 연산',
-                        'solutions': ['type_conversion', 'check_data_types']
-                    },
-                    {
-                        'pattern': r"'(\w+)' object is not callable",
-                        'cause': '함수가 아닌 객체를 함수처럼 호출',
-                        'solutions': ['check_function_call', 'variable_name_conflict']
-                    },
-                    {
-                        'pattern': r"takes (\d+) positional argument.*but (\d+) were given",
-                        'cause': '함수 인수 개수 불일치',
-                        'solutions': ['check_function_arguments', 'function_documentation']
-                    }
+            ErrorType.TYPE_ERROR: {
+                "title": "타입 오류",
+                "description": "데이터 타입이 맞지 않습니다.",
+                "solutions": [
+                    "함수에 전달된 인자의 타입이 올바른지 확인하세요.",
+                    "문자열과 숫자를 연산할 때는 적절한 변환이 필요합니다.",
+                    "리스트, 딕셔너리 등의 자료구조를 올바르게 사용하고 있는지 확인하세요.",
+                    "함수 호출 시 괄호를 빠뜨리지 않았는지 확인하세요."
                 ],
-                'general_advice': '데이터 타입과 함수 사용법을 확인하세요'
+                "examples": [
+                    '# 타입 변환 예시\nnum_str = "123"\nnum = int(num_str)  # 문자열을 정수로 변환\nresult = num + 10  # 이제 숫자 연산 가능',
+                    '# 올바른 함수 호출\nmy_list = [1, 2, 3]\nprint(len(my_list))  # len() 함수 호출'
+                ],
+                "severity": ErrorSeverity.MEDIUM
             },
-            'ValueError': {
-                'patterns': [
-                    {
-                        'pattern': r"invalid literal for int\(\).*'(\w+)'",
-                        'cause': '숫자로 변환할 수 없는 문자열',
-                        'solutions': ['validate_input', 'handle_conversion_error']
-                    },
-                    {
-                        'pattern': r"math domain error",
-                        'cause': '수학 함수의 정의역 오류',
-                        'solutions': ['check_math_domain', 'validate_math_input']
-                    }
+            ErrorType.VALUE_ERROR: {
+                "title": "값 오류",
+                "description": "함수나 연산에 부적절한 값이 전달되었습니다.",
+                "solutions": [
+                    "함수에 전달된 인자의 값이 허용 범위 내인지 확인하세요.",
+                    "문자열을 숫자로 변환할 때는 유효한 형식인지 확인하세요.",
+                    "수학 함수의 정의역을 확인하세요 (예: 음수의 제곱근).",
+                    "리스트나 배열의 차원이 올바른지 확인하세요."
                 ],
-                'general_advice': '입력 값의 유효성을 확인하세요'
+                "examples": [
+                    '# 안전한 타입 변환\ntry:\n    num = int(input_str)\nexcept ValueError:\n    print("유효한 숫자를 입력하세요")',
+                    '# 수학 함수 사용 시 주의\nimport math\nif x >= 0:\n    result = math.sqrt(x)'
+                ],
+                "severity": ErrorSeverity.MEDIUM
             },
-            'IndexError': {
-                'patterns': [
-                    {
-                        'pattern': r"list index out of range",
-                        'cause': '리스트 인덱스 범위 초과',
-                        'solutions': ['check_list_length', 'safe_indexing']
-                    }
+            ErrorType.INDEX_ERROR: {
+                "title": "인덱스 오류",
+                "description": "리스트나 배열의 범위를 벗어났습니다.",
+                "solutions": [
+                    "리스트의 길이를 확인하세요 (len(리스트)).",
+                    "인덱스는 0부터 시작합니다 (리스트[0]이 첫 번째 요소).",
+                    "음수 인덱스는 뒤에서부터 접근합니다 (리스트[-1]이 마지막 요소).",
+                    "반복문에서 인덱스 범위를 올바르게 설정하세요."
                 ],
-                'general_advice': '리스트나 문자열의 길이를 먼저 확인하세요'
+                "examples": [
+                    '# 안전한 인덱스 접근\nmy_list = [10, 20, 30]\nif len(my_list) > 2:\n    print(my_list[2])  # 인덱스가 범위 내인지 확인',
+                    '# 올바른 반복문\nfor i in range(len(my_list)):\n    print(my_list[i])'
+                ],
+                "severity": ErrorSeverity.MEDIUM
             },
-            'KeyError': {
-                'patterns': [
-                    {
-                        'pattern': r"'(\w+)'",
-                        'cause': '딕셔너리에 존재하지 않는 키 접근',
-                        'solutions': ['check_dictionary_keys', 'use_get_method']
-                    }
+            ErrorType.KEY_ERROR: {
+                "title": "키 오류",
+                "description": "딕셔너리나 DataFrame에 존재하지 않는 키를 사용했습니다.",
+                "solutions": [
+                    "키 이름이 올바른지 확인하세요 (대소문자 구분).",
+                    "딕셔너리의 모든 키를 확인하려면 dict.keys()를 사용하세요.",
+                    "DataFrame의 열 이름을 확인하려면 df.columns를 사용하세요.",
+                    "키가 존재하는지 먼저 확인하세요 (key in dict)."
                 ],
-                'general_advice': '딕셔너리 키의 존재 여부를 확인하세요'
+                "examples": [
+                    '# 안전한 딕셔너리 접근\nmy_dict = {"name": "John", "age": 30}\nif "name" in my_dict:\n    print(my_dict["name"])',
+                    '# get() 메서드 사용\nvalue = my_dict.get("height", "키 정보 없음")'
+                ],
+                "severity": ErrorSeverity.LOW
             },
-            'ImportError': {
-                'patterns': [
-                    {
-                        'pattern': r"No module named '(\w+)'",
-                        'cause': '설치되지 않은 모듈 import',
-                        'solutions': ['install_module', 'check_module_name']
-                    }
+            ErrorType.ATTRIBUTE_ERROR: {
+                "title": "속성 오류",
+                "description": "객체에 존재하지 않는 속성이나 메서드를 호출했습니다.",
+                "solutions": [
+                    "객체의 타입을 확인하세요 (type(객체)).",
+                    "메서드나 속성 이름이 올바른지 확인하세요.",
+                    "필요한 라이브러리를 import 했는지 확인하세요.",
+                    "객체가 None이 아닌지 확인하세요."
                 ],
-                'general_advice': '필요한 라이브러리가 설치되어 있는지 확인하세요'
+                "examples": [
+                    '# 객체 타입 확인\nmy_var = [1, 2, 3]\nprint(type(my_var))  # <class \'list\'>\nprint(dir(my_var))   # 사용 가능한 메서드 확인',
+                    '# None 체크\nif my_object is not None:\n    result = my_object.some_method()'
+                ],
+                "severity": ErrorSeverity.MEDIUM
+            },
+            ErrorType.IMPORT_ERROR: {
+                "title": "모듈 import 오류",
+                "description": "필요한 모듈을 찾을 수 없거나 import할 수 없습니다.",
+                "solutions": [
+                    "모듈 이름이 올바른지 확인하세요.",
+                    "필요한 패키지가 설치되어 있는지 확인하세요.",
+                    "import 문의 문법이 올바른지 확인하세요.",
+                    "상대 경로 import의 경우 패키지 구조를 확인하세요."
+                ],
+                "examples": [
+                    '# 올바른 import 방법\nimport numpy as np\nfrom matplotlib import pyplot as plt\nfrom scipy.stats import norm',
+                    '# 조건부 import\ntry:\n    import pandas as pd\nexcept ImportError:\n    print("pandas가 설치되지 않았습니다")'
+                ],
+                "severity": ErrorSeverity.HIGH
+            },
+            ErrorType.ZERO_DIVISION_ERROR: {
+                "title": "0으로 나누기 오류",
+                "description": "0으로 나누려고 했습니다.",
+                "solutions": [
+                    "나누는 값이 0이 아닌지 확인하세요.",
+                    "나누기 전에 조건문으로 0인지 확인하는 방어 코드를 추가하세요.",
+                    "분모가 0에 가까운 값인지 확인하세요 (부동소수점 오차).",
+                    "수학적으로 의미 있는 연산인지 검토하세요."
+                ],
+                "examples": [
+                    '# 안전한 나누기\nif denominator != 0:\n    result = numerator / denominator\nelse:\n    print("0으로 나눌 수 없습니다")',
+                    '# 부동소수점 비교\nif abs(denominator) > 1e-10:\n    result = numerator / denominator'
+                ],
+                "severity": ErrorSeverity.HIGH
             }
         }
     
-    def _initialize_common_mistakes(self) -> Dict[str, Dict[str, Any]]:
-        """일반적인 실수 패턴 초기화"""
+    def _initialize_learning_tips(self) -> Dict[ErrorType, List[str]]:
+        """학습 팁 초기화"""
         return {
-            'beginner': [
-                {
-                    'mistake': '들여쓰기 혼용 (탭과 스페이스)',
-                    'detection': r'[\t ]+',
-                    'solution': '일관된 들여쓰기 사용 (스페이스 4개 권장)'
-                },
-                {
-                    'mistake': '변수명 오타',
-                    'detection': r'similar_variable_names',
-                    'solution': '변수명 철자 확인 및 자동완성 활용'
-                },
-                {
-                    'mistake': '함수 호출 시 괄호 누락',
-                    'detection': r'function_without_parentheses',
-                    'solution': '함수 호출 시 반드시 괄호 사용'
-                }
+            ErrorType.SYNTAX_ERROR: [
+                "코드를 작성할 때는 IDE나 에디터의 문법 하이라이팅을 활용하세요.",
+                "복잡한 표현식은 여러 줄로 나누어 작성하면 오류를 찾기 쉽습니다.",
+                "괄호의 짝을 맞추기 위해 여는 괄호를 쓸 때 바로 닫는 괄호도 함께 쓰는 습관을 기르세요."
             ],
-            'intermediate': [
-                {
-                    'mistake': '리스트와 문자열 인덱싱 혼동',
-                    'detection': r'string_list_confusion',
-                    'solution': '데이터 타입별 인덱싱 방법 숙지'
-                },
-                {
-                    'mistake': '반복문에서 인덱스 오류',
-                    'detection': r'loop_index_error',
-                    'solution': 'range() 함수와 len() 함수 올바른 사용'
-                }
+            ErrorType.NAME_ERROR: [
+                "변수명은 의미 있게 짓고, 일관된 명명 규칙을 사용하세요.",
+                "전역 변수와 지역 변수의 차이를 이해하고 적절히 사용하세요.",
+                "함수나 클래스를 정의한 후에 사용하는 순서를 지키세요."
             ],
-            'advanced': [
-                {
-                    'mistake': '스코프 관련 오류',
-                    'detection': r'scope_error',
-                    'solution': '변수 스코프와 네임스페이스 이해'
-                }
+            ErrorType.TYPE_ERROR: [
+                "Python의 동적 타입 시스템을 이해하고, 필요시 타입을 명시적으로 확인하세요.",
+                "함수의 매개변수와 반환값의 타입을 문서화하는 습관을 기르세요.",
+                "타입 힌트(Type Hints)를 사용하여 코드의 가독성을 높이세요."
+            ],
+            ErrorType.VALUE_ERROR: [
+                "사용자 입력이나 외부 데이터를 처리할 때는 항상 검증을 수행하세요.",
+                "예외 처리(try-except)를 적절히 사용하여 프로그램의 안정성을 높이세요.",
+                "함수의 전제조건(precondition)을 명확히 하고 문서화하세요."
+            ],
+            ErrorType.INDEX_ERROR: [
+                "리스트나 배열을 다룰 때는 항상 길이를 확인하는 습관을 기르세요.",
+                "반복문에서는 range() 함수를 적절히 사용하여 인덱스 오류를 방지하세요.",
+                "슬라이싱을 활용하면 인덱스 오류 없이 안전하게 부분 데이터를 추출할 수 있습니다."
             ]
         }
     
-    def _initialize_learning_progressions(self) -> Dict[str, List[str]]:
-        """학습 진행 단계별 가이드"""
-        return {
-            'syntax_mastery': [
-                '기본 문법 규칙 학습',
-                '들여쓰기와 코드 블록 이해',
-                '함수와 클래스 정의 문법',
-                '예외 처리 문법'
-            ],
-            'data_types': [
-                '기본 데이터 타입 이해',
-                '타입 변환과 검증',
-                '컬렉션 타입 활용',
-                '사용자 정의 타입'
-            ],
-            'error_handling': [
-                '오류 메시지 읽기',
-                '디버깅 기법 습득',
-                '예외 처리 구현',
-                '로깅과 모니터링'
-            ]
-        }
-    
-    def analyze_error_pattern(self, error_context: ErrorContext) -> Dict[str, Any]:
-        """오류 패턴 분석"""
-        error_type = error_context.error_type
-        error_message = error_context.error_message
+    def analyze_error(self, error_message: str, code: str = None, traceback_info: str = None) -> Dict[str, Any]:
+        """
+        오류 분석
         
-        analysis = {
-            'error_category': error_type,
-            'specific_cause': 'unknown',
-            'confidence': 0.0,
-            'pattern_matches': [],
-            'suggested_solutions': []
-        }
-        
-        if error_type in self.error_patterns:
-            patterns = self.error_patterns[error_type]['patterns']
+        Args:
+            error_message (str): 오류 메시지
+            code (str, optional): 실행된 코드
+            traceback_info (str, optional): 트레이스백 정보
             
-            for pattern_info in patterns:
-                pattern = pattern_info['pattern']
+        Returns:
+            dict: 오류 분석 결과
+        """
+        # 오류 유형 식별
+        error_type = self._identify_error_type(error_message)
+        
+        # 오류 세부 정보 추출
+        error_details = self._extract_error_details(error_message, error_type)
+        
+        # 해결 방법 생성
+        solutions = self._generate_solutions(error_type, error_details, code)
+        
+        # 학습 팁 제공
+        learning_tips = self.learning_tips.get(error_type, [])
+        
+        # 오류 기록
+        error_record = {
+            "timestamp": self._get_timestamp(),
+            "error_type": error_type.value,
+            "error_message": error_message,
+            "code": code,
+            "traceback": traceback_info
+        }
+        self.error_history.append(error_record)
+        
+        return {
+            "error_type": error_type.value,
+            "error_details": error_details,
+            "solutions": solutions,
+            "learning_tips": learning_tips,
+            "severity": solutions.get("severity", ErrorSeverity.MEDIUM).value,
+            "user_friendly_message": self._generate_user_friendly_message(error_type, error_details),
+            "code_suggestions": self._generate_code_suggestions(error_type, error_details, code)
+        }
+    
+    def _identify_error_type(self, error_message: str) -> ErrorType:
+        """오류 유형 식별"""
+        for error_type, patterns in self.error_patterns.items():
+            for pattern in patterns:
                 if re.search(pattern, error_message, re.IGNORECASE):
-                    analysis['specific_cause'] = pattern_info['cause']
-                    analysis['confidence'] = 0.9
-                    analysis['pattern_matches'].append(pattern_info)
-                    analysis['suggested_solutions'].extend(pattern_info['solutions'])
-                    break
-            
-            # 일반적인 조언 추가
-            analysis['general_advice'] = self.error_patterns[error_type]['general_advice']
+                    return error_type
         
-        return analysis
-
-class SolutionGenerator:
-    """해결 방안 생성기"""
+        return ErrorType.UNKNOWN_ERROR
     
-    def __init__(self):
-        self.solution_templates = self._initialize_solution_templates()
-        self.code_examples = self._initialize_code_examples()
-    
-    def _initialize_solution_templates(self) -> Dict[str, ErrorSolution]:
-        """해결 방안 템플릿 초기화"""
-        return {
-            'missing_parenthesis': ErrorSolution(
-                solution_id='missing_parenthesis',
-                title='누락된 괄호 추가',
-                description='함수 호출이나 수식에서 괄호가 누락되었습니다.',
-                code_example='''
-# 잘못된 예
-print "Hello World"  # 괄호 누락
-
-# 올바른 예
-print("Hello World")  # 괄호 추가
-''',
-                difficulty='easy',
-                success_rate=0.95,
-                learning_resources=['Python 기본 문법 가이드', '함수 호출 방법']
-            ),
-            
-            'define_variable': ErrorSolution(
-                solution_id='define_variable',
-                title='변수 정의하기',
-                description='사용하기 전에 변수를 먼저 정의해야 합니다.',
-                code_example='''
-# 잘못된 예
-print(my_variable)  # my_variable이 정의되지 않음
-
-# 올바른 예
-my_variable = "Hello"  # 변수 먼저 정의
-print(my_variable)     # 그 다음 사용
-''',
-                difficulty='easy',
-                success_rate=0.9,
-                learning_resources=['변수와 할당', 'Python 변수 명명 규칙']
-            ),
-            
-            'type_conversion': ErrorSolution(
-                solution_id='type_conversion',
-                title='데이터 타입 변환',
-                description='호환되지 않는 타입 간 연산을 위해 타입 변환이 필요합니다.',
-                code_example='''
-# 잘못된 예
-age = "25"
-next_year = age + 1  # 문자열과 숫자 연산 불가
-
-# 올바른 예
-age = "25"
-next_year = int(age) + 1  # 문자열을 정수로 변환
-print(f"내년 나이: {next_year}")
-''',
-                difficulty='medium',
-                success_rate=0.85,
-                learning_resources=['데이터 타입 변환', 'int(), float(), str() 함수']
-            ),
-            
-            'check_list_length': ErrorSolution(
-                solution_id='check_list_length',
-                title='리스트 길이 확인',
-                description='인덱스 접근 전에 리스트의 길이를 확인하세요.',
-                code_example='''
-# 잘못된 예
-my_list = [1, 2, 3]
-print(my_list[5])  # 인덱스 5는 존재하지 않음
-
-# 올바른 예
-my_list = [1, 2, 3]
-if len(my_list) > 5:
-    print(my_list[5])
-else:
-    print("인덱스가 범위를 벗어났습니다")
-    
-# 또는 안전한 접근 방법
-index = 5
-if 0 <= index < len(my_list):
-    print(my_list[index])
-''',
-                difficulty='medium',
-                success_rate=0.8,
-                learning_resources=['리스트 인덱싱', '안전한 리스트 접근 방법']
-            ),
-            
-            'use_get_method': ErrorSolution(
-                solution_id='use_get_method',
-                title='딕셔너리 안전한 접근',
-                description='딕셔너리 키 접근 시 get() 메서드를 사용하세요.',
-                code_example='''
-# 잘못된 예
-student = {"name": "김철수", "age": 20}
-print(student["grade"])  # "grade" 키가 없어서 오류
-
-# 올바른 예 1: get() 메서드 사용
-grade = student.get("grade", "정보 없음")
-print(f"성적: {grade}")
-
-# 올바른 예 2: 키 존재 확인
-if "grade" in student:
-    print(student["grade"])
-else:
-    print("성적 정보가 없습니다")
-''',
-                difficulty='medium',
-                success_rate=0.88,
-                learning_resources=['딕셔너리 메서드', '안전한 딕셔너리 접근']
-            ),
-            
-            'fix_indentation': ErrorSolution(
-                solution_id='fix_indentation',
-                title='들여쓰기 수정',
-                description='파이썬은 들여쓰기로 코드 블록을 구분합니다.',
-                code_example='''
-# 잘못된 예
-if True:
-print("Hello")  # 들여쓰기 없음
-
-# 올바른 예
-if True:
-    print("Hello")  # 4칸 들여쓰기
-
-# 함수 정의 예
-def my_function():
-    x = 10
-    y = 20
-    return x + y  # 모든 줄이 같은 수준으로 들여쓰기
-''',
-                difficulty='easy',
-                success_rate=0.92,
-                learning_resources=['Python 들여쓰기 규칙', 'PEP 8 스타일 가이드']
-            )
-        }
-    
-    def _initialize_code_examples(self) -> Dict[str, List[str]]:
-        """코드 예제 초기화"""
-        return {
-            'basic_syntax': [
-                '변수 정의와 사용',
-                '함수 정의와 호출',
-                '조건문과 반복문',
-                '리스트와 딕셔너리 사용'
-            ],
-            'error_prevention': [
-                '입력 검증 코드',
-                '예외 처리 구문',
-                '안전한 타입 변환',
-                '디버깅 기법'
-            ]
-        }
-    
-    def generate_solutions(self, error_analysis: Dict[str, Any], 
-                         error_context: ErrorContext) -> List[ErrorSolution]:
-        """해결 방안 생성"""
-        solutions = []
-        
-        # 분석된 해결 방안들 추가
-        for solution_id in error_analysis.get('suggested_solutions', []):
-            if solution_id in self.solution_templates:
-                solution = self.solution_templates[solution_id]
-                solutions.append(solution)
-        
-        # 사용자 수준에 맞는 추가 해결 방안
-        additional_solutions = self._get_level_appropriate_solutions(
-            error_context.user_level, error_context.error_type
-        )
-        solutions.extend(additional_solutions)
-        
-        # 중복 제거 및 우선순위 정렬
-        unique_solutions = self._deduplicate_solutions(solutions)
-        sorted_solutions = self._sort_solutions_by_relevance(
-            unique_solutions, error_context
-        )
-        
-        return sorted_solutions[:3]  # 최대 3개 해결 방안 반환
-    
-    def _get_level_appropriate_solutions(self, user_level: str, 
-                                       error_type: str) -> List[ErrorSolution]:
-        """사용자 수준에 맞는 해결 방안"""
-        level_solutions = {
-            'beginner': ['missing_parenthesis', 'define_variable', 'fix_indentation'],
-            'intermediate': ['type_conversion', 'check_list_length', 'use_get_method'],
-            'advanced': []  # 고급 사용자는 기본 해결 방안으로 충분
+    def _extract_error_details(self, error_message: str, error_type: ErrorType) -> Dict[str, Any]:
+        """오류 세부 정보 추출"""
+        details = {
+            "original_message": error_message,
+            "extracted_info": {}
         }
         
-        solutions = []
-        for solution_id in level_solutions.get(user_level, []):
-            if solution_id in self.solution_templates:
-                solutions.append(self.solution_templates[solution_id])
+        if error_type == ErrorType.NAME_ERROR:
+            match = re.search(r"name '(.+)' is not defined", error_message)
+            if match:
+                details["extracted_info"]["undefined_name"] = match.group(1)
         
-        return solutions
+        elif error_type == ErrorType.KEY_ERROR:
+            match = re.search(r"KeyError: ['\"](.+)['\"]", error_message)
+            if match:
+                details["extracted_info"]["missing_key"] = match.group(1)
+        
+        elif error_type == ErrorType.ATTRIBUTE_ERROR:
+            match = re.search(r"'(.+)' object has no attribute '(.+)'", error_message)
+            if match:
+                details["extracted_info"]["object_type"] = match.group(1)
+                details["extracted_info"]["missing_attribute"] = match.group(2)
+        
+        elif error_type == ErrorType.IMPORT_ERROR:
+            match = re.search(r"No module named ['\"](.+)['\"]", error_message)
+            if match:
+                details["extracted_info"]["missing_module"] = match.group(1)
+        
+        return details
     
-    def _deduplicate_solutions(self, solutions: List[ErrorSolution]) -> List[ErrorSolution]:
-        """중복 해결 방안 제거"""
-        seen_ids = set()
-        unique_solutions = []
+    def _generate_solutions(self, error_type: ErrorType, error_details: Dict[str, Any], code: str = None) -> Dict[str, Any]:
+        """해결 방법 생성"""
+        base_solution = self.solution_templates.get(error_type, {
+            "title": "알 수 없는 오류",
+            "description": "오류 유형을 식별할 수 없습니다.",
+            "solutions": ["오류 메시지를 확인하고 코드를 검토해보세요."],
+            "examples": [],
+            "severity": ErrorSeverity.MEDIUM
+        })
         
-        for solution in solutions:
-            if solution.solution_id not in seen_ids:
-                seen_ids.add(solution.solution_id)
-                unique_solutions.append(solution)
+        # 맞춤형 해결 방법 추가
+        customized_solutions = base_solution["solutions"].copy()
         
-        return unique_solutions
-    
-    def _sort_solutions_by_relevance(self, solutions: List[ErrorSolution], 
-                                   context: ErrorContext) -> List[ErrorSolution]:
-        """관련성에 따른 해결 방안 정렬"""
-        def relevance_score(solution: ErrorSolution) -> float:
-            score = solution.success_rate
+        if error_type == ErrorType.NAME_ERROR and "undefined_name" in error_details["extracted_info"]:
+            var_name = error_details["extracted_info"]["undefined_name"]
+            customized_solutions.insert(0, f"'{var_name}' 변수가 정의되지 않았습니다. 변수를 먼저 선언하세요.")
             
-            # 사용자 수준에 따른 가중치
-            if context.user_level == 'beginner' and solution.difficulty == 'easy':
-                score += 0.2
-            elif context.user_level == 'intermediate' and solution.difficulty == 'medium':
-                score += 0.1
-            
-            return score
+            # 코드에서 유사한 변수명 찾기
+            if code:
+                similar_names = self._find_similar_names(var_name, code)
+                if similar_names:
+                    customized_solutions.append(f"혹시 다음 중 하나를 의도하셨나요? {', '.join(similar_names)}")
         
-        return sorted(solutions, key=relevance_score, reverse=True)
-
-class UserFriendlyErrorHandler:
-    """사용자 친화적 오류 처리기"""
-    
-    def __init__(self):
-        self.pattern_analyzer = ErrorPatternAnalyzer()
-        self.solution_generator = SolutionGenerator()
-        self.error_history = {}  # 사용자별 오류 기록
-    
-    def handle_error(self, error_info: Dict[str, Any], user_id: str = "default",
-                    user_level: str = "beginner", learning_context: str = "general") -> Dict[str, Any]:
-        """종합적인 오류 처리"""
-        
-        # 오류 컨텍스트 생성
-        error_context = ErrorContext(
-            error_type=error_info.get('error_type', 'Unknown'),
-            error_message=error_info.get('error', ''),
-            line_number=self._extract_line_number(error_info.get('traceback', '')),
-            code_snippet=error_info.get('code', ''),
-            user_level=user_level,
-            learning_context=learning_context,
-            previous_errors=self._get_user_error_history(user_id)
-        )
-        
-        # 오류 패턴 분석
-        error_analysis = self.pattern_analyzer.analyze_error_pattern(error_context)
-        
-        # 해결 방안 생성
-        solutions = self.solution_generator.generate_solutions(error_analysis, error_context)
-        
-        # 학습 가이드 생성
-        learning_guide = self._generate_learning_guide(error_context, error_analysis)
-        
-        # 오류 기록 업데이트
-        self._update_error_history(user_id, error_context)
-        
-        # 종합 결과 생성
-        comprehensive_response = {
-            'error_summary': {
-                'type': error_context.error_type,
-                'message': error_context.error_message,
-                'cause': error_analysis.get('specific_cause', 'unknown'),
-                'confidence': error_analysis.get('confidence', 0.0)
-            },
-            'user_friendly_explanation': self._generate_friendly_explanation(
-                error_context, error_analysis
-            ),
-            'solutions': [
-                {
-                    'title': sol.title,
-                    'description': sol.description,
-                    'code_example': sol.code_example,
-                    'difficulty': sol.difficulty,
-                    'success_rate': sol.success_rate
-                }
-                for sol in solutions
-            ],
-            'learning_guide': learning_guide,
-            'prevention_tips': self._generate_prevention_tips(error_context),
-            'next_steps': self._suggest_next_steps(error_context, error_analysis)
-        }
-        
-        return comprehensive_response
-    
-    def _extract_line_number(self, traceback_str: str) -> Optional[int]:
-        """트레이스백에서 라인 번호 추출"""
-        match = re.search(r'line (\d+)', traceback_str)
-        return int(match.group(1)) if match else None
-    
-    def _get_user_error_history(self, user_id: str) -> List[str]:
-        """사용자 오류 기록 조회"""
-        return self.error_history.get(user_id, [])
-    
-    def _update_error_history(self, user_id: str, error_context: ErrorContext):
-        """사용자 오류 기록 업데이트"""
-        if user_id not in self.error_history:
-            self.error_history[user_id] = []
-        
-        self.error_history[user_id].append(error_context.error_type)
-        
-        # 최근 10개 오류만 유지
-        if len(self.error_history[user_id]) > 10:
-            self.error_history[user_id] = self.error_history[user_id][-10:]
-    
-    def _generate_friendly_explanation(self, error_context: ErrorContext, 
-                                     error_analysis: Dict[str, Any]) -> str:
-        """사용자 친화적 설명 생성"""
-        error_type = error_context.error_type
-        specific_cause = error_analysis.get('specific_cause', 'unknown')
-        
-        explanations = {
-            'SyntaxError': {
-                'general': '파이썬 문법에 맞지 않는 코드가 있습니다.',
-                'specific': {
-                    '괄호 불일치': '괄호가 제대로 닫히지 않았거나 누락되었습니다.',
-                    '콜론 누락 또는 잘못된 위치': 'if, for, def 등 뒤에 콜론(:)이 필요합니다.',
-                    '들여쓰기 오류': '코드 블록의 들여쓰기가 올바르지 않습니다.'
-                }
-            },
-            'NameError': {
-                'general': '정의되지 않은 변수나 함수를 사용하려고 했습니다.',
-                'specific': {
-                    '정의되지 않은 변수 사용': '변수를 사용하기 전에 먼저 값을 할당해야 합니다.'
-                }
-            },
-            'TypeError': {
-                'general': '데이터 타입이 맞지 않아 연산을 수행할 수 없습니다.',
-                'specific': {
-                    '호환되지 않는 데이터 타입 연산': '서로 다른 타입의 데이터를 연산하려고 했습니다.',
-                    '함수가 아닌 객체를 함수처럼 호출': '변수를 함수처럼 호출하려고 했습니다.'
-                }
-            }
-        }
-        
-        error_info = explanations.get(error_type, {'general': '예상치 못한 오류가 발생했습니다.'})
-        
-        if specific_cause in error_info.get('specific', {}):
-            return error_info['specific'][specific_cause]
-        else:
-            return error_info['general']
-    
-    def _generate_learning_guide(self, error_context: ErrorContext, 
-                               error_analysis: Dict[str, Any]) -> Dict[str, Any]:
-        """학습 가이드 생성"""
-        error_type = error_context.error_type
-        user_level = error_context.user_level
-        
-        # 기본 학습 자료
-        learning_resources = {
-            'SyntaxError': {
-                'beginner': [
-                    'Python 기본 문법 튜토리얼',
-                    '들여쓰기와 코드 블록 이해하기',
-                    '함수와 조건문 문법 연습'
-                ],
-                'intermediate': [
-                    'Python 스타일 가이드 (PEP 8)',
-                    '고급 문법 구조 학습'
-                ]
-            },
-            'NameError': {
-                'beginner': [
-                    '변수 선언과 사용법',
-                    'Python 변수 명명 규칙',
-                    '스코프와 네임스페이스 기초'
-                ]
-            },
-            'TypeError': {
-                'beginner': [
-                    'Python 데이터 타입 이해하기',
-                    '타입 변환 함수 사용법',
-                    '함수 정의와 호출 방법'
-                ]
-            }
-        }
-        
-        # 실습 제안
-        practice_suggestions = {
-            'SyntaxError': [
-                '간단한 계산기 프로그램 작성하기',
-                '조건문을 사용한 프로그램 만들기'
-            ],
-            'NameError': [
-                '변수를 사용한 데이터 저장 연습',
-                '함수 정의와 호출 연습'
-            ],
-            'TypeError': [
-                '다양한 데이터 타입 변환 연습',
-                '타입 검사 함수 만들어보기'
-            ]
-        }
+        elif error_type == ErrorType.KEY_ERROR and "missing_key" in error_details["extracted_info"]:
+            key_name = error_details["extracted_info"]["missing_key"]
+            customized_solutions.insert(0, f"'{key_name}' 키가 딕셔너리에 존재하지 않습니다.")
         
         return {
-            'recommended_resources': learning_resources.get(error_type, {}).get(user_level, []),
-            'practice_suggestions': practice_suggestions.get(error_type, []),
-            'difficulty_progression': self._get_difficulty_progression(error_type, user_level)
+            **base_solution,
+            "solutions": customized_solutions
         }
     
-    def _get_difficulty_progression(self, error_type: str, user_level: str) -> List[str]:
-        """난이도별 학습 진행 단계"""
-        progressions = {
-            'SyntaxError': [
-                '기본 문법 규칙 숙지',
-                '간단한 프로그램 작성',
-                '복잡한 구조 이해',
-                '코드 스타일 개선'
-            ],
-            'NameError': [
-                '변수 개념 이해',
-                '스코프 규칙 학습',
-                '모듈과 패키지 사용',
-                '네임스페이스 관리'
-            ],
-            'TypeError': [
-                '기본 타입 이해',
-                '타입 변환 숙지',
-                '객체 지향 개념',
-                '고급 타입 시스템'
-            ]
+    def _generate_user_friendly_message(self, error_type: ErrorType, error_details: Dict[str, Any]) -> str:
+        """사용자 친화적 메시지 생성"""
+        base_messages = {
+            ErrorType.SYNTAX_ERROR: "코드 문법에 오류가 있습니다. 괄호, 따옴표, 들여쓰기를 확인해보세요.",
+            ErrorType.NAME_ERROR: "정의되지 않은 변수나 함수를 사용하려고 했습니다.",
+            ErrorType.TYPE_ERROR: "데이터 타입이 맞지 않습니다. 변수의 타입을 확인해보세요.",
+            ErrorType.VALUE_ERROR: "함수에 잘못된 값이 전달되었습니다.",
+            ErrorType.INDEX_ERROR: "리스트나 배열의 범위를 벗어났습니다.",
+            ErrorType.KEY_ERROR: "딕셔너리에 존재하지 않는 키를 사용했습니다.",
+            ErrorType.ATTRIBUTE_ERROR: "객체에 존재하지 않는 속성이나 메서드를 호출했습니다.",
+            ErrorType.IMPORT_ERROR: "필요한 모듈을 찾을 수 없습니다.",
+            ErrorType.ZERO_DIVISION_ERROR: "0으로 나누려고 했습니다.",
+            ErrorType.UNKNOWN_ERROR: "알 수 없는 오류가 발생했습니다."
         }
         
-        return progressions.get(error_type, ['기본기 다지기', '실습 늘리기', '고급 기법 학습'])
+        return base_messages.get(error_type, "오류가 발생했습니다.")
     
-    def _generate_prevention_tips(self, error_context: ErrorContext) -> List[str]:
-        """오류 예방 팁 생성"""
-        general_tips = [
-            '코드를 작성한 후 한 번 더 검토하세요',
-            '작은 단위로 나누어 테스트하세요',
-            '오류 메시지를 주의 깊게 읽어보세요'
-        ]
+    def _generate_code_suggestions(self, error_type: ErrorType, error_details: Dict[str, Any], code: str = None) -> List[str]:
+        """코드 수정 제안 생성"""
+        suggestions = []
         
-        specific_tips = {
-            'SyntaxError': [
-                '코드 에디터의 문법 하이라이팅을 활용하세요',
-                '괄호와 들여쓰기를 일관되게 사용하세요'
-            ],
-            'NameError': [
-                '변수명을 명확하고 의미 있게 지으세요',
-                '변수를 사용하기 전에 정의했는지 확인하세요'
-            ],
-            'TypeError': [
-                'type() 함수로 데이터 타입을 확인하세요',
-                '타입 변환이 필요한지 미리 생각해보세요'
-            ]
+        if error_type == ErrorType.NAME_ERROR and code and "undefined_name" in error_details["extracted_info"]:
+            var_name = error_details["extracted_info"]["undefined_name"]
+            
+            # 일반적인 라이브러리 import 제안
+            if var_name in ["np", "numpy"]:
+                suggestions.append("import numpy as np")
+            elif var_name in ["pd", "pandas"]:
+                suggestions.append("import pandas as pd")
+            elif var_name in ["plt", "pyplot"]:
+                suggestions.append("import matplotlib.pyplot as plt")
+            elif var_name in ["stats"]:
+                suggestions.append("from scipy import stats")
+            else:
+                suggestions.append(f"{var_name} = # 여기에 값을 할당하세요")
+        
+        elif error_type == ErrorType.IMPORT_ERROR and "missing_module" in error_details["extracted_info"]:
+            module_name = error_details["extracted_info"]["missing_module"]
+            suggestions.append(f"# {module_name} 모듈이 필요합니다. 설치 후 다시 시도하세요.")
+        
+        return suggestions
+    
+    def _find_similar_names(self, target_name: str, code: str) -> List[str]:
+        """코드에서 유사한 변수명 찾기"""
+        # 간단한 변수명 추출 (정규식 사용)
+        variable_pattern = r'\b([a-zA-Z_][a-zA-Z0-9_]*)\s*='
+        variables = re.findall(variable_pattern, code)
+        
+        similar_names = []
+        for var in set(variables):
+            if self._calculate_similarity(target_name, var) > 0.6:
+                similar_names.append(var)
+        
+        return similar_names[:3]  # 최대 3개까지
+    
+    def _calculate_similarity(self, str1: str, str2: str) -> float:
+        """문자열 유사도 계산 (간단한 Levenshtein 거리 기반)"""
+        if len(str1) == 0 or len(str2) == 0:
+            return 0.0
+        
+        # 간단한 유사도 계산
+        common_chars = set(str1.lower()) & set(str2.lower())
+        total_chars = set(str1.lower()) | set(str2.lower())
+        
+        if len(total_chars) == 0:
+            return 0.0
+        
+        return len(common_chars) / len(total_chars)
+    
+    def _get_timestamp(self) -> str:
+        """현재 시간 반환"""
+        from datetime import datetime
+        return datetime.now().isoformat()
+    
+    def get_error_statistics(self) -> Dict[str, Any]:
+        """오류 통계 반환"""
+        if not self.error_history:
+            return {"total_errors": 0, "error_types": {}}
+        
+        error_counts = {}
+        for record in self.error_history:
+            error_type = record["error_type"]
+            error_counts[error_type] = error_counts.get(error_type, 0) + 1
+        
+        return {
+            "total_errors": len(self.error_history),
+            "error_types": error_counts,
+            "most_common_error": max(error_counts, key=error_counts.get) if error_counts else None
+        }
+    
+    def generate_error_report_html(self, error_analysis: Dict[str, Any]) -> str:
+        """오류 보고서 HTML 생성"""
+        severity_colors = {
+            "low": "#28a745",
+            "medium": "#ffc107", 
+            "high": "#fd7e14",
+            "critical": "#dc3545"
         }
         
-        error_specific = specific_tips.get(error_context.error_type, [])
-        return general_tips + error_specific
-    
-    def _suggest_next_steps(self, error_context: ErrorContext, 
-                          error_analysis: Dict[str, Any]) -> List[str]:
-        """다음 단계 제안"""
-        next_steps = []
+        severity_color = severity_colors.get(error_analysis["severity"], "#6c757d")
         
-        # 즉시 해결 단계
-        next_steps.append('제안된 해결 방법을 하나씩 시도해보세요')
+        html = f"""
+        <div class="error-report" style="margin: 20px 0; border: 1px solid #dc3545; border-radius: 8px; overflow: hidden;">
+            <div class="error-header" style="background-color: {severity_color}; color: white; padding: 12px;">
+                <h4 style="margin: 0; display: flex; align-items: center;">
+                    <span style="margin-right: 8px;">❌</span>
+                    {error_analysis.get('solutions', {}).get('title', '오류 발생')}
+                    <span style="margin-left: auto; font-size: 0.8em; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 4px;">
+                        {error_analysis['severity'].upper()}
+                    </span>
+                </h4>
+            </div>
+            
+            <div class="error-body" style="padding: 16px;">
+                <div class="error-description" style="margin-bottom: 16px;">
+                    <p style="margin: 0; color: #6c757d; font-size: 0.95em;">
+                        {error_analysis['user_friendly_message']}
+                    </p>
+                </div>
+                
+                <div class="solutions-section" style="margin-bottom: 16px;">
+                    <h5 style="color: #28a745; margin-bottom: 8px;">🔧 해결 방법</h5>
+                    <ul style="margin: 0; padding-left: 20px;">
+        """
         
-        # 학습 단계
-        if error_context.user_level == 'beginner':
-            next_steps.extend([
-                '기본 문법 튜토리얼을 복습하세요',
-                '간단한 예제부터 다시 시작해보세요'
-            ])
+        for solution in error_analysis.get('solutions', {}).get('solutions', []):
+            html += f"<li style='margin-bottom: 4px;'>{solution}</li>"
         
-        # 반복 오류 방지
-        if error_context.error_type in error_context.previous_errors:
-            next_steps.append('이 오류가 반복되고 있습니다. 관련 개념을 집중적으로 학습하세요')
+        html += """
+                    </ul>
+                </div>
+        """
         
-        # 도움 요청
-        next_steps.append('해결되지 않으면 온라인 커뮤니티나 문서를 참고하세요')
+        # 코드 제안이 있으면 추가
+        if error_analysis.get('code_suggestions'):
+            html += """
+                <div class="code-suggestions" style="margin-bottom: 16px;">
+                    <h5 style="color: #007bff; margin-bottom: 8px;">💡 코드 제안</h5>
+                    <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px;">
+            """
+            
+            for suggestion in error_analysis['code_suggestions']:
+                html += f'<code style="display: block; margin-bottom: 4px; color: #e83e8c;">{suggestion}</code>'
+            
+            html += """
+                    </div>
+                </div>
+            """
         
-        return next_steps
+        # 학습 팁이 있으면 추가
+        if error_analysis.get('learning_tips'):
+            html += """
+                <div class="learning-tips">
+                    <h5 style="color: #6f42c1; margin-bottom: 8px;">📚 학습 팁</h5>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9em; color: #6c757d;">
+            """
+            
+            for tip in error_analysis['learning_tips']:
+                html += f"<li style='margin-bottom: 4px;'>{tip}</li>"
+            
+            html += """
+                    </ul>
+                </div>
+            """
+        
+        html += """
+            </div>
+        </div>
+        """
+        
+        return html
 
-# 사용 예제 및 테스트
-def demo_error_handling_system():
-    """오류 처리 시스템 데모"""
-    print("🚨 고급 오류 처리 시스템 데모")
-    print("=" * 50)
-    
-    handler = UserFriendlyErrorHandler()
-    
-    # 테스트 오류 케이스들
-    test_cases = [
-        {
-            'title': '구문 오류 (괄호 누락)',
-            'error_info': {
-                'error_type': 'SyntaxError',
-                'error': 'invalid syntax',
-                'code': 'print "Hello World"',
-                'traceback': 'File "<string>", line 1\n    print "Hello World"\n                      ^\nSyntaxError: invalid syntax'
-            },
-            'user_level': 'beginner'
-        },
-        {
-            'title': '이름 오류 (정의되지 않은 변수)',
-            'error_info': {
-                'error_type': 'NameError',
-                'error': "name 'undefined_var' is not defined",
-                'code': 'result = undefined_var + 10',
-                'traceback': 'NameError: name \'undefined_var\' is not defined'
-            },
-            'user_level': 'beginner'
-        },
-        {
-            'title': '타입 오류 (문자열과 숫자 연산)',
-            'error_info': {
-                'error_type': 'TypeError',
-                'error': "unsupported operand type(s) for +: 'str' and 'int'",
-                'code': 'age = "25"\nresult = age + 1',
-                'traceback': 'TypeError: unsupported operand type(s) for +: \'str\' and \'int\''
-            },
-            'user_level': 'intermediate'
-        }
-    ]
-    
-    for i, case in enumerate(test_cases, 1):
-        print(f"\n📝 테스트 케이스 {i}: {case['title']}")
-        print("-" * 50)
-        
-        response = handler.handle_error(
-            case['error_info'], 
-            user_id=f"test_user_{i}",
-            user_level=case['user_level']
-        )
-        
-        print(f"🔍 오류 분석:")
-        print(f"  타입: {response['error_summary']['type']}")
-        print(f"  원인: {response['error_summary']['cause']}")
-        print(f"  신뢰도: {response['error_summary']['confidence']:.1%}")
-        
-        print(f"\n💡 친화적 설명:")
-        print(f"  {response['user_friendly_explanation']}")
-        
-        print(f"\n🛠️  해결 방법:")
-        for j, solution in enumerate(response['solutions'][:2], 1):
-            print(f"  {j}. {solution['title']}")
-            print(f"     {solution['description']}")
-            print(f"     난이도: {solution['difficulty']}, 성공률: {solution['success_rate']:.1%}")
-        
-        print(f"\n🎯 예방 팁:")
-        for tip in response['prevention_tips'][:2]:
-            print(f"  • {tip}")
-        
-        if i < len(test_cases):
-            print(f"\n{'='*50}")
-    
-    print(f"\n🎉 Task 2.3 완료!")
-    print("✅ 사용자 친화적 오류 메시지 생성")
-    print("✅ 맞춤형 해결 방법 제안")
-    print("✅ 학습 지원 오류 가이드 제공")
-
-if __name__ == "__main__":
-    demo_error_handling_system()
+# 오류 처리 시스템 인스턴스 생성
+error_handler = ErrorHandlingSystem()

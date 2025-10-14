@@ -1,670 +1,640 @@
 """
-Python Code Executor - Safe Code Execution System
-브라우저 기반 Python 코드 실시간 실행 환경
-안전한 코드 실행을 위한 보안 기능 포함
+브라우저 기반 Python 코드 실행기
+- GitHub Pages 호환 (클라이언트 사이드 실행)
+- 안전한 코드 실행 환경
+- 실행 결과 포맷팅
+- 향상된 오류 처리 시스템
 """
 
-import sys
-import io
-import contextlib
-import traceback
-import ast
-import types
-import time
 import json
-import base64
-from typing import Dict, Any, List, Optional, Tuple
 import re
-import threading
-import queue
-from datetime import datetime
-
-
-class SecurityValidator:
-    """코드 보안 검증기"""
-    
-    def __init__(self):
-        # 금지된 모듈과 함수들
-        self.forbidden_imports = {
-            'os', 'subprocess', 'sys', 'importlib', 'exec', 'eval',
-            'open', '__import__', 'compile', 'globals', 'locals',
-            'vars', 'dir', 'getattr', 'setattr', 'delattr', 'hasattr'
-        }
-        
-        # 허용된 모듈들 (데이터 분석 관련)
-        self.allowed_imports = {
-            'pandas', 'numpy', 'matplotlib', 'seaborn', 'scipy',
-            'sklearn', 'math', 'statistics', 'random', 'datetime',
-            'json', 'csv', 're', 'collections', 'itertools'
-        }
-        
-        # 금지된 키워드들
-        self.forbidden_keywords = {
-            'import os', 'import sys', 'import subprocess',
-            'exec(', 'eval(', 'open(', '__import__',
-            'file', 'input(', 'raw_input('
-        }
-    
-    def validate_code(self, code: str) -> Tuple[bool, List[str]]:
-        """코드 보안 검증"""
-        issues = []
-        
-        # 1. 금지된 키워드 검사
-        code_lower = code.lower()
-        for keyword in self.forbidden_keywords:
-            if keyword in code_lower:
-                issues.append(f"보안상 금지된 키워드 사용: {keyword}")
-        
-        # 2. AST를 통한 구문 분석
-        try:
-            tree = ast.parse(code)
-            for node in ast.walk(tree):
-                # Import 문 검사
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        if alias.name in self.forbidden_imports:
-                            issues.append(f"금지된 모듈 import: {alias.name}")
-                
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module in self.forbidden_imports:
-                        issues.append(f"금지된 모듈 import: {node.module}")
-                
-                # 함수 호출 검사
-                elif isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Name):
-                        if node.func.id in self.forbidden_imports:
-                            issues.append(f"금지된 함수 호출: {node.func.id}")
-        
-        except SyntaxError as e:
-            issues.append(f"구문 오류: {str(e)}")
-        
-        return len(issues) == 0, issues
-    
-    def sanitize_code(self, code: str) -> str:
-        """코드 정리 및 안전화"""
-        # 주석 제거하지 않고 유지
-        # 불필요한 공백 정리
-        lines = code.split('\n')
-        cleaned_lines = []
-        
-        for line in lines:
-            # 빈 줄이 아닌 경우에만 처리
-            if line.strip():
-                cleaned_lines.append(line.rstrip())
-            else:
-                cleaned_lines.append('')
-        
-        return '\n'.join(cleaned_lines)
-
+from typing import Dict, Any, List, Optional
+from .error_handling_system import ErrorHandlingSystem
 
 class CodeExecutor:
-    """Python 코드 실행기"""
+    """
+    브라우저에서 Python 코드를 실행하기 위한 클래스
+    GitHub Pages와 같은 정적 호스팅 환경에서 사용 가능
+    """
     
     def __init__(self):
-        self.security_validator = SecurityValidator()
-        self.execution_timeout = 10  # 10초 제한
-        self.max_output_length = 5000  # 최대 출력 길이
-    
-    def execute_code(self, code: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Python 코드 실행"""
-        start_time = time.time()
+        """초기화"""
+        self.execution_count = 0
+        self.last_result = None
+        self.execution_history = []
+        self.error_handler = ErrorHandlingSystem()
         
-        # 1. 보안 검증
-        is_safe, security_issues = self.security_validator.validate_code(code)
-        if not is_safe:
-            return {
-                'success': False,
-                'error': 'Security validation failed',
-                'security_issues': security_issues,
-                'output': '',
-                'execution_time': 0
-            }
+    def generate_executor_html(self, code: str = "", 
+                             placeholder: str = "여기에 Python 코드를 입력하세요...",
+                             height: str = "300px") -> str:
+        """
+        브라우저에서 Python 코드를 실행할 수 있는 HTML 생성
         
-        # 2. 코드 정리
-        clean_code = self.security_validator.sanitize_code(code)
-        
-        # 3. 실행 환경 준비
-        if context is None:
-            context = {}
-        
-        # 안전한 내장 함수들만 포함
-        safe_builtins = {
-            'print': print,
-            'len': len,
-            'range': range,
-            'enumerate': enumerate,
-            'zip': zip,
-            'map': map,
-            'filter': filter,
-            'sum': sum,
-            'min': min,
-            'max': max,
-            'abs': abs,
-            'round': round,
-            'sorted': sorted,
-            'reversed': reversed,
-            'int': int,
-            'float': float,
-            'str': str,
-            'bool': bool,
-            'list': list,
-            'dict': dict,
-            'tuple': tuple,
-            'set': set,
-            'type': type,
-            'isinstance': isinstance,
-            'issubclass': issubclass,
-        }
-        
-        # 실행 컨텍스트 설정
-        exec_globals = {
-            '__builtins__': safe_builtins,
-            **context
-        }
-        exec_locals = {}
-        
-        # 4. 출력 캡처 준비
-        output_buffer = io.StringIO()
-        error_buffer = io.StringIO()
-        
-        try:
-            # stdout, stderr 리다이렉션
-            with contextlib.redirect_stdout(output_buffer), \
-                 contextlib.redirect_stderr(error_buffer):
+        Args:
+            code (str): 기본 코드
+            placeholder (str): 입력창 플레이스홀더
+            height (str): 코드 에디터 높이
+            
+        Returns:
+            str: HTML 코드
+        """
+        html = f"""
+        <div class="code-executor" style="width: 100%; margin: 20px 0;">
+            <div class="code-editor-container" style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+                <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                    <button id="run-button" class="run-button" style="background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                        ▶️ 실행
+                    </button>
+                    <button id="clear-button" style="background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+                        🗑️ 지우기
+                    </button>
+                    <span id="execution-status" style="margin-left: 10px; font-size: 14px;"></span>
+                </div>
+                <textarea id="code-editor" style="width: 100%; height: {height}; padding: 10px; font-family: monospace; font-size: 14px; line-height: 1.5; border: none; resize: vertical;" placeholder="{placeholder}">{code}</textarea>
+            </div>
+            
+            <div class="output-container" style="margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+                <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                    <span style="font-weight: bold;">실행 결과</span>
+                    <button id="copy-output" style="float: right; background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                        📋 복사
+                    </button>
+                </div>
+                <pre id="output" style="margin: 0; padding: 10px; min-height: 100px; max-height: 300px; overflow-y: auto; background-color: #f8f8f8; font-family: monospace; white-space: pre-wrap;"></pre>
+            </div>
+            
+            <div class="interpretation-container" style="margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; display: none;">
+                <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                    <span style="font-weight: bold;">결과 해석</span>
+                </div>
+                <div id="interpretation" style="padding: 10px;"></div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+        <script>
+        // 코드 실행기 초기화
+        (async function() {
+            // 상태 변수
+            let pyodideReady = false;
+            let pyodide = null;
+            let outputElement = document.getElementById('output');
+            let statusElement = document.getElementById('execution-status');
+            let interpretationElement = document.getElementById('interpretation');
+            let interpretationContainer = document.querySelector('.interpretation-container');
+            
+            // 상태 메시지 표시
+            statusElement.textContent = "Pyodide 로딩 중...";
+            
+            try {
+                // Pyodide 로드
+                pyodide = await loadPyodide();
+                await pyodide.loadPackagesFromImports(`
+                    import numpy as np
+                    import pandas as pd
+                    import matplotlib.pyplot as plt
+                    from io import StringIO
+                `);
                 
-                # 코드 실행
-                exec(clean_code, exec_globals, exec_locals)
-            
-            # 실행 결과 수집
-            output = output_buffer.getvalue()
-            error_output = error_buffer.getvalue()
-            
-            # 출력 길이 제한
-            if len(output) > self.max_output_length:
-                output = output[:self.max_output_length] + "\n... (출력이 너무 길어 잘렸습니다)"
-            
-            execution_time = time.time() - start_time
-            
-            # 성공적인 실행
-            result = {
-                'success': True,
-                'output': output,
-                'error': error_output if error_output else None,
-                'execution_time': round(execution_time, 3),
-                'variables': self._extract_variables(exec_locals),
-                'code': clean_code
+                pyodideReady = true;
+                statusElement.textContent = "준비 완료";
+            } catch (error) {
+                statusElement.textContent = "Pyodide 로드 실패";
+                outputElement.textContent = "오류: " + error.message;
+                console.error("Pyodide 로드 오류:", error);
             }
             
-            return result
+            // 실행 버튼 이벤트 리스너
+            document.getElementById('run-button').addEventListener('click', async () => {
+                if (!pyodideReady) {
+                    outputElement.textContent = "Pyodide가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.";
+                    return;
+                }
+                
+                const code = document.getElementById('code-editor').value;
+                if (!code.trim()) {
+                    outputElement.textContent = "실행할 코드를 입력해주세요.";
+                    return;
+                }
+                
+                // 실행 상태 업데이트
+                statusElement.textContent = "실행 중...";
+                outputElement.textContent = "코드 실행 중...";
+                interpretationContainer.style.display = 'none';
+                
+                try {
+                    // 표준 출력 캡처를 위한 설정
+                    pyodide.runPython(`
+                        import sys
+                        from io import StringIO
+                        sys.stdout = StringIO()
+                        sys.stderr = StringIO()
+                    `);
+                    
+                    // 코드 실행
+                    const result = pyodide.runPython(code);
+                    
+                    // 표준 출력 및 오류 가져오기
+                    const stdout = pyodide.runPython("sys.stdout.getvalue()");
+                    const stderr = pyodide.runPython("sys.stderr.getvalue()");
+                    
+                    // 결과 표시
+                    let output = "";
+                    if (stdout) output += stdout;
+                    if (stderr) output += "\\n오류:\\n" + stderr;
+                    
+                    // 반환값이 있으면 추가
+                    if (result !== undefined && result !== null) {
+                        if (output) output += "\\n\\n";
+                        output += "반환값: " + String(result);
+                        
+                        // 결과 해석 시도
+                        try {
+                            const interpretation = interpretResult(result, code);
+                            if (interpretation) {
+                                interpretationElement.innerHTML = interpretation;
+                                interpretationContainer.style.display = 'block';
+                            }
+                        } catch (e) {
+                            console.error("결과 해석 오류:", e);
+                        }
+                    }
+                    
+                    outputElement.textContent = output || "실행 완료 (출력 없음)";
+                    statusElement.textContent = "실행 완료";
+                    
+                } catch (error) {
+                    outputElement.textContent = "실행 오류: " + error.message;
+                    statusElement.textContent = "오류 발생";
+                    console.error("코드 실행 오류:", error);
+                    
+                    // 오류 해석 및 도움말 제공
+                    try {
+                        const errorHelp = getErrorHelp(error.message);
+                        if (errorHelp) {
+                            interpretationElement.innerHTML = errorHelp;
+                            interpretationContainer.style.display = 'block';
+                        }
+                    } catch (e) {
+                        console.error("오류 해석 실패:", e);
+                    }
+                }
+            });
             
-        except Exception as e:
-            execution_time = time.time() - start_time
-            error_message = str(e)
-            error_type = type(e).__name__
+            // 지우기 버튼 이벤트 리스너
+            document.getElementById('clear-button').addEventListener('click', () => {
+                document.getElementById('code-editor').value = '';
+                outputElement.textContent = '';
+                interpretationContainer.style.display = 'none';
+                statusElement.textContent = "준비 완료";
+            });
             
-            # 상세한 오류 정보
-            tb = traceback.format_exc()
+            // 출력 복사 버튼 이벤트 리스너
+            document.getElementById('copy-output').addEventListener('click', () => {
+                const output = outputElement.textContent;
+                if (!output) return;
+                
+                navigator.clipboard.writeText(output).then(() => {
+                    const originalText = document.getElementById('copy-output').textContent;
+                    document.getElementById('copy-output').textContent = "✓ 복사됨";
+                    setTimeout(() => {
+                        document.getElementById('copy-output').textContent = originalText;
+                    }, 2000);
+                });
+            });
             
-            return {
-                'success': False,
-                'error': error_message,
-                'error_type': error_type,
-                'traceback': tb,
-                'output': output_buffer.getvalue(),
-                'execution_time': round(execution_time, 3),
-                'code': clean_code
+            // 결과 해석 함수
+            function interpretResult(result, code) {
+                // 코드 분석
+                const isStatisticalAnalysis = /np\\.mean|np\\.std|np\\.percentile|np\\.median|describe\\(\\)|df\\.mean|df\\.std/.test(code);
+                const isVisualization = /plt\\./.test(code);
+                const isDataManipulation = /pd\\.DataFrame|pd\\.Series|pd\\.read_|df\\[/.test(code);
+                
+                let interpretation = "";
+                
+                // 결과 유형에 따른 해석
+                if (result && typeof result === 'object') {
+                    // 숫자 배열인 경우
+                    if (result.length !== undefined && result.length > 0 && typeof result[0] === 'number') {
+                        const arr = Array.from(result);
+                        const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                        const stdDev = Math.sqrt(arr.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / arr.length);
+                        
+                        interpretation += "<h4>📊 데이터 요약</h4>";
+                        interpretation += "<ul>";
+                        interpretation += `<li><strong>평균:</strong> ${mean.toFixed(2)}</li>`;
+                        interpretation += `<li><strong>표준편차:</strong> ${stdDev.toFixed(2)}</li>`;
+                        interpretation += `<li><strong>최소값:</strong> ${Math.min(...arr).toFixed(2)}</li>`;
+                        interpretation += `<li><strong>최대값:</strong> ${Math.max(...arr).toFixed(2)}</li>`;
+                        interpretation += `<li><strong>데이터 개수:</strong> ${arr.length}</li>`;
+                        interpretation += "</ul>";
+                        
+                        interpretation += "<h4>💡 해석 가이드</h4>";
+                        interpretation += "<p>이 데이터는 ";
+                        
+                        if (stdDev / mean < 0.1) interpretation += "변동성이 낮은 ";
+                        else if (stdDev / mean > 0.3) interpretation += "변동성이 높은 ";
+                        else interpretation += "중간 정도의 변동성을 가진 ";
+                        
+                        interpretation += "수치형 데이터입니다.</p>";
+                    }
+                    // 기타 객체
+                    else {
+                        interpretation += "<h4>🔍 결과 분석</h4>";
+                        interpretation += "<p>객체 유형의 결과가 반환되었습니다.</p>";
+                    }
+                }
+                // 숫자인 경우
+                else if (typeof result === 'number') {
+                    interpretation += "<h4>🔢 숫자 결과</h4>";
+                    interpretation += `<p>계산된 값: <strong>${result}</strong></p>`;
+                    
+                    // 통계적 의미 추론
+                    if (isStatisticalAnalysis) {
+                        interpretation += "<h4>📈 통계적 의미</h4>";
+                        if (/mean|average/.test(code)) {
+                            interpretation += "<p>이 값은 데이터의 <strong>평균</strong>으로, 중심 경향성을 나타냅니다.</p>";
+                        } else if (/std|variance/.test(code)) {
+                            interpretation += "<p>이 값은 데이터의 <strong>분산 또는 표준편차</strong>로, 데이터의 퍼짐 정도를 나타냅니다.</p>";
+                        } else if (/median/.test(code)) {
+                            interpretation += "<p>이 값은 데이터의 <strong>중앙값</strong>으로, 이상치에 덜 민감한 중심 경향성 측정값입니다.</p>";
+                        }
+                    }
+                }
+                // 문자열인 경우
+                else if (typeof result === 'string') {
+                    interpretation += "<h4>📝 텍스트 결과</h4>";
+                    interpretation += `<p>반환된 텍스트 길이: <strong>${result.length}</strong>자</p>`;
+                }
+                
+                // 코드 유형에 따른 추가 해석
+                if (isStatisticalAnalysis) {
+                    interpretation += "<h4>📊 통계 분석 팁</h4>";
+                    interpretation += "<ul>";
+                    interpretation += "<li>데이터의 분포 형태를 시각화하려면 히스토그램을 사용해보세요.</li>";
+                    interpretation += "<li>이상치가 있는지 확인하려면 박스플롯을 활용하세요.</li>";
+                    interpretation += "<li>평균과 중앙값의 차이는 데이터의 치우침을 나타냅니다.</li>";
+                    interpretation += "</ul>";
+                }
+                else if (isVisualization) {
+                    interpretation += "<h4>📈 시각화 팁</h4>";
+                    interpretation += "<ul>";
+                    interpretation += "<li>제목과 축 레이블을 추가하면 그래프의 의미가 명확해집니다.</li>";
+                    interpretation += "<li>적절한 색상과 마커를 사용하면 가독성이 향상됩니다.</li>";
+                    interpretation += "<li>여러 그래프를 비교하려면 subplot을 활용하세요.</li>";
+                    interpretation += "</ul>";
+                }
+                else if (isDataManipulation) {
+                    interpretation += "<h4>🔍 데이터 처리 팁</h4>";
+                    interpretation += "<ul>";
+                    interpretation += "<li>결측값 처리는 데이터 분석의 중요한 단계입니다.</li>";
+                    interpretation += "<li>데이터 요약 통계는 describe() 메서드로 확인할 수 있습니다.</li>";
+                    interpretation += "<li>그룹별 집계는 groupby() 메서드를 활용하세요.</li>";
+                    interpretation += "</ul>";
+                }
+                
+                return interpretation;
             }
+            
+            // 오류 도움말 함수
+            function getErrorHelp(errorMessage) {
+                let help = "<h4>❌ 오류 도움말</h4>";
+                
+                // 일반적인 오류 패턴 확인
+                if (/NameError: name '(.+)' is not defined/.test(errorMessage)) {
+                    const varName = errorMessage.match(/NameError: name '(.+)' is not defined/)[1];
+                    help += `<p><strong>정의되지 않은 변수/함수:</strong> '${varName}'이(가) 정의되지 않았습니다.</p>`;
+                    help += "<ul>";
+                    help += "<li>변수명이 올바르게 입력되었는지 확인하세요 (대소문자 구분).</li>";
+                    help += "<li>필요한 라이브러리를 import 했는지 확인하세요.</li>";
+                    help += `<li>변수를 먼저 선언했는지 확인하세요 (예: ${varName} = 값).</li>`;
+                    help += "</ul>";
+                }
+                else if (/SyntaxError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>문법 오류:</strong> Python 코드 문법에 문제가 있습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>괄호, 따옴표, 콜론이 올바르게 짝을 이루는지 확인하세요.</li>";
+                    help += "<li>들여쓰기가 일관되게 되어있는지 확인하세요.</li>";
+                    help += "<li>문자열 안에 따옴표를 사용할 때는 이스케이프(\\) 또는 다른 종류의 따옴표를 사용하세요.</li>";
+                    help += "</ul>";
+                }
+                else if (/TypeError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>타입 오류:</strong> 데이터 타입이 맞지 않습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>함수에 전달된 인자의 타입이 올바른지 확인하세요.</li>";
+                    help += "<li>문자열과 숫자를 연산할 때는 적절한 변환이 필요합니다 (str(), int(), float()).</li>";
+                    help += "<li>리스트, 딕셔너리 등의 자료구조를 올바르게 사용하고 있는지 확인하세요.</li>";
+                    help += "</ul>";
+                }
+                else if (/IndexError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>인덱스 오류:</strong> 리스트나 배열의 범위를 벗어났습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>리스트의 길이를 확인하세요 (len(리스트)).</li>";
+                    help += "<li>인덱스는 0부터 시작합니다 (리스트[0]이 첫 번째 요소).</li>";
+                    help += "<li>음수 인덱스는 뒤에서부터 접근합니다 (리스트[-1]이 마지막 요소).</li>";
+                    help += "</ul>";
+                }
+                else if (/KeyError: (.+)/.test(errorMessage)) {
+                    const key = errorMessage.match(/KeyError: (.+)/)[1];
+                    help += `<p><strong>키 오류:</strong> 딕셔너리나 DataFrame에 '${key}' 키가 없습니다.</p>`;
+                    help += "<ul>";
+                    help += "<li>키 이름이 올바른지 확인하세요 (대소문자 구분).</li>";
+                    help += "<li>딕셔너리의 모든 키를 확인하려면 dict.keys()를 사용하세요.</li>";
+                    help += "<li>DataFrame의 열 이름을 확인하려면 df.columns를 사용하세요.</li>";
+                    help += "</ul>";
+                }
+                else if (/AttributeError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>속성 오류:</strong> 객체에 존재하지 않는 속성이나 메서드를 호출했습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>객체의 타입을 확인하세요 (type(객체)).</li>";
+                    help += "<li>메서드나 속성 이름이 올바른지 확인하세요.</li>";
+                    help += "<li>필요한 라이브러리를 import 했는지 확인하세요.</li>";
+                    help += "</ul>";
+                }
+                else if (/ValueError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>값 오류:</strong> 함수나 연산에 부적절한 값이 전달되었습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>함수에 전달된 인자의 값이 허용 범위 내인지 확인하세요.</li>";
+                    help += "<li>문자열을 숫자로 변환할 때는 유효한 형식인지 확인하세요.</li>";
+                    help += "<li>리스트나 배열의 차원이 올바른지 확인하세요.</li>";
+                    help += "</ul>";
+                }
+                else if (/ZeroDivisionError: (.+)/.test(errorMessage)) {
+                    help += "<p><strong>0으로 나누기 오류:</strong> 0으로 나누려고 했습니다.</p>";
+                    help += "<ul>";
+                    help += "<li>나누는 값이 0이 아닌지 확인하세요.</li>";
+                    help += "<li>나누기 전에 조건문으로 0인지 확인하는 방어 코드를 추가하세요.</li>";
+                    help += "</ul>";
+                }
+                else {
+                    help += "<p>오류 메시지를 확인하고 코드를 검토해보세요.</p>";
+                    help += "<p><strong>오류 내용:</strong> " + errorMessage + "</p>";
+                }
+                
+                help += "<h4>🔍 일반적인 디버깅 팁</h4>";
+                help += "<ul>";
+                help += "<li>코드를 작은 부분으로 나누어 테스트해보세요.</li>";
+                help += "<li>print() 문을 사용하여 변수 값을 확인해보세요.</li>";
+                help += "<li>복잡한 표현식은 여러 단계로 나누어 작성해보세요.</li>";
+                help += "</ul>";
+                
+                return help;
+            }
+        })();
+        </script>
+        """
+        return html
     
-    def _extract_variables(self, locals_dict: Dict[str, Any]) -> Dict[str, Any]:
-        """실행 후 변수들 추출"""
-        variables = {}
+    def generate_example_code(self, example_type: str) -> str:
+        """
+        예제 코드 생성
         
-        for name, value in locals_dict.items():
-            if not name.startswith('_'):
-                try:
-                    # 직렬화 가능한 값들만 포함
-                    if isinstance(value, (int, float, str, bool, list, dict, tuple)):
-                        variables[name] = value
-                    elif hasattr(value, '__str__'):
-                        variables[name] = str(value)
-                except:
-                    variables[name] = f"<{type(value).__name__} object>"
-        
-        return variables
-    
-    def execute_with_imports(self, code: str) -> Dict[str, Any]:
-        """필요한 라이브러리를 자동으로 import하여 실행"""
-        # 일반적인 데이터 분석 라이브러리들을 미리 import
-        setup_code = """
-import pandas as pd
+        Args:
+            example_type (str): 예제 유형 (basic, stats, visualization, data_analysis)
+            
+        Returns:
+            str: 예제 코드
+        """
+        examples = {
+            "basic": """# 기본 Python 예제
+print("안녕하세요! Python 코드 실행기입니다.")
+
+# 간단한 계산
+a = 10
+b = 20
+result = a + b
+print(f"{a} + {b} = {result}")
+
+# 리스트 다루기
+numbers = [1, 2, 3, 4, 5]
+print("리스트:", numbers)
+print("합계:", sum(numbers))
+print("평균:", sum(numbers) / len(numbers))
+
+# 함수 정의 및 호출
+def greet(name):
+    return f"안녕하세요, {name}님!"
+
+print(greet("학습자"))
+""",
+            "stats": """# 통계 분석 예제
+import numpy as np
+
+# 데이터 생성
+data = np.random.normal(loc=70, scale=10, size=100)  # 평균 70, 표준편차 10인 정규분포 데이터
+
+# 기술 통계량 계산
+mean = np.mean(data)
+median = np.median(data)
+std_dev = np.std(data)
+min_val = np.min(data)
+max_val = np.max(data)
+q1, q3 = np.percentile(data, [25, 75])
+
+# 결과 출력
+print(f"데이터 개수: {len(data)}")
+print(f"평균: {mean:.2f}")
+print(f"중앙값: {median:.2f}")
+print(f"표준편차: {std_dev:.2f}")
+print(f"최소값: {min_val:.2f}")
+print(f"최대값: {max_val:.2f}")
+print(f"1사분위수(Q1): {q1:.2f}")
+print(f"3사분위수(Q3): {q3:.2f}")
+print(f"사분위수 범위(IQR): {q3 - q1:.2f}")
+
+# 데이터 일부 출력
+print("\n데이터 샘플:")
+print(data[:10])
+
+# 데이터 반환 (결과 해석을 위해)
+data
+""",
+            "visualization": """# 시각화 예제 (참고: 브라우저에서는 그래프가 표시되지 않을 수 있습니다)
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import math
-import statistics
-from collections import Counter
+from io import BytesIO
+import base64
+
+# 데이터 생성
+x = np.linspace(0, 10, 100)
+y1 = np.sin(x)
+y2 = np.cos(x)
+
+# 그래프 그리기
+plt.figure(figsize=(10, 6))
+plt.plot(x, y1, 'b-', label='sin(x)')
+plt.plot(x, y2, 'r--', label='cos(x)')
+plt.title('사인과 코사인 함수')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.grid(True)
+plt.legend()
+
+# 그래프를 이미지로 변환
+buffer = BytesIO()
+plt.savefig(buffer, format='png')
+buffer.seek(0)
+image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+# HTML에 이미지 표시
+from IPython.display import HTML
+HTML(f'<img src="data:image/png;base64,{image_base64}" />')
+
+# 데이터 반환
+print("그래프 데이터 생성 완료")
+""",
+            "data_analysis": """# 데이터 분석 예제
+import pandas as pd
+import numpy as np
+
+# 샘플 데이터 생성
+data = {
+    '이름': ['김철수', '이영희', '박민수', '정지은', '최현우'],
+    '나이': [25, 30, 28, 22, 35],
+    '성별': ['남', '여', '남', '여', '남'],
+    '점수': [85, 92, 78, 96, 88]
+}
+
+# DataFrame 생성
+df = pd.DataFrame(data)
+print("데이터프레임 생성 완료:")
+print(df)
+
+# 기본 통계량
+print("\n기본 통계량:")
+print(df.describe())
+
+# 그룹별 분석
+print("\n성별에 따른 평균 점수와 나이:")
+print(df.groupby('성별').mean())
+
+# 조건부 필터링
+print("\n90점 이상인 학생:")
+high_score = df[df['점수'] >= 90]
+print(high_score)
+
+# 새로운 열 추가
+df['학점'] = pd.cut(df['점수'], 
+                  bins=[0, 60, 70, 80, 90, 100], 
+                  labels=['F', 'D', 'C', 'B', 'A'])
+print("\n학점이 추가된 데이터:")
+print(df)
+
+# 데이터프레임 반환
+df
 """
+        }
         
-        full_code = setup_code + "\n" + code
-        return self.execute_code(full_code)
-
-
-class BrowserCodeExecutor:
-    """브라우저 기반 Python 코드 실행기"""
+        return examples.get(example_type, examples["basic"])
     
-    def __init__(self):
-        self.executor = CodeExecutor()
-        self.execution_queue = queue.Queue()
-        self.result_cache = {}
-        self.max_cache_size = 100
+    def execute_python_code(self, code: str) -> Dict[str, Any]:
+        """
+        Python 코드 실행 (서버 사이드)
         
-    def execute_async(self, code: str, session_id: str = "default") -> str:
-        """비동기 코드 실행"""
-        execution_id = f"{session_id}_{int(time.time() * 1000)}"
-        
-        # 실행 작업을 큐에 추가
-        self.execution_queue.put({
-            'execution_id': execution_id,
-            'code': code,
-            'session_id': session_id,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-        # 별도 스레드에서 실행
-        thread = threading.Thread(
-            target=self._execute_in_thread,
-            args=(execution_id, code, session_id)
-        )
-        thread.daemon = True
-        thread.start()
-        
-        return execution_id
-    
-    def _execute_in_thread(self, execution_id: str, code: str, session_id: str):
-        """스레드에서 코드 실행"""
-        try:
-            result = self.executor.execute_with_imports(code)
-            result['execution_id'] = execution_id
-            result['timestamp'] = datetime.now().isoformat()
+        Args:
+            code (str): 실행할 Python 코드
             
-            # 결과 캐시에 저장
-            self._cache_result(execution_id, result)
+        Returns:
+            dict: 실행 결과
+        """
+        # 실제 서버에서 실행하는 경우에만 사용
+        # GitHub Pages에서는 브라우저에서 실행됨
+        import sys
+        from io import StringIO
+        
+        # 실행 ID 생성
+        self.execution_count += 1
+        execution_id = f"exec_{self.execution_count}_{int(datetime.now().timestamp())}"
+        
+        # 출력 캡처 준비
+        stdout_capture = StringIO()
+        stderr_capture = StringIO()
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        
+        result = {
+            "execution_id": execution_id,
+            "success": False,
+            "output": "",
+            "error": "",
+            "result_value": None,
+            "execution_time": 0
+        }
+        
+        try:
+            # 시작 시간 기록
+            import time
+            start_time = time.time()
+            
+            # 출력 리디렉션
+            sys.stdout = stdout_capture
+            sys.stderr = stderr_capture
+            
+            # 코드 실행
+            compiled_code = compile(code, "<string>", "exec")
+            local_vars = {}
+            exec(compiled_code, {"__builtins__": __builtins__}, local_vars)
+            
+            # 마지막 표현식 값 가져오기
+            last_expression = None
+            lines = code.strip().split('\n')
+            if lines:
+                last_line = lines[-1].strip()
+                if not last_line.startswith(('import ', 'from ', 'def ', 'class ', 'if ', 'for ', 'while ', 'try:', 'with ')):
+                    try:
+                        last_expression = eval(last_line, {"__builtins__": __builtins__}, local_vars)
+                    except:
+                        pass
+            
+            # 결과 설정
+            result["success"] = True
+            result["output"] = stdout_capture.getvalue()
+            result["result_value"] = last_expression
+            result["execution_time"] = time.time() - start_time
             
         except Exception as e:
-            error_result = {
-                'success': False,
-                'error': str(e),
-                'execution_id': execution_id,
-                'timestamp': datetime.now().isoformat()
-            }
-            self._cache_result(execution_id, error_result)
-    
-    def get_result(self, execution_id: str) -> Optional[Dict[str, Any]]:
-        """실행 결과 조회"""
-        return self.result_cache.get(execution_id)
-    
-    def _cache_result(self, execution_id: str, result: Dict[str, Any]):
-        """결과 캐시 저장"""
-        if len(self.result_cache) >= self.max_cache_size:
-            # 가장 오래된 결과 제거
-            oldest_key = min(self.result_cache.keys())
-            del self.result_cache[oldest_key]
+            import traceback
+            result["success"] = False
+            result["error"] = str(e)
+            result["traceback"] = traceback.format_exc()
+            result["execution_time"] = time.time() - start_time
         
-        self.result_cache[execution_id] = result
-    
-    def get_execution_status(self, execution_id: str) -> str:
-        """실행 상태 확인"""
-        if execution_id in self.result_cache:
-            return "completed"
-        else:
-            return "running"
-
-
-class InlineCodeRunner:
-    """인라인 코드 실행기 - 웹 인터페이스용"""
-    
-    def __init__(self):
-        self.executor = CodeExecutor()
-        self.browser_executor = BrowserCodeExecutor()
-        self.session_context = {}  # 세션별 컨텍스트 저장
-        self.execution_history = {}  # 실행 기록
-    
-    def run_code_block(self, code: str, session_id: str = "default", 
-                      async_execution: bool = False) -> Dict[str, Any]:
-        """코드 블록 실행"""
-        # 실행 기록 저장
-        self._add_to_history(session_id, code)
-        
-        if async_execution:
-            # 비동기 실행
-            execution_id = self.browser_executor.execute_async(code, session_id)
-            return {
-                'async': True,
-                'execution_id': execution_id,
-                'status': 'running',
-                'session_id': session_id
-            }
-        else:
-            # 동기 실행
-            return self._run_sync(code, session_id)
-    
-    def _run_sync(self, code: str, session_id: str) -> Dict[str, Any]:
-        """동기 코드 실행"""
-        # 세션 컨텍스트 가져오기
-        if session_id not in self.session_context:
-            self.session_context[session_id] = {}
-        
-        context = self.session_context[session_id]
-        
-        # 코드 실행
-        result = self.executor.execute_with_imports(code)
-        
-        # 성공한 경우 컨텍스트 업데이트
-        if result['success'] and 'variables' in result:
-            context.update(result['variables'])
-            self.session_context[session_id] = context
-        
-        # 세션 정보 추가
-        result['session_id'] = session_id
-        result['session_variables'] = list(context.keys())
-        result['async'] = False
+        finally:
+            # 원래 출력 스트림 복원
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+            
+            # 에러 출력 추가
+            if stderr_capture.getvalue():
+                result["error"] = stderr_capture.getvalue()
+            
+            # 실행 기록 저장
+            self.execution_history.append({
+                "execution_id": execution_id,
+                "code": code,
+                "result": result,
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            # 마지막 결과 저장
+            self.last_result = result
         
         return result
     
-    def get_async_result(self, execution_id: str) -> Optional[Dict[str, Any]]:
-        """비동기 실행 결과 조회"""
-        return self.browser_executor.get_result(execution_id)
-    
-    def get_execution_status(self, execution_id: str) -> str:
-        """실행 상태 확인"""
-        return self.browser_executor.get_execution_status(execution_id)
-    
-    def _add_to_history(self, session_id: str, code: str):
-        """실행 기록 추가"""
-        if session_id not in self.execution_history:
-            self.execution_history[session_id] = []
-        
-        self.execution_history[session_id].append({
-            'code': code,
-            'timestamp': datetime.now().isoformat()
-        })
-        
-        # 최대 50개 기록만 유지
-        if len(self.execution_history[session_id]) > 50:
-            self.execution_history[session_id] = self.execution_history[session_id][-50:]
-    
-    def get_execution_history(self, session_id: str = "default") -> List[Dict[str, Any]]:
-        """실행 기록 조회"""
-        return self.execution_history.get(session_id, [])
-    
-    def clear_session(self, session_id: str = "default"):
-        """세션 컨텍스트 초기화"""
-        if session_id in self.session_context:
-            del self.session_context[session_id]
-        if session_id in self.execution_history:
-            del self.execution_history[session_id]
-    
-    def get_session_info(self, session_id: str = "default") -> Dict[str, Any]:
-        """세션 정보 조회"""
-        context = self.session_context.get(session_id, {})
-        history = self.execution_history.get(session_id, [])
-        
-        return {
-            'session_id': session_id,
-            'variables': context,
-            'variable_count': len(context),
-            'execution_count': len(history),
-            'last_execution': history[-1]['timestamp'] if history else None
-        }
-    
-    def export_session(self, session_id: str = "default") -> str:
-        """세션 내보내기 (JSON)"""
-        session_data = {
-            'session_id': session_id,
-            'variables': self.session_context.get(session_id, {}),
-            'history': self.execution_history.get(session_id, []),
-            'export_timestamp': datetime.now().isoformat()
-        }
-        
-        return json.dumps(session_data, ensure_ascii=False, indent=2)
-    
-    def import_session(self, session_data: str, session_id: str = "default") -> bool:
-        """세션 가져오기"""
-        try:
-            data = json.loads(session_data)
-            
-            if 'variables' in data:
-                self.session_context[session_id] = data['variables']
-            
-            if 'history' in data:
-                self.execution_history[session_id] = data['history']
-            
-            return True
-        except Exception:
-            return False
-
-
-class WebCodeInterface:
-    """웹 인터페이스용 코드 실행 API"""
-    
-    def __init__(self):
-        self.runner = InlineCodeRunner()
-    
-    def execute_code_api(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
-        """웹 API용 코드 실행"""
-        try:
-            code = request_data.get('code', '')
-            session_id = request_data.get('session_id', 'default')
-            async_execution = request_data.get('async', False)
-            
-            if not code.strip():
-                return {
-                    'success': False,
-                    'error': '실행할 코드가 없습니다.',
-                    'error_type': 'EmptyCode'
-                }
-            
-            result = self.runner.run_code_block(code, session_id, async_execution)
-            
-            # 웹 응답용 포맷팅
-            if result.get('async'):
-                return {
-                    'success': True,
-                    'async': True,
-                    'execution_id': result['execution_id'],
-                    'status': 'running',
-                    'message': '코드가 백그라운드에서 실행 중입니다.'
-                }
-            else:
-                return self._format_sync_response(result)
-                
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_type': type(e).__name__
-            }
-    
-    def get_result_api(self, execution_id: str) -> Dict[str, Any]:
-        """비동기 실행 결과 조회 API"""
-        try:
-            status = self.runner.get_execution_status(execution_id)
-            
-            if status == 'running':
-                return {
-                    'success': True,
-                    'status': 'running',
-                    'message': '코드가 아직 실행 중입니다.'
-                }
-            
-            result = self.runner.get_async_result(execution_id)
-            if result:
-                return self._format_sync_response(result)
-            else:
-                return {
-                    'success': False,
-                    'error': '실행 결과를 찾을 수 없습니다.',
-                    'status': 'not_found'
-                }
-                
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_type': type(e).__name__
-            }
-    
-    def _format_sync_response(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """동기 실행 결과 포맷팅"""
-        if result['success']:
-            return {
-                'success': True,
-                'output': result.get('output', ''),
-                'variables': result.get('variables', {}),
-                'execution_time': result.get('execution_time', 0),
-                'session_info': {
-                    'session_id': result.get('session_id'),
-                    'variable_count': len(result.get('session_variables', []))
-                }
-            }
-        else:
-            return {
-                'success': False,
-                'error': result.get('error', '알 수 없는 오류'),
-                'error_type': result.get('error_type', 'UnknownError'),
-                'output': result.get('output', ''),
-                'suggestions': self._get_error_suggestions(result)
-            }
-    
-    def _get_error_suggestions(self, result: Dict[str, Any]) -> List[str]:
-        """오류 해결 제안"""
-        suggestions = []
-        error_type = result.get('error_type', '')
-        error_message = result.get('error', '').lower()
-        
-        if 'syntaxerror' in error_type.lower():
-            suggestions.extend([
-                "문법 오류를 확인하세요 (괄호, 콜론, 들여쓰기)",
-                "Python 문법 가이드를 참고하세요"
-            ])
-        
-        elif 'nameerror' in error_type.lower():
-            suggestions.extend([
-                "변수나 함수 이름을 확인하세요",
-                "필요한 라이브러리를 import했는지 확인하세요"
-            ])
-        
-        elif 'typeerror' in error_type.lower():
-            suggestions.extend([
-                "데이터 타입을 확인하세요",
-                "함수의 매개변수 개수와 타입을 확인하세요"
-            ])
-        
-        elif 'indexerror' in error_type.lower():
-            suggestions.extend([
-                "리스트나 배열의 인덱스 범위를 확인하세요",
-                "len() 함수로 크기를 먼저 확인해보세요"
-            ])
-        
-        elif 'keyerror' in error_type.lower():
-            suggestions.extend([
-                "딕셔너리의 키가 존재하는지 확인하세요",
-                "get() 메서드 사용을 고려해보세요"
-            ])
-        
-        if 'security' in error_message:
-            suggestions.append("보안상 제한된 기능입니다. 허용된 라이브러리만 사용하세요")
-        
-        return suggestions
-    
-    def get_session_api(self, session_id: str = "default") -> Dict[str, Any]:
-        """세션 정보 조회 API"""
-        try:
-            session_info = self.runner.get_session_info(session_id)
-            history = self.runner.get_execution_history(session_id)
-            
-            return {
-                'success': True,
-                'session_info': session_info,
-                'recent_history': history[-5:] if history else []  # 최근 5개만
-            }
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e)
-            }
-    
-    def clear_session_api(self, session_id: str = "default") -> Dict[str, Any]:
-        """세션 초기화 API"""
-        try:
-            self.runner.clear_session(session_id)
-            return {
-                'success': True,
-                'message': f'세션 {session_id}이 초기화되었습니다.'
-            }
-        except Exception as e:
-            return {
-                'success': False,
-                'error': str(e)
-            }
-
-
-# 테스트용 함수
-def test_code_executor():
-    """코드 실행기 테스트"""
-    executor = CodeExecutor()
-    
-    # 테스트 코드들
-    test_codes = [
-        # 1. 기본 계산
+    def get_error_help(self, error_message: str, code: str = None) -> str:
         """
-x = 10
-y = 20
-result = x + y
-print(f"결과: {result}")
-""",
+        오류 메시지에 대한 도움말 제공 (향상된 버전)
         
-        # 2. 데이터 분석 예제
+        Args:
+            error_message (str): 오류 메시지
+            code (str, optional): 실행된 코드
+            
+        Returns:
+            str: HTML 형식의 오류 도움말
         """
-import pandas as pd
-import numpy as np
+        # 향상된 오류 처리 시스템 사용
+        error_analysis = self.error_handler.analyze_error(error_message, code)
+        return self.error_handler.generate_error_report_html(error_analysis)
 
-data = [1, 2, 3, 4, 5]
-mean_val = np.mean(data)
-print(f"평균: {mean_val}")
-""",
-        
-        # 3. 보안 위반 코드 (실행되지 않아야 함)
-        """
-import os
-os.system("ls")
-""",
-        
-        # 4. 구문 오류 코드
-        """
-x = 10
-y = 
-print(x + y)
-"""
-    ]
-    
-    for i, code in enumerate(test_codes, 1):
-        print(f"\n=== 테스트 {i} ===")
-        print(f"코드:\n{code}")
-        
-        result = executor.execute_code(code)
-        print(f"성공: {result['success']}")
-        
-        if result['success']:
-            print(f"출력: {result['output']}")
-            print(f"실행 시간: {result['execution_time']}초")
-            if result.get('variables'):
-                print(f"변수: {result['variables']}")
-        else:
-            print(f"오류: {result['error']}")
-            if 'security_issues' in result:
-                print(f"보안 문제: {result['security_issues']}")
-
-
-if __name__ == "__main__":
-    test_code_executor()
+# 코드 실행기 인스턴스 생성
+code_executor = CodeExecutor()

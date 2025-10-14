@@ -1,0 +1,43 @@
+{
+  "excellent_content": {
+    "overall_score": 99.93736842105262,
+    "grade": "A+",
+    "passed_rules": 6,
+    "total_rules": 6,
+    "missing_sections": [],
+    "recommendations": [],
+    "validation_time": "2025-07-21T00:10:46.506633"
+  },
+  "poor_content": {
+    "overall_score": 33.27450980392156,
+    "grade": "F",
+    "passed_rules": 1,
+    "total_rules": 5,
+    "missing_sections": [
+      "practical_example",
+      "self_assessment"
+    ],
+    "recommendations": [
+      "다음 필수 섹션을 추가하세요: practical_example, self_assessment",
+      "다음 섹션의 내용을 보강하세요: concept_introduction",
+      "다음 섹션을 추가하세요: practical_example, self_assessment",
+      "리스트를 사용하여 내용을 정리하세요",
+      "헤더를 더 추가하세요 (현재 0개, 권장 3개 이상)",
+      "실습 코드나 예제를 추가하세요",
+      "더 자세한 설명과 예제를 추가하세요"
+    ],
+    "validation_time": "2025-07-21T00:10:46.508317"
+  },
+  "medium_content": {
+    "overall_score": 89.32666666666667,
+    "grade": "A",
+    "passed_rules": 4,
+    "total_rules": 6,
+    "missing_sections": [],
+    "recommendations": [
+      "헤더를 더 추가하세요 (현재 0개, 권장 3개 이상)",
+      "더 자세한 설명과 예제를 추가하세요"
+    ],
+    "validation_time": "2025-07-21T00:10:46.510452"
+  }
+}

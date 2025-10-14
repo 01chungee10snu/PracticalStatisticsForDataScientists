@@ -1,0 +1,189 @@
+{
+  "session_id": "72243d7b-f9a3-4fa4-a741-311d4efe8361",
+  "concept_id": "descriptive_statistics",
+  "concept_title": "기술통계량 분석 실습",
+  "user_id": "test_user",
+  "status": "in_progress",
+  "steps": [
+    {
+      "step_id": "data_preparation",
+      "title": "데이터 준비",
+      "description": "분석할 데이터를 준비하고 기본 정보를 확인합니다.",
+      "instructions": [
+        "필요한 라이브러리를 import하세요",
+        "샘플 데이터를 생성하거나 로드하세요",
+        "데이터의 기본 정보를 확인하세요"
+      ],
+      "expected_output": "데이터 크기와 처음 5개 데이터가 출력되어야 합니다",
+      "hints": [
+        "numpy와 pandas 라이브러리를 사용하세요",
+        "np.random.normal()로 정규분포 데이터를 생성할 수 있습니다",
+        "df.head()로 처음 몇 개 데이터를 확인할 수 있습니다"
+      ],
+      "code_template": "import numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\n# 샘플 데이터 생성\ndata = np.random.normal(75, 12, 100)\ndf = pd.DataFrame({'scores': data})\n\n# 데이터 기본 정보 확인\nprint(\"데이터 크기:\", len(df))\nprint(\"처음 5개 데이터:\")\nprint(df.head())",
+      "validation_criteria": {
+        "required_imports": [
+          "numpy",
+          "pandas"
+        ],
+        "required_variables": [
+          "data",
+          "df"
+        ],
+        "min_data_size": 50
+      },
+      "estimated_time": 5,
+      "difficulty": "easy",
+      "status": "completed",
+      "start_time": "2025-07-21T00:34:50.502765",
+      "completion_time": "2025-07-21T00:34:50.504326",
+      "user_code": "import numpy as np\nimport pandas as pd\n\ndata = np.random.normal(75, 12, 100)\ndf = pd.DataFrame({'scores': data})\n\nprint(\"데이터 크기:\", len(df))\nprint(\"처음 5개 데이터:\")\nprint(df.head())",
+      "user_output": "데이터 크기: 100\n처음 5개 데이터:\n...",
+      "attempts": 1,
+      "score": 70
+    },
+    {
+      "step_id": "central_tendency",
+      "title": "중심경향성 계산",
+      "description": "평균, 중앙값, 최빈값을 계산합니다.",
+      "instructions": [
+        "데이터의 평균을 계산하세요",
+        "데이터의 중앙값을 계산하세요",
+        "결과를 출력하고 해석하세요"
+      ],
+      "expected_output": "평균, 중앙값, 그리고 둘의 차이가 출력되어야 합니다",
+      "hints": [
+        ".mean() 메서드로 평균을 계산할 수 있습니다",
+        ".median() 메서드로 중앙값을 계산할 수 있습니다",
+        "평균과 중앙값의 차이로 분포의 대칭성을 판단할 수 있습니다"
+      ],
+      "code_template": "# 중심경향성 계산\nmean_value = df['scores'].mean()\nmedian_value = df['scores'].median()\n\nprint(f\"평균: {mean_value:.2f}\")\nprint(f\"중앙값: {median_value:.2f}\")\n\n# 평균과 중앙값 비교\ndiff = abs(mean_value - median_value)\nprint(f\"평균과 중앙값의 차이: {diff:.2f}\")",
+      "validation_criteria": {
+        "required_calculations": [
+          "mean",
+          "median"
+        ],
+        "output_format": "numeric"
+      },
+      "estimated_time": 8,
+      "difficulty": "medium",
+      "status": "in_progress",
+      "start_time": "2025-07-21T00:34:50.504328",
+      "completion_time": null,
+      "user_code": null,
+      "user_output": null,
+      "attempts": 0,
+      "score": 0.0
+    },
+    {
+      "step_id": "dispersion",
+      "title": "산포도 계산",
+      "description": "분산, 표준편차, 범위를 계산합니다.",
+      "instructions": [
+        "데이터의 분산을 계산하세요",
+        "데이터의 표준편차를 계산하세요",
+        "데이터의 범위(최댓값-최솟값)를 계산하세요",
+        "결과를 해석하세요"
+      ],
+      "expected_output": "분산, 표준편차, 범위, 변동계수가 출력되어야 합니다",
+      "hints": [
+        ".var() 메서드로 분산을 계산할 수 있습니다",
+        ".std() 메서드로 표준편차를 계산할 수 있습니다",
+        "변동계수는 표준편차를 평균으로 나눈 값입니다"
+      ],
+      "code_template": "# 산포도 계산\nvariance = df['scores'].var()\nstd_dev = df['scores'].std()\ndata_range = df['scores'].max() - df['scores'].min()\n\nprint(f\"분산: {variance:.2f}\")\nprint(f\"표준편차: {std_dev:.2f}\")\nprint(f\"범위: {data_range:.2f}\")\n\n# 변동계수 계산 (상대적 변동성)\ncv = (std_dev / mean_value) * 100\nprint(f\"변동계수: {cv:.2f}%\")",
+      "validation_criteria": {
+        "required_calculations": [
+          "var",
+          "std",
+          "range"
+        ],
+        "coefficient_of_variation": true
+      },
+      "estimated_time": 10,
+      "difficulty": "medium",
+      "status": "not_started",
+      "start_time": null,
+      "completion_time": null,
+      "user_code": null,
+      "user_output": null,
+      "attempts": 0,
+      "score": 0.0
+    },
+    {
+      "step_id": "visualization",
+      "title": "데이터 시각화",
+      "description": "히스토그램과 박스플롯을 그려 데이터 분포를 시각화합니다.",
+      "instructions": [
+        "히스토그램을 그려 데이터 분포를 확인하세요",
+        "박스플롯을 그려 사분위수를 확인하세요",
+        "평균과 중앙값을 히스토그램에 표시하세요"
+      ],
+      "expected_output": "히스토그램과 박스플롯이 표시되어야 합니다",
+      "hints": [
+        "plt.subplots()로 여러 그래프를 한 번에 그릴 수 있습니다",
+        "axvline()으로 수직선을 그을 수 있습니다",
+        "boxplot()으로 박스플롯을 그릴 수 있습니다"
+      ],
+      "code_template": "# 시각화\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))\n\n# 히스토그램\nax1.hist(df['scores'], bins=20, alpha=0.7, color='skyblue', edgecolor='black')\nax1.axvline(mean_value, color='red', linestyle='--', label=f'평균: {mean_value:.1f}')\nax1.axvline(median_value, color='green', linestyle='--', label=f'중앙값: {median_value:.1f}')\nax1.set_xlabel('점수')\nax1.set_ylabel('빈도')\nax1.set_title('점수 분포 히스토그램')\nax1.legend()\nax1.grid(True, alpha=0.3)\n\n# 박스플롯\nax2.boxplot(df['scores'])\nax2.set_ylabel('점수')\nax2.set_title('점수 박스플롯')\nax2.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()",
+      "validation_criteria": {
+        "required_plots": [
+          "histogram",
+          "boxplot"
+        ],
+        "mean_median_lines": true
+      },
+      "estimated_time": 12,
+      "difficulty": "hard",
+      "status": "not_started",
+      "start_time": null,
+      "completion_time": null,
+      "user_code": null,
+      "user_output": null,
+      "attempts": 0,
+      "score": 0.0
+    },
+    {
+      "step_id": "interpretation",
+      "title": "결과 해석",
+      "description": "계산된 통계량들을 종합하여 데이터의 특성을 해석합니다.",
+      "instructions": [
+        "평균과 중앙값을 비교하여 분포의 대칭성을 평가하세요",
+        "표준편차를 통해 데이터의 변동성을 해석하세요",
+        "시각화 결과와 수치 결과를 종합하여 결론을 내리세요"
+      ],
+      "expected_output": "데이터 분석 결과와 해석이 출력되어야 합니다",
+      "hints": [
+        "평균과 중앙값의 차이로 분포의 치우침을 판단할 수 있습니다",
+        "변동계수로 상대적 변동성을 평가할 수 있습니다",
+        "수치와 시각화를 함께 고려하여 종합적으로 해석하세요"
+      ],
+      "code_template": "# 결과 해석\nprint(\"=== 데이터 분석 결과 해석 ===\")\n\n# 분포의 대칭성 평가\nif abs(mean_value - median_value) < std_dev * 0.1:\n    print(\"분포가 대칭적입니다 (평균 ≈ 중앙값)\")\nelif mean_value > median_value:\n    print(\"분포가 우측으로 치우쳐 있습니다 (평균 > 중앙값)\")\nelse:\n    print(\"분포가 좌측으로 치우쳐 있습니다 (평균 < 중앙값)\")\n\n# 변동성 평가\nif cv < 15:\n    print(\"데이터의 변동성이 낮습니다 (일관성 높음)\")\nelif cv < 30:\n    print(\"데이터의 변동성이 보통입니다\")\nelse:\n    print(\"데이터의 변동성이 높습니다 (일관성 낮음)\")\n\nprint(f\"\\n데이터 요약:\")\nprint(f\"- 중심값: 평균 {mean_value:.1f}, 중앙값 {median_value:.1f}\")\nprint(f\"- 변동성: 표준편차 {std_dev:.1f}, 변동계수 {cv:.1f}%\")\nprint(f\"- 범위: {data_range:.1f} (최소 {df['scores'].min():.1f} ~ 최대 {df['scores'].max():.1f})\")",
+      "validation_criteria": {
+        "interpretation_elements": [
+          "symmetry",
+          "variability",
+          "summary"
+        ],
+        "conclusion_required": true
+      },
+      "estimated_time": 10,
+      "difficulty": "hard",
+      "status": "not_started",
+      "start_time": null,
+      "completion_time": null,
+      "user_code": null,
+      "user_output": null,
+      "attempts": 0,
+      "score": 0.0
+    }
+  ],
+  "current_step_index": 1,
+  "start_time": "2025-07-21T00:34:50.502765",
+  "last_activity_time": "2025-07-21T00:34:50.504310",
+  "completion_time": null,
+  "total_time_spent": 0,
+  "progress_percentage": 20.0,
+  "overall_score": 14.0,
+  "session_data": {}
+}

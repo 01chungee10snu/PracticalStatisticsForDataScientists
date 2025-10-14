@@ -1,1007 +1,1259 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통계학습 교육 플랫폼 - 실무 중심 데이터 분석 학습</title>
-    <meta name="description" content="브라우저에서 바로 실행하는 Python 통계 분석, 단계별 실습 가이드, 3권의 전문서적 기반 체계적 커리큘럼">
+    <title>실무 통계학 학습 시스템</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #f39c12;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --danger-color: #e74c3c;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding-top: 56px;
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        
+        .navbar {
+            background-color: var(--dark-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-
-        /* 히어로 섹션 */
-        .hero-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 60px 40px;
-            margin-bottom: 40px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .hero-content h1 {
-            color: #2c3e50;
-            font-size: 3.5rem;
-            margin-bottom: 20px;
+        
+        .navbar-brand {
             font-weight: 700;
-            line-height: 1.2;
-        }
-
-        .hero-subtitle {
-            color: #3498db;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-
-        .hero-description {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.7;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .hero-btn {
-            padding: 15px 30px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .hero-btn.primary {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .hero-btn.primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-        }
-
-        .hero-btn.secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: #2c3e50;
-            border: 2px solid #3498db;
-        }
-
-        .hero-btn.secondary:hover {
-            background: #3498db;
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        .hero-stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-
-        .hero-stat {
-            text-align: center;
-        }
-
-        .hero-stat .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #3498db;
-            display: block;
-        }
-
-        .hero-stat .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* 서브에이전트 섹션 */
-        .subagents-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 50px 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .agents-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 40px;
-        }
-
-        .agent-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .agent-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .agent-card.quality::before {
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-        }
-
-        .agent-card.adaptive::before {
-            background: linear-gradient(90deg, #9b59b6, #8e44ad);
-        }
-
-        .agent-card.cognitive::before {
-            background: linear-gradient(90deg, #e74c3c, #f39c12);
-        }
-
-        .agent-card.assessment::before {
-            background: linear-gradient(90deg, #1abc9c, #16a085);
-        }
-
-        .agent-card.visualization::before {
-            background: linear-gradient(90deg, #e67e22, #d35400);
-        }
-
-        .agent-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .agent-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .agent-card h3 {
-            color: #2c3e50;
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .agent-card p {
-            color: #555;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .agent-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        .feature {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* 학습 콘텐츠 섹션 */
-        .learning-content-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 50px 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 1.2rem;
-            margin-bottom: 50px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* 학습 경로 카드 */
-        .learning-paths {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-
-        .path-card {
-            background: white;
-            border-radius: 15px;
-            padding: 35px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .path-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-        }
-
-        .path-card.foundation::before {
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-        }
-
-        .path-card.developing::before {
-            background: linear-gradient(90deg, #e74c3c, #f39c12);
-        }
-
-        .path-card.proficient::before {
-            background: linear-gradient(90deg, #9b59b6, #8e44ad);
-        }
-
-        .path-card.advanced::before {
-            background: linear-gradient(90deg, #e67e22, #d35400);
-        }
-
-        .path-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .path-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .path-icon {
-            font-size: 3rem;
-            margin-right: 20px;
-        }
-
-        .path-info h3 {
-            color: #2c3e50;
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .path-level {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .path-description {
-            color: #555;
-            font-size: 1.1rem;
-            margin-bottom: 25px;
-            line-height: 1.7;
-        }
-
-        .path-content {
-            margin-bottom: 30px;
-        }
-
-        .content-section {
-            margin-bottom: 20px;
-        }
-
-        .content-section h4 {
-            color: #3498db;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .content-list {
-            list-style: none;
-            margin-left: 20px;
-        }
-
-        .content-list li {
-            color: #666;
-            margin-bottom: 6px;
-            padding-left: 20px;
-            position: relative;
-            font-size: 0.95rem;
-        }
-
-        .content-list li::before {
-            content: '▸';
-            position: absolute;
-            left: 0;
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .path-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        .path-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-
-        .path-btn.theory {
-            background: #ecf0f1;
-            color: #2c3e50;
-        }
-
-        .path-btn.theory:hover {
-            background: #d5dbdb;
-            transform: translateY(-2px);
-        }
-
-        .path-btn.practice {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-        }
-
-        .path-btn.practice:hover {
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* 빠른 시작 가이드 */
-        .quick-start-section {
-            margin-top: 40px;
-        }
-
-        .quick-start-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .quick-start-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .quick-start-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            border-color: #3498db;
-        }
-
-        .quick-start-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .quick-start-card h4 {
-            color: #2c3e50;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .quick-start-card p {
-            color: #7f8c8d;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .quick-start-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-
-        .quick-start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
-        }
-
-        /* 푸터 */
-        .footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-top: 40px;
-        }
-
-        .footer p {
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-
-        .footer a {
-            color: #3498db;
-            text-decoration: none;
+            color: white !important;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
             font-weight: 500;
+            transition: color 0.3s;
         }
-
-        .footer a:hover {
-            text-decoration: underline;
+        
+        .nav-link:hover {
+            color: white !important;
         }
-
-        /* 애니메이션 */
-        .fade-in {
-            animation: fadeIn 0.8s ease-in;
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 4rem 0;
+            margin-bottom: 2rem;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
-
-        /* 반응형 디자인 */
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            padding: 1rem;
+        }
+        
+        .card-header.beginner {
+            background-color: var(--secondary-color);
+        }
+        
+        .card-header.intermediate {
+            background-color: var(--primary-color);
+        }
+        
+        .card-header.advanced {
+            background-color: var(--accent-color);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .code-editor {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .code-toolbar {
+            background-color: #f5f5f5;
+            padding: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .code-output {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .interpretation {
+            background-color: #f0f8ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .error-message {
+            background-color: #fff5f5;
+            border: 1px solid #f8d7da;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: var(--danger-color);
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            border-bottom: 3px solid #ddd;
+            position: relative;
+        }
+        
+        .step.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .step.completed {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-right: 1rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+        }
+        
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .hero-title {
+                font-size: 2rem;
             }
-
-            .hero-section {
-                padding: 40px 25px;
-            }
-
-            .hero-content h1 {
-                font-size: 2.5rem;
-            }
-
+            
             .hero-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .hero-description {
                 font-size: 1rem;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .hero-btn {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .learning-paths {
-                grid-template-columns: 1fr;
-                gap: 25px;
-            }
-
-            .learning-content-section {
-                padding: 35px 25px;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .path-card {
-                padding: 25px;
-            }
-
-            .path-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-
-            .path-icon {
-                margin-right: 0;
-                margin-bottom: 10px;
-            }
-
-            .path-actions {
-                flex-direction: column;
-            }
-
-            .quick-start-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-
-            .hero-stats {
-                gap: 20px;
-            }
-
-            .quick-start-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .path-card {
-                padding: 20px;
             }
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <!-- 히어로 섹션 -->
-        <div class="hero-section fade-in">
-            <div class="hero-content">
-                <h1>📊 실무 통계학 마스터하기</h1>
-                <p class="hero-subtitle">3권의 전문서적 기반 체계적 커리큘럼으로 배우는 데이터 분석</p>
-                <p class="hero-description">
-                    브라우저에서 바로 실행하는 Python 코드, 단계별 실습 가이드,
-                    개인화된 학습 경로로 통계학을 완전히 마스터하세요
-                </p>
-                <div class="hero-buttons">
-                    <a href="integrated_practice_demo.html" class="hero-btn primary">
-                        🚀 지금 시작하기
-                    </a>
-                    <a href="#learning-content" class="hero-btn secondary">
-                        📚 학습 내용 보기
-                    </a>
-                </div>
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">📊 실무 통계학 학습 시스템</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#home">홈</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">주요 기능</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#tutorials">튜토리얼</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#practice">실습</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">소개</a>
+                    </li>
+                </ul>
             </div>
-            <div class="hero-stats">
-                <div class="hero-stat">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">전문 서적</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">실습 모듈</div>
-                </div>
-                <div class="hero-stat">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">웹 기반</div>
+        </div>
+    </nav>
+
+    <!-- 히어로 섹션 -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="hero-title">실무 통계학 학습 시스템</h1>
+                    <p class="hero-subtitle">통계 개념을 이해하고 즉시 실습할 수 있는 인터랙티브 학습 환경</p>
+                    <a href="#tutorials" class="btn btn-light btn-lg">학습 시작하기</a>
                 </div>
             </div>
         </div>
-
-        <!-- 5개 서브에이전트 소개 섹션 -->
-        <div class="subagents-section">
-            <h2 class="section-title">🤖 5개 전문 AI 에이전트</h2>
-            <p class="section-subtitle">
-                각 분야의 전문가 AI가 협력하여 최적의 학습 경험을 제공합니다
-            </p>
-
-            <div class="agents-grid">
-                <div class="agent-card quality">
-                    <div class="agent-icon">📝</div>
-                    <h3>콘텐츠 품질 에이전트</h3>
-                    <p>가독성 분석, 정보 구조 최적화, 학습 효과 극대화를 위한 콘텐츠 개선</p>
-                    <div class="agent-features">
-                        <span class="feature">가독성 분석</span>
-                        <span class="feature">구조 최적화</span>
-                        <span class="feature">품질 검증</span>
+    </section>    <!-- 
+주요 기능 섹션 -->
+    <section class="container my-5" id="features">
+        <h2 class="text-center mb-4">주요 기능</h2>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">📝</div>
+                        <h5 class="card-title">콘텐츠 표준화</h5>
+                        <p class="card-text">일관된 구조와 품질의 교육 콘텐츠로 효율적인 학습 경험을 제공합니다.</p>
                     </div>
                 </div>
-
-                <div class="agent-card adaptive">
-                    <div class="agent-icon">🧠</div>
-                    <h3>적응형 학습 엔진</h3>
-                    <p>개인 수준 자동 감지, 맞춤형 학습 경로, 실시간 난이도 조절</p>
-                    <div class="agent-features">
-                        <span class="feature">수준 감지</span>
-                        <span class="feature">개인화 경로</span>
-                        <span class="feature">난이도 조절</span>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">💻</div>
+                        <h5 class="card-title">인라인 코드 실행</h5>
+                        <p class="card-text">브라우저에서 바로 Python 코드를 실행하고 결과를 확인할 수 있습니다.</p>
                     </div>
                 </div>
-
-                <div class="agent-card cognitive">
-                    <div class="agent-icon">⚡</div>
-                    <h3>인지 부하 최적화</h3>
-                    <p>학습자 인지 상태 모니터링, 정보 제시 최적화, 집중도 향상</p>
-                    <div class="agent-features">
-                        <span class="feature">인지 모니터링</span>
-                        <span class="feature">부하 최적화</span>
-                        <span class="feature">집중도 관리</span>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">🔍</div>
+                        <h5 class="card-title">결과 해석</h5>
+                        <p class="card-text">코드 실행 결과의 통계적 의미와 실무적 해석을 자동으로 제공합니다.</p>
                     </div>
                 </div>
-
-                <div class="agent-card assessment">
-                    <div class="agent-icon">📊</div>
-                    <h3>평가 및 피드백</h3>
-                    <p>실시간 성과 평가, 개인화된 피드백, 적응형 문항 생성</p>
-                    <div class="agent-features">
-                        <span class="feature">실시간 평가</span>
-                        <span class="feature">맞춤 피드백</span>
-                        <span class="feature">적응형 문항</span>
-                    </div>
-                </div>
-
-                <div class="agent-card visualization">
-                    <div class="agent-icon">📈</div>
-                    <h3>향상된 시각화</h3>
-                    <p>인터랙티브 차트, 학습자 맞춤 시각화, 접근성 고려 디자인</p>
-                    <div class="agent-features">
-                        <span class="feature">인터랙티브 차트</span>
-                        <span class="feature">맞춤 시각화</span>
-                        <span class="feature">접근성 디자인</span>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">🧩</div>
+                        <h5 class="card-title">단계별 실습</h5>
+                        <p class="card-text">복잡한 개념을 단계별로 나누어 차근차근 학습할 수 있습니다.</p>
                     </div>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- 학습 콘텐츠 섹션 -->
-        <div id="learning-content" class="learning-content-section">
-            <h2 class="section-title">🎓 체계적 학습 경로</h2>
-            <p class="section-subtitle">
-                5개 AI 에이전트가 협력하여 제공하는 개인화된 학습 커리큘럼
-            </p>
-
-            <div class="learning-paths">
-                <!-- Foundation 경로 -->
-                <div class="path-card foundation">
-                    <div class="path-header">
-                        <span class="path-icon">🏗️</span>
-                        <div class="path-info">
-                            <h3>Foundation (기초)</h3>
-                            <span class="path-level">입문자 · 4주 과정</span>
-                        </div>
+    <!-- 튜토리얼 섹션 -->
+    <section class="container my-5" id="tutorials">
+        <h2 class="text-center mb-4">튜토리얼</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header beginner">
+                        초급
                     </div>
-                    <p class="path-description">
-                        통계학의 기본 개념부터 Python을 활용한 데이터 분석의 첫걸음까지.
-                        수학적 배경 지식이 없어도 쉽게 따라할 수 있는 실습 중심 커리큘럼입니다.
-                    </p>
-                    <div class="path-content">
-                        <div class="content-section">
-                            <h4>📊 핵심 개념</h4>
-                            <ul class="content-list">
-                                <li>기술통계량: 평균, 중앙값, 표준편차의 실제 의미</li>
-                                <li>데이터 시각화: 히스토그램, 박스플롯, 산점도 해석</li>
-                                <li>확률 기초: 일상에서 만나는 확률 개념</li>
-                                <li>Python 데이터 분석: pandas, numpy 기초 실습</li>
-                            </ul>
-                        </div>
-                        <div class="content-section">
-                            <h4>🎯 실습 프로젝트</h4>
-                            <ul class="content-list">
-                                <li>학생 성적 데이터 분석 (5단계 가이드)</li>
-                                <li>브라우저 기반 Python 코드 실행</li>
-                                <li>인터랙티브 차트 생성 및 해석</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="path-actions">
-                        <a href="docs/beginner/" class="path-btn theory">📚 이론 학습</a>
-                        <a href="integrated_practice_demo.html" class="path-btn practice">🚀 실습 시작</a>
+                    <div class="card-body">
+                        <h5 class="card-title">기술통계 기초</h5>
+                        <p class="card-text">평균, 중앙값, 표준편차 등 기본적인 통계량의 개념과 계산 방법을 배웁니다.</p>
+                        <a href="#" class="btn btn-outline-primary" onclick="loadTutorial('basic_stats')">학습하기</a>
                     </div>
                 </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header intermediate">
+                        중급
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">데이터 시각화</h5>
+                        <p class="card-text">히스토그램, 산점도, 박스플롯 등 다양한 시각화 방법을 배우고 실습합니다.</p>
+                        <a href="#" class="btn btn-outline-primary" onclick="loadTutorial('data_visualization')">학습하기</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header advanced">
+                        고급
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">가설 검정</h5>
+                        <p class="card-text">t-검정, 카이제곱 검정 등 통계적 가설 검정 방법을 배우고 실습합니다.</p>
+                        <a href="#" class="btn btn-outline-primary" onclick="loadTutorial('hypothesis_testing')">학습하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <!-- Developing 경로 -->
-                <div class="path-card developing">
-                    <div class="path-header">
-                        <span class="path-icon">🔬</span>
-                        <div class="path-info">
-                            <h3>Developing (발전)</h3>
-                            <span class="path-level">중급자 · 6주 과정</span>
+    <!-- 실습 섹션 -->
+    <section class="container my-5" id="practice">
+        <h2 class="text-center mb-4">실습</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Python 코드 실행기</h5>
+                <p class="card-text">아래에 Python 코드를 입력하고 실행해보세요. 결과와 함께 통계적 해석이 제공됩니다.</p>
+                
+                <div id="code-executor-container">
+                    <!-- 코드 실행기가 여기에 로드됩니다 -->
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
                         </div>
+                        <p>코드 실행기 로딩 중...</p>
                     </div>
-                    <p class="path-description">
-                        통계적 추론과 가설검정을 통해 데이터에서 의미 있는 인사이트를 발견하는 방법을 배웁니다.
-                        실무에서 바로 활용할 수 있는 분석 기법들을 중점적으로 다룹니다.
-                    </p>
-                    <div class="path-content">
-                        <div class="content-section">
-                            <h4>🧪 통계적 추론</h4>
-                            <ul class="content-list">
-                                <li>가설검정: p-값의 올바른 해석과 활용</li>
-                                <li>신뢰구간: 불확실성을 표현하는 방법</li>
-                                <li>표본분포: 중심극한정리의 실제 적용</li>
-                                <li>검정력 분석: 표본 크기 결정하기</li>
-                            </ul>
-                        </div>
-                        <div class="content-section">
-                            <h4>📈 분석 기법</h4>
-                            <ul class="content-list">
-                                <li>t-검정, 카이제곱 검정 실무 적용</li>
-                                <li>상관분석과 단순회귀분석</li>
-                                <li>A/B 테스트 설계 및 분석</li>
-                            </ul>
-                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 단계별 실습 가이드 섹션 -->
+    <section class="container my-5" id="step-guide">
+        <h2 class="text-center mb-4">단계별 실습 가이드</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">기술통계량 분석 실습</h5>
+                
+                <div class="step-indicator mb-4">
+                    <div class="step active" id="step-1">1. 데이터 준비</div>
+                    <div class="step" id="step-2">2. 중심경향성</div>
+                    <div class="step" id="step-3">3. 산포도</div>
+                    <div class="step" id="step-4">4. 시각화</div>
+                    <div class="step" id="step-5">5. 해석</div>
+                </div>
+                
+                <div id="step-content">
+                    <h6>1단계: 데이터 준비</h6>
+                    <p>먼저 분석할 데이터를 준비합니다. 아래 코드를 실행하여 샘플 데이터를 생성해보세요.</p>
+                    
+                    <div id="step-code-executor">
+                        <!-- 단계별 코드 실행기가 여기에 로드됩니다 -->
                     </div>
-                    <div class="path-actions">
-                        <a href="docs/intermediate/" class="path-btn theory">📚 이론 학습</a>
-                        <a href="code_snippet_demo.html" class="path-btn practice">⚡ 코드 실습</a>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-primary" id="check-step">확인하기</button>
+                        <button class="btn btn-outline-secondary" id="show-hint">힌트 보기</button>
                     </div>
-                    <!-- Proficient 경로 -->
-                    <div class="path-card proficient">
-                        <div class="path-header">
-                            <span class="path-icon">🎯</span>
-                            <div class="path-info">
-                                <h3>Proficient (숙련)</h3>
-                                <span class="path-level">고급자 · 8주 과정</span>
-                            </div>
-                        </div>
-                        <p class="path-description">
-                            고급 통계 기법과 머신러닝의 기초를 마스터합니다.
-                            복잡한 데이터 분석 문제를 해결할 수 있는 실력을 기릅니다.
+                    
+                    <div class="mt-3" id="step-feedback" style="display: none;">
+                        <!-- 피드백이 여기에 표시됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 소개 섹션 -->
+    <section class="container my-5" id="about">
+        <h2 class="text-center mb-4">소개</h2>
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">실무 통계학 학습 시스템이란?</h5>
+                        <p class="card-text">
+                            이 시스템은 통계학 개념을 이해하고 즉시 실습할 수 있는 인터랙티브 학습 환경을 제공합니다.
+                            별도의 사용자 등록 없이도 누구나 접근하여 학습할 수 있으며, GitHub Pages를 통해 호스팅됩니다.
                         </p>
-                        <div class="path-content">
-                            <div class="content-section">
-                                <h4>🔍 고급 분석</h4>
-                                <ul class="content-list">
-                                    <li>다중회귀분석: 여러 변수의 영향 분석</li>
-                                    <li>로지스틱 회귀: 분류 문제 해결</li>
-                                    <li>분산분석(ANOVA): 그룹 간 차이 검정</li>
-                                    <li>비모수 통계: 분포 가정 없는 분석</li>
-                                </ul>
-                            </div>
-                            <div class="content-section">
-                                <h4>🤖 머신러닝 기초</h4>
-                                <ul class="content-list">
-                                    <li>지도학습: 회귀와 분류 알고리즘</li>
-                                    <li>비지도학습: 클러스터링과 차원축소</li>
-                                    <li>모델 평가와 검증</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="path-actions">
-                            <a href="docs/advanced/" class="path-btn theory">📚 이론 학습</a>
-                            <a href="notebooks/interactive_demo.ipynb" class="path-btn practice">📊 고급 실습</a>
-                        </div>
-                    </div>
-
-                    <!-- Advanced 경로 -->
-                    <div class="path-card advanced">
-                        <div class="path-header">
-                            <span class="path-icon">🏆</span>
-                            <div class="path-info">
-                                <h3>Advanced (전문가)</h3>
-                                <span class="path-level">전문가 · 12주 과정</span>
-                            </div>
-                        </div>
-                        <p class="path-description">
-                            최신 데이터 사이언스 기법과 실무 프로젝트를 경험합니다.
-                            업계 전문가 수준의 분석 능력을 갖추게 됩니다.
+                        <p class="card-text">
+                            주요 기능으로는 콘텐츠 표준화 시스템, 인라인 코드 실행 및 결과 해석, 단계별 실습 가이드,
+                            통합 데모 시스템 등이 있습니다.
                         </p>
-                        <div class="path-content">
-                            <div class="content-section">
-                                <h4>🚀 최신 기법</h4>
-                                <ul class="content-list">
-                                    <li>딥러닝: 신경망과 텐서플로우</li>
-                                    <li>시계열 분석: 예측 모델링</li>
-                                    <li>빅데이터 처리: Spark와 분산 컴퓨팅</li>
-                                    <li>자연어 처리: 텍스트 마이닝</li>
-                                </ul>
-                            </div>
-                            <div class="content-section">
-                                <h4>💼 실무 프로젝트</h4>
-                                <ul class="content-list">
-                                    <li>고객 세분화 분석</li>
-                                    <li>추천 시스템 구축</li>
-                                    <li>이상 탐지 시스템</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="path-actions">
-                            <a href="docs/content/" class="path-btn theory">📚 심화 학습</a>
-                            <a href="templates/showcase_index.html" class="path-btn practice">🔧 프로젝트 실습</a>
-                        </div>
+                        <p class="card-text">
+                            이 프로젝트는 오픈 소스로 개발되었으며, GitHub 저장소에서 소스 코드를 확인하고 기여할 수 있습니다.
+                        </p>
+                        <a href="https://github.com/yourusername/your-repo" class="btn btn-outline-primary" target="_blank">GitHub 저장소</a>
                     </div>
                 </div>
-
-                <!-- 빠른 시작 가이드 -->
-                <div class="quick-start-section">
-                    <h3 style="text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 1.8rem;">⚡ 빠른 시작 가이드
-                    </h3>
-                    <div class="quick-start-grid">
-                        <div class="quick-start-card">
-                            <div class="quick-start-icon">🎯</div>
-                            <h4>5분 실습</h4>
-                            <p>기술통계량 계산을 5단계로 체험해보세요</p>
-                            <a href="integrated_practice_demo.html" class="quick-start-btn">시작하기</a>
-                        </div>
-                        <div class="quick-start-card">
-                            <div class="quick-start-icon">🐍</div>
-                            <h4>코드 실행</h4>
-                            <p>브라우저에서 바로 Python 코드를 실행해보세요</p>
-                            <a href="code_snippet_demo.html" class="quick-start-btn">실행하기</a>
-                        </div>
-                        <div class="quick-start-card">
-                            <div class="quick-start-icon">📊</div>
-                            <h4>결과 확인</h4>
-                            <p>학습 결과와 성과를 분석해보세요</p>
-                            <a href="docs/results.html" class="quick-start-btn">확인하기</a>
-                        </div>
-                        <div class="quick-start-card">
-                            <div class="quick-start-icon">📚</div>
-                            <h4>문서 탐색</h4>
-                            <p>체계적인 학습 자료를 둘러보세요</p>
-                            <a href="docs/index.html" class="quick-start-btn">탐색하기</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 푸터 -->
-            <div class="footer fade-in">
-                <p><strong>통계학습 교육 플랫폼</strong> - 실용적인 데이터 분석 학습을 위한 통합 솔루션</p>
-                <p>
-                    <a href="https://github.com/01chungee10snu/PracticalStatisticsForDataScientists"
-                        target="_blank">GitHub 저장소</a> |
-                    <a href="docs/overview.md" target="_blank">프로젝트 개요</a> |
-                    <a href="README.md" target="_blank">사용 가이드</a>
-                </p>
-                <p style="margin-top: 15px; font-size: 0.9rem; color: #95a5a6;">
-                    © 2025 통계학습 교육 플랫폼. 교육 목적으로 제작되었습니다.
-                </p>
             </div>
         </div>
+    </section>
 
-        <script>
-            // 페이지 로드 애니메이션
-            document.addEventListener('DOMContentLoaded', function () {
-                // 부드러운 스크롤
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    anchor.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const target = document.querySelector(this.getAttribute('href'));
-                        if (target) {
-                            target.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'start'
-                            });
-                        }
-                    });
-                });
+    <!-- 푸터 -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>실무 통계학 학습 시스템</h5>
+                    <p>통계 개념을 이해하고 즉시 실습할 수 있는 인터랙티브 학습 환경</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-links">
+                        <a href="#home">홈</a>
+                        <a href="#features">주요 기능</a>
+                        <a href="#tutorials">튜토리얼</a>
+                        <a href="#practice">실습</a>
+                        <a href="#about">소개</a>
+                    </div>
+                    <p class="mt-3">© 2025 실무 통계학 학습 시스템. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-                // 카드 애니메이션
-                const cards = document.querySelectorAll('.path-card, .quick-start-card');
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.style.opacity = '1';
-                            entry.target.style.transform = 'translateY(0)';
-                        }
-                    });
-                }, { threshold: 0.1 });
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script>
+        // 코드 실행기 로드
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // 코드 실행기 HTML 가져오기
+                const response = await fetch('modules/code_executor_html.js');
+                if (!response.ok) {
+                    throw new Error('코드 실행기 HTML을 가져오는 데 실패했습니다.');
+                }
+                
+                const codeExecutorModule = await response.text();
+                eval(codeExecutorModule);
+                
+                // 기본 코드 실행기 로드
+                const codeExecutorContainer = document.getElementById('code-executor-container');
+                codeExecutorContainer.innerHTML = generateCodeExecutor(`
+# 기본 통계 예제
+import numpy as np
 
-                cards.forEach(card => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(30px)';
-                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                    observer.observe(card);
-                });
+# 데이터 생성
+data = np.random.normal(loc=70, scale=10, size=100)  # 평균 70, 표준편차 10인 정규분포 데이터
 
-                // 통계 카운터 애니메이션
-                const statNumbers = document.querySelectorAll('.stat-number');
-                const statsObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const target = entry.target;
-                            const finalValue = target.textContent;
+# 기술 통계량 계산
+mean = np.mean(data)
+median = np.median(data)
+std_dev = np.std(data)
+min_val = np.min(data)
+max_val = np.max(data)
+q1, q3 = np.percentile(data, [25, 75])
 
-                            if (finalValue !== '100%' && !isNaN(parseInt(finalValue))) {
-                                animateCounter(target, 0, parseInt(finalValue), 1500);
+# 결과 출력
+print(f"데이터 개수: {len(data)}")
+print(f"평균: {mean:.2f}")
+print(f"중앙값: {median:.2f}")
+print(f"표준편차: {std_dev:.2f}")
+print(f"최소값: {min_val:.2f}")
+print(f"최대값: {max_val:.2f}")
+print(f"1사분위수(Q1): {q1:.2f}")
+print(f"3사분위수(Q3): {q3:.2f}")
+print(f"사분위수 범위(IQR): {q3 - q1:.2f}")
+
+# 데이터 일부 출력
+print("\\n데이터 샘플:")
+print(data[:10])
+
+# 데이터 반환 (결과 해석을 위해)
+data
+`);
+                
+                // 단계별 코드 실행기 로드
+                const stepCodeExecutor = document.getElementById('step-code-executor');
+                stepCodeExecutor.innerHTML = generateCodeExecutor(`
+# 1단계: 데이터 준비
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 학생 시험 점수 데이터 생성 (평균 70, 표준편차 15인 정규분포)
+np.random.seed(42)  # 재현성을 위한 시드 설정
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 데이터 확인
+print(f"생성된 데이터 개수: {len(scores)}")
+print("처음 10개 데이터:")
+print(scores[:10])
+
+# 데이터 반환
+scores
+`);
+                
+            } catch (error) {
+                console.error('코드 실행기 로드 오류:', error);
+                document.getElementById('code-executor-container').innerHTML = `
+                    <div class="alert alert-danger">
+                        코드 실행기를 로드하는 데 실패했습니다. 페이지를 새로고침하거나 나중에 다시 시도해주세요.
+                    </div>
+                `;
+            }
+        });
+        
+        // 튜토리얼 로드 함수
+        function loadTutorial(tutorialId) {
+            alert(`${tutorialId} 튜토리얼을 로드합니다. (개발 중)`);
+            // 실제 구현에서는 AJAX를 사용하여 튜토리얼 콘텐츠를 가져와 표시
+        }
+        
+        // 단계별 가이드 관련 함수
+        document.getElementById('check-step').addEventListener('click', function() {
+            const stepFeedback = document.getElementById('step-feedback');
+            stepFeedback.style.display = 'block';
+            stepFeedback.innerHTML = `
+                <div class="alert alert-success">
+                    <strong>잘했습니다!</strong> 데이터가 성공적으로 생성되었습니다. 
+                    <button class="btn btn-sm btn-success float-end" onclick="nextStep()">다음 단계로</button>
+                </div>
+            `;
+        });
+        
+        document.getElementById('show-hint').addEventListener('click', function() {
+            const stepFeedback = document.getElementById('step-feedback');
+            stepFeedback.style.display = 'block';
+            stepFeedback.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>힌트:</strong> numpy의 random.normal() 함수를 사용하여 정규분포 데이터를 생성할 수 있습니다.
+                    매개변수 loc는 평균, scale은 표준편차, size는 데이터 개수를 의미합니다.
+                </div>
+            `;
+        });
+        
+        function nextStep() {
+            // 현재 활성화된 단계 찾기
+            const activeStep = document.querySelector('.step.active');
+            const activeStepId = activeStep.id;
+            const currentStepNumber = parseInt(activeStepId.split('-')[1]);
+            
+            // 다음 단계로 이동
+            if (currentStepNumber < 5) {
+                // 현재 단계 완료 표시
+                activeStep.classList.remove('active');
+                activeStep.classList.add('completed');
+                
+                // 다음 단계 활성화
+                const nextStepNumber = currentStepNumber + 1;
+                const nextStepId = `step-${nextStepNumber}`;
+                document.getElementById(nextStepId).classList.add('active');
+                
+                // 단계 내용 업데이트
+                updateStepContent(nextStepNumber);
+            }
+        }
+        
+        function updateStepContent(stepNumber) {
+            const stepContent = document.getElementById('step-content');
+            const stepCodeExecutor = document.getElementById('step-code-executor');
+            const stepFeedback = document.getElementById('step-feedback');
+            
+            // 피드백 초기화
+            stepFeedback.style.display = 'none';
+            
+            // 단계별 내용 설정
+            let title, description, code;
+            
+            switch (stepNumber) {
+                case 2:
+                    title = "2단계: 중심경향성 분석";
+                    description = "데이터의 중심경향성(평균, 중앙값, 최빈값)을 계산하고 비교해보세요.";
+                    code = `
+# 2단계: 중심경향성 분석
+import numpy as np
+from scipy import stats
+
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 중심경향성 계산
+mean = np.mean(scores)
+median = np.median(scores)
+mode = stats.mode(scores)[0][0]  # scipy의 mode 함수 사용
+
+# 결과 출력
+print(f"평균: {mean:.2f}")
+print(f"중앙값: {median:.2f}")
+print(f"최빈값: {mode:.2f}")
+
+# 평균과 중앙값 비교
+if mean > median:
+    print("\\n평균이 중앙값보다 크므로, 데이터가 오른쪽으로 치우쳐 있을 가능성이 있습니다.")
+elif mean < median:
+    print("\\n평균이 중앙값보다 작으므로, 데이터가 왼쪽으로 치우쳐 있을 가능성이 있습니다.")
+else:
+    print("\\n평균과 중앙값이 같으므로, 데이터가 대칭적일 가능성이 높습니다.")
+
+# 결과 반환
+{
+    'mean': mean,
+    'median': median,
+    'mode': mode
+}
+`;
+                    break;
+                case 3:
+                    title = "3단계: 산포도 분석";
+                    description = "데이터의 산포도(범위, 분산, 표준편차, 사분위수 범위)를 계산하고 해석해보세요.";
+                    code = `
+# 3단계: 산포도 분석
+import numpy as np
+
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 산포도 계산
+data_range = np.max(scores) - np.min(scores)
+variance = np.var(scores)
+std_dev = np.std(scores)
+q1, q3 = np.percentile(scores, [25, 75])
+iqr = q3 - q1
+
+# 결과 출력
+print(f"범위: {data_range:.2f}")
+print(f"분산: {variance:.2f}")
+print(f"표준편차: {std_dev:.2f}")
+print(f"1사분위수(Q1): {q1:.2f}")
+print(f"3사분위수(Q3): {q3:.2f}")
+print(f"사분위수 범위(IQR): {iqr:.2f}")
+
+# 변동계수 계산 (표준편차/평균)
+cv = std_dev / np.mean(scores)
+print(f"\\n변동계수(CV): {cv:.4f}")
+
+if cv < 0.1:
+    print("변동계수가 0.1보다 작으므로, 데이터의 변동성이 낮습니다.")
+elif cv > 0.3:
+    print("변동계수가 0.3보다 크므로, 데이터의 변동성이 높습니다.")
+else:
+    print("변동계수가 중간 정도로, 데이터가 적절한 변동성을 가지고 있습니다.")
+
+# 이상치 탐지
+lower_bound = q1 - 1.5 * iqr
+upper_bound = q3 + 1.5 * iqr
+outliers = scores[(scores < lower_bound) | (scores > upper_bound)]
+
+print(f"\\n이상치 경계: {lower_bound:.2f} ~ {upper_bound:.2f}")
+print(f"이상치 개수: {len(outliers)}")
+if len(outliers) > 0:
+    print(f"이상치: {outliers}")
+
+# 결과 반환
+{
+    'range': data_range,
+    'variance': variance,
+    'std_dev': std_dev,
+    'iqr': iqr,
+    'cv': cv,
+    'outliers': outliers
+}
+`;
+                    break;
+                case 4:
+                    title = "4단계: 데이터 시각화";
+                    description = "히스토그램과 박스플롯을 사용하여 데이터 분포를 시각화해보세요.";
+                    code = `
+# 4단계: 데이터 시각화
+import numpy as np
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 그래프 설정
+plt.figure(figsize=(12, 5))
+
+# 히스토그램
+plt.subplot(1, 2, 1)
+plt.hist(scores, bins=10, color='skyblue', edgecolor='black', alpha=0.7)
+plt.axvline(np.mean(scores), color='red', linestyle='--', linewidth=2, label=f'평균: {np.mean(scores):.2f}')
+plt.axvline(np.median(scores), color='green', linestyle='-.', linewidth=2, label=f'중앙값: {np.median(scores):.2f}')
+plt.title('점수 분포 히스토그램')
+plt.xlabel('점수')
+plt.ylabel('빈도')
+plt.legend()
+plt.grid(alpha=0.3)
+
+# 박스플롯
+plt.subplot(1, 2, 2)
+plt.boxplot(scores, vert=False, patch_artist=True, 
+           boxprops=dict(facecolor='lightblue', color='black'),
+           whiskerprops=dict(color='black'),
+           medianprops=dict(color='red', linewidth=2))
+plt.title('점수 분포 박스플롯')
+plt.xlabel('점수')
+plt.grid(alpha=0.3)
+
+# 레이아웃 조정
+plt.tight_layout()
+
+# 그래프를 이미지로 변환
+buffer = BytesIO()
+plt.savefig(buffer, format='png')
+buffer.seek(0)
+image_base64 = base64.b64encode(buffer.read()).decode('utf-8')
+
+# HTML에 이미지 표시
+from IPython.display import HTML
+HTML(f'<img src="data:image/png;base64,{image_base64}" />')
+
+# 결과 출력
+print("데이터 시각화 완료!")
+print(f"평균: {np.mean(scores):.2f}")
+print(f"중앙값: {np.median(scores):.2f}")
+print(f"표준편차: {np.std(scores):.2f}")
+
+# 그래프 닫기
+plt.close()
+
+# 결과 반환
+{
+    'mean': np.mean(scores),
+    'median': np.median(scores),
+    'std_dev': np.std(scores)
+}
+`;
+                    break;
+                case 5:
+                    title = "5단계: 결과 해석";
+                    description = "지금까지 분석한 결과를 종합하여 데이터의 특성을 해석해보세요.";
+                    code = `
+# 5단계: 결과 해석
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 기술통계량 계산
+mean = np.mean(scores)
+median = np.median(scores)
+std_dev = np.std(scores)
+min_val = np.min(scores)
+max_val = np.max(scores)
+q1, q3 = np.percentile(scores, [25, 75])
+iqr = q3 - q1
+
+# 정규성 검정
+shapiro_test = stats.shapiro(scores)
+normal_p_value = shapiro_test[1]
+
+# 종합 결과 출력
+print("📊 데이터 분석 종합 결과")
+print("=" * 40)
+print(f"데이터 개수: {len(scores)}")
+print(f"\\n🔸 중심경향성:")
+print(f"   • 평균: {mean:.2f}")
+print(f"   • 중앙값: {median:.2f}")
+print(f"\\n🔸 산포도:")
+print(f"   • 표준편차: {std_dev:.2f}")
+print(f"   • 범위: {min_val:.2f} ~ {max_val:.2f}")
+print(f"   • 사분위수 범위: {q1:.2f} ~ {q3:.2f}")
+print(f"\\n🔸 분포 특성:")
+print(f"   • 치우침: {'우측' if mean > median else '좌측' if mean < median else '없음'}")
+print(f"   • 정규성 검정 p-값: {normal_p_value:.4f} ({'정규분포에 가까움' if normal_p_value > 0.05 else '정규분포가 아닐 수 있음'})")
+
+# 해석 및 결론
+print("\\n📝 해석 및 결론:")
+if normal_p_value > 0.05:
+    print("1. 이 데이터는 정규분포를 따르는 것으로 보입니다.")
+    print("2. 평균과 표준편차를 사용하여 데이터를 요약하는 것이 적절합니다.")
+    print(f"3. 약 68%의 데이터가 {mean - std_dev:.2f}~{mean + std_dev:.2f} 범위에 있을 것으로 예상됩니다.")
+    print(f"4. 약 95%의 데이터가 {mean - 2*std_dev:.2f}~{mean + 2*std_dev:.2f} 범위에 있을 것으로 예상됩니다.")
+else:
+    print("1. 이 데이터는 정규분포를 따르지 않을 수 있습니다.")
+    print("2. 중앙값과 사분위수를 사용하여 데이터를 요약하는 것이 더 적절할 수 있습니다.")
+    print(f"3. 데이터의 50%가 {q1:.2f}~{q3:.2f} 범위에 있습니다.")
+
+# 실무적 해석 예시 (학생 점수 데이터 가정)
+print("\\n💡 실무적 해석 (학생 점수 데이터 예시):")
+if mean < 60:
+    print("• 전반적인 성적이 낮으므로, 추가 학습 지원이 필요할 수 있습니다.")
+elif mean > 80:
+    print("• 전반적인 성적이 우수하므로, 심화 학습을 제공할 수 있습니다.")
+else:
+    print("• 전반적인 성적이 보통 수준입니다.")
+
+if std_dev > 20:
+    print("• 점수 편차가 크므로, 학생별 맞춤형 지도가 필요할 수 있습니다.")
+else:
+    print("• 점수 편차가 적절하므로, 전체 학생을 대상으로 한 교육이 효과적일 수 있습니다.")
+
+# 결과 반환
+{
+    'mean': mean,
+    'median': median,
+    'std_dev': std_dev,
+    'normal_p_value': normal_p_value,
+    'is_normal': normal_p_value > 0.05
+}
+`;
+                    break;
+                default:
+                    title = "1단계: 데이터 준비";
+                    description = "먼저 분석할 데이터를 준비합니다. 아래 코드를 실행하여 샘플 데이터를 생성해보세요.";
+                    code = `
+# 1단계: 데이터 준비
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 학생 시험 점수 데이터 생성 (평균 70, 표준편차 15인 정규분포)
+np.random.seed(42)  # 재현성을 위한 시드 설정
+scores = np.random.normal(loc=70, scale=15, size=50)
+
+# 데이터 확인
+print(f"생성된 데이터 개수: {len(scores)}")
+print("처음 10개 데이터:")
+print(scores[:10])
+
+# 데이터 반환
+scores
+`;
+            }
+            
+            // 내용 업데이트
+            stepContent.innerHTML = `
+                <h6>${title}</h6>
+                <p>${description}</p>
+                
+                <div id="step-code-executor">
+                    <!-- 단계별 코드 실행기가 여기에 로드됩니다 -->
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-primary" id="check-step">확인하기</button>
+                    <button class="btn btn-outline-secondary" id="show-hint">힌트 보기</button>
+                </div>
+                
+                <div class="mt-3" id="step-feedback" style="display: none;">
+                    <!-- 피드백이 여기에 표시됩니다 -->
+                </div>
+            `;
+            
+            // 코드 실행기 업데이트
+            document.getElementById('step-code-executor').innerHTML = generateCodeExecutor(code);
+            
+            // 이벤트 리스너 다시 연결
+            document.getElementById('check-step').addEventListener('click', function() {
+                const stepFeedback = document.getElementById('step-feedback');
+                stepFeedback.style.display = 'block';
+                stepFeedback.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>잘했습니다!</strong> ${stepNumber === 5 ? '모든 단계를 완료했습니다!' : '이 단계를 성공적으로 완료했습니다.'}
+                        ${stepNumber < 5 ? '<button class="btn btn-sm btn-success float-end" onclick="nextStep()">다음 단계로</button>' : ''}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('show-hint').addEventListener('click', function() {
+                const stepFeedback = document.getElementById('step-feedback');
+                stepFeedback.style.display = 'block';
+                
+                let hintText = "";
+                switch (stepNumber) {
+                    case 2:
+                        hintText = "numpy의 mean(), median() 함수와 scipy.stats의 mode() 함수를 사용하여 중심경향성을 계산할 수 있습니다.";
+                        break;
+                    case 3:
+                        hintText = "numpy의 var(), std(), percentile() 함수를 사용하여 산포도를 계산할 수 있습니다.";
+                        break;
+                    case 4:
+                        hintText = "matplotlib의 hist()와 boxplot() 함수를 사용하여 데이터를 시각화할 수 있습니다.";
+                        break;
+                    case 5:
+                        hintText = "scipy.stats의 shapiro() 함수를 사용하여 정규성 검정을 수행할 수 있습니다.";
+                        break;
+                    default:
+                        hintText = "numpy의 random.normal() 함수를 사용하여 정규분포 데이터를 생성할 수 있습니다.";
+                }
+                
+                stepFeedback.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>힌트:</strong> ${hintText}
+                    </div>
+                `;
+            });
+        }
+        
+        // 코드 실행기 HTML 생성 함수
+        function generateCodeExecutor(code) {
+            return `
+            <div class="code-executor" style="width: 100%; margin: 20px 0;">
+                <div class="code-editor-container" style="border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+                    <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                        <button id="run-button" class="run-button btn btn-success btn-sm" style="padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                            ▶️ 실행
+                        </button>
+                        <button id="clear-button" class="btn btn-danger btn-sm" style="padding: 6px 12px; border-radius: 4px; margin-left: 8px; cursor: pointer;">
+                            🗑️ 지우기
+                        </button>
+                        <span id="execution-status" style="margin-left: 10px; font-size: 14px;"></span>
+                    </div>
+                    <textarea id="code-editor" style="width: 100%; height: 300px; padding: 10px; font-family: monospace; font-size: 14px; line-height: 1.5; border: none; resize: vertical;" placeholder="여기에 Python 코드를 입력하세요...">${code}</textarea>
+                </div>
+                
+                <div class="output-container" style="margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+                    <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                        <span style="font-weight: bold;">실행 결과</span>
+                        <button id="copy-output" class="btn btn-primary btn-sm" style="float: right; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                            📋 복사
+                        </button>
+                    </div>
+                    <pre id="output" style="margin: 0; padding: 10px; min-height: 100px; max-height: 300px; overflow-y: auto; background-color: #f8f8f8; font-family: monospace; white-space: pre-wrap;"></pre>
+                </div>
+                
+                <div class="interpretation-container" style="margin-top: 10px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; display: none;">
+                    <div class="toolbar" style="background: #f5f5f5; padding: 8px; border-bottom: 1px solid #ccc;">
+                        <span style="font-weight: bold;">결과 해석</span>
+                    </div>
+                    <div id="interpretation" style="padding: 10px;"></div>
+                </div>
+            </div>
+
+            <script>
+            // 코드 실행기 초기화
+            (async function() {
+                // 상태 변수
+                let pyodideReady = false;
+                let pyodide = null;
+                let outputElement = document.getElementById('output');
+                let statusElement = document.getElementById('execution-status');
+                let interpretationElement = document.getElementById('interpretation');
+                let interpretationContainer = document.querySelector('.interpretation-container');
+                
+                // 상태 메시지 표시
+                statusElement.textContent = "Pyodide 로딩 중...";
+                
+                try {
+                    // Pyodide 로드
+                    pyodide = await loadPyodide();
+                    await pyodide.loadPackagesFromImports(\`
+                        import numpy as np
+                        import pandas as pd
+                        import matplotlib.pyplot as plt
+                        from io import StringIO
+                    \`);
+                    
+                    pyodideReady = true;
+                    statusElement.textContent = "준비 완료";
+                } catch (error) {
+                    statusElement.textContent = "Pyodide 로드 실패";
+                    outputElement.textContent = "오류: " + error.message;
+                    console.error("Pyodide 로드 오류:", error);
+                }
+                
+                // 실행 버튼 이벤트 리스너
+                document.getElementById('run-button').addEventListener('click', async () => {
+                    if (!pyodideReady) {
+                        outputElement.textContent = "Pyodide가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.";
+                        return;
+                    }
+                    
+                    const code = document.getElementById('code-editor').value;
+                    if (!code.trim()) {
+                        outputElement.textContent = "실행할 코드를 입력해주세요.";
+                        return;
+                    }
+                    
+                    // 실행 상태 업데이트
+                    statusElement.textContent = "실행 중...";
+                    outputElement.textContent = "코드 실행 중...";
+                    interpretationContainer.style.display = 'none';
+                    
+                    try {
+                        // 표준 출력 캡처를 위한 설정
+                        pyodide.runPython(\`
+                            import sys
+                            from io import StringIO
+                            sys.stdout = StringIO()
+                            sys.stderr = StringIO()
+                        \`);
+                        
+                        // 코드 실행
+                        const result = pyodide.runPython(code);
+                        
+                        // 표준 출력 및 오류 가져오기
+                        const stdout = pyodide.runPython("sys.stdout.getvalue()");
+                        const stderr = pyodide.runPython("sys.stderr.getvalue()");
+                        
+                        // 결과 표시
+                        let output = "";
+                        if (stdout) output += stdout;
+                        if (stderr) output += "\\n오류:\\n" + stderr;
+                        
+                        // 반환값이 있으면 추가
+                        if (result !== undefined && result !== null) {
+                            if (output) output += "\\n\\n";
+                            output += "반환값: " + String(result);
+                            
+                            // 결과 해석 시도
+                            try {
+                                const interpretation = interpretResult(result, code);
+                                if (interpretation) {
+                                    interpretationElement.innerHTML = interpretation;
+                                    interpretationContainer.style.display = 'block';
+                                }
+                            } catch (e) {
+                                console.error("결과 해석 오류:", e);
                             }
                         }
+                        
+                        outputElement.textContent = output || "실행 완료 (출력 없음)";
+                        statusElement.textContent = "실행 완료";
+                        
+                    } catch (error) {
+                        outputElement.textContent = "실행 오류: " + error.message;
+                        statusElement.textContent = "오류 발생";
+                        console.error("코드 실행 오류:", error);
+                        
+                        // 오류 해석 및 도움말 제공
+                        try {
+                            const errorHelp = getErrorHelp(error.message);
+                            if (errorHelp) {
+                                interpretationElement.innerHTML = errorHelp;
+                                interpretationContainer.style.display = 'block';
+                            }
+                        } catch (e) {
+                            console.error("오류 해석 실패:", e);
+                        }
+                    }
+                });
+                
+                // 지우기 버튼 이벤트 리스너
+                document.getElementById('clear-button').addEventListener('click', () => {
+                    document.getElementById('code-editor').value = '';
+                    outputElement.textContent = '';
+                    interpretationContainer.style.display = 'none';
+                    statusElement.textContent = "준비 완료";
+                });
+                
+                // 출력 복사 버튼 이벤트 리스너
+                document.getElementById('copy-output').addEventListener('click', () => {
+                    const output = outputElement.textContent;
+                    if (!output) return;
+                    
+                    navigator.clipboard.writeText(output).then(() => {
+                        const originalText = document.getElementById('copy-output').textContent;
+                        document.getElementById('copy-output').textContent = "✓ 복사됨";
+                        setTimeout(() => {
+                            document.getElementById('copy-output').textContent = originalText;
+                        }, 2000);
                     });
                 });
-
-                statNumbers.forEach(stat => statsObserver.observe(stat));
-            });
-
-            // 카운터 애니메이션 함수
-            function animateCounter(element, start, end, duration) {
-                const startTime = performance.now();
-
-                function updateCounter(currentTime) {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-
-                    const current = Math.floor(start + (end - start) * progress);
-                    element.textContent = current + (element.textContent.includes('+') ? '+' : '');
-
-                    if (progress < 1) {
-                        requestAnimationFrame(updateCounter);
+                
+                // 결과 해석 함수
+                function interpretResult(result, code) {
+                    // 코드 분석
+                    const isStatisticalAnalysis = /np\\.mean|np\\.std|np\\.percentile|np\\.median|describe\\(\\)|df\\.mean|df\\.std/.test(code);
+                    const isVisualization = /plt\\./.test(code);
+                    const isDataManipulation = /pd\\.DataFrame|pd\\.Series|pd\\.read_|df\\[/.test(code);
+                    
+                    let interpretation = "";
+                    
+                    // 결과 유형에 따른 해석
+                    if (result && typeof result === 'object') {
+                        // 숫자 배열인 경우
+                        if (result.length !== undefined && result.length > 0 && typeof result[0] === 'number') {
+                            const arr = Array.from(result);
+                            const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                            const stdDev = Math.sqrt(arr.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / arr.length);
+                            
+                            interpretation += "<h4>📊 데이터 요약</h4>";
+                            interpretation += "<ul>";
+                            interpretation += \`<li><strong>평균:</strong> \${mean.toFixed(2)}</li>\`;
+                            interpretation += \`<li><strong>표준편차:</strong> \${stdDev.toFixed(2)}</li>\`;
+                            interpretation += \`<li><strong>최소값:</strong> \${Math.min(...arr).toFixed(2)}</li>\`;
+                            interpretation += \`<li><strong>최대값:</strong> \${Math.max(...arr).toFixed(2)}</li>\`;
+                            interpretation += \`<li><strong>데이터 개수:</strong> \${arr.length}</li>\`;
+                            interpretation += "</ul>";
+                            
+                            interpretation += "<h4>💡 해석 가이드</h4>";
+                            interpretation += "<p>이 데이터는 ";
+                            
+                            if (stdDev / mean < 0.1) interpretation += "변동성이 낮은 ";
+                            else if (stdDev / mean > 0.3) interpretation += "변동성이 높은 ";
+                            else interpretation += "중간 정도의 변동성을 가진 ";
+                            
+                            interpretation += "수치형 데이터입니다.</p>";
+                        }
+                        // 기타 객체
+                        else {
+                            interpretation += "<h4>🔍 결과 분석</h4>";
+                            interpretation += "<p>객체 유형의 결과가 반환되었습니다.</p>";
+                        }
                     }
+                    // 숫자인 경우
+                    else if (typeof result === 'number') {
+                        interpretation += "<h4>🔢 숫자 결과</h4>";
+                        interpretation += \`<p>계산된 값: <strong>\${result}</strong></p>\`;
+                        
+                        // 통계적 의미 추론
+                        if (isStatisticalAnalysis) {
+                            interpretation += "<h4>📈 통계적 의미</h4>";
+                            if (/mean|average/.test(code)) {
+                                interpretation += "<p>이 값은 데이터의 <strong>평균</strong>으로, 중심 경향성을 나타냅니다.</p>";
+                            } else if (/std|variance/.test(code)) {
+                                interpretation += "<p>이 값은 데이터의 <strong>분산 또는 표준편차</strong>로, 데이터의 퍼짐 정도를 나타냅니다.</p>";
+                            } else if (/median/.test(code)) {
+                                interpretation += "<p>이 값은 데이터의 <strong>중앙값</strong>으로, 이상치에 덜 민감한 중심 경향성 측정값입니다.</p>";
+                            }
+                        }
+                    }
+                    // 문자열인 경우
+                    else if (typeof result === 'string') {
+                        interpretation += "<h4>📝 텍스트 결과</h4>";
+                        interpretation += \`<p>반환된 텍스트 길이: <strong>\${result.length}</strong>자</p>\`;
+                    }
+                    
+                    // 코드 유형에 따른 추가 해석
+                    if (isStatisticalAnalysis) {
+                        interpretation += "<h4>📊 통계 분석 팁</h4>";
+                        interpretation += "<ul>";
+                        interpretation += "<li>데이터의 분포 형태를 시각화하려면 히스토그램을 사용해보세요.</li>";
+                        interpretation += "<li>이상치가 있는지 확인하려면 박스플롯을 활용하세요.</li>";
+                        interpretation += "<li>평균과 중앙값의 차이는 데이터의 치우침을 나타냅니다.</li>";
+                        interpretation += "</ul>";
+                    }
+                    else if (isVisualization) {
+                        interpretation += "<h4>📈 시각화 팁</h4>";
+                        interpretation += "<ul>";
+                        interpretation += "<li>제목과 축 레이블을 추가하면 그래프의 의미가 명확해집니다.</li>";
+                        interpretation += "<li>적절한 색상과 마커를 사용하면 가독성이 향상됩니다.</li>";
+                        interpretation += "<li>여러 그래프를 비교하려면 subplot을 활용하세요.</li>";
+                        interpretation += "</ul>";
+                    }
+                    else if (isDataManipulation) {
+                        interpretation += "<h4>🔍 데이터 처리 팁</h4>";
+                        interpretation += "<ul>";
+                        interpretation += "<li>결측값 처리는 데이터 분석의 중요한 단계입니다.</li>";
+                        interpretation += "<li>데이터 요약 통계는 describe() 메서드로 확인할 수 있습니다.</li>";
+                        interpretation += "<li>그룹별 집계는 groupby() 메서드를 활용하세요.</li>";
+                        interpretation += "</ul>";
+                    }
+                    
+                    return interpretation;
                 }
-
-                requestAnimationFrame(updateCounter);
-            }
-
-            // 카드 호버 효과
-            document.querySelectorAll('.path-card').forEach(card => {
-                card.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-12px) scale(1.02)';
-                });
-
-                card.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(0) scale(1)';
-                });
-            });
-        </script>
+                
+                // 오류 도움말 함수
+                function getErrorHelp(errorMessage) {
+                    let help = "<h4>❌ 오류 도움말</h4>";
+                    
+                    // 일반적인 오류 패턴 확인
+                    if (/NameError: name '(.+)' is not defined/.test(errorMessage)) {
+                        const varName = errorMessage.match(/NameError: name '(.+)' is not defined/)[1];
+                        help += \`<p><strong>정의되지 않은 변수/함수:</strong> '\${varName}'이(가) 정의되지 않았습니다.</p>\`;
+                        help += "<ul>";
+                        help += "<li>변수명이 올바르게 입력되었는지 확인하세요 (대소문자 구분).</li>";
+                        help += "<li>필요한 라이브러리를 import 했는지 확인하세요.</li>";
+                        help += \`<li>변수를 먼저 선언했는지 확인하세요 (예: \${varName} = 값).</li>\`;
+                        help += "</ul>";
+                    }
+                    else if (/SyntaxError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>문법 오류:</strong> Python 코드 문법에 문제가 있습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>괄호, 따옴표, 콜론이 올바르게 짝을 이루는지 확인하세요.</li>";
+                        help += "<li>들여쓰기가 일관되게 되어있는지 확인하세요.</li>";
+                        help += "<li>문자열 안에 따옴표를 사용할 때는 이스케이프(\\) 또는 다른 종류의 따옴표를 사용하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else if (/TypeError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>타입 오류:</strong> 데이터 타입이 맞지 않습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>함수에 전달된 인자의 타입이 올바른지 확인하세요.</li>";
+                        help += "<li>문자열과 숫자를 연산할 때는 적절한 변환이 필요합니다 (str(), int(), float()).</li>";
+                        help += "<li>리스트, 딕셔너리 등의 자료구조를 올바르게 사용하고 있는지 확인하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else if (/IndexError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>인덱스 오류:</strong> 리스트나 배열의 범위를 벗어났습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>리스트의 길이를 확인하세요 (len(리스트)).</li>";
+                        help += "<li>인덱스는 0부터 시작합니다 (리스트[0]이 첫 번째 요소).</li>";
+                        help += "<li>음수 인덱스는 뒤에서부터 접근합니다 (리스트[-1]이 마지막 요소).</li>";
+                        help += "</ul>";
+                    }
+                    else if (/KeyError: (.+)/.test(errorMessage)) {
+                        const key = errorMessage.match(/KeyError: (.+)/)[1];
+                        help += \`<p><strong>키 오류:</strong> 딕셔너리나 DataFrame에 '\${key}' 키가 없습니다.</p>\`;
+                        help += "<ul>";
+                        help += "<li>키 이름이 올바른지 확인하세요 (대소문자 구분).</li>";
+                        help += "<li>딕셔너리의 모든 키를 확인하려면 dict.keys()를 사용하세요.</li>";
+                        help += "<li>DataFrame의 열 이름을 확인하려면 df.columns를 사용하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else if (/AttributeError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>속성 오류:</strong> 객체에 존재하지 않는 속성이나 메서드를 호출했습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>객체의 타입을 확인하세요 (type(객체)).</li>";
+                        help += "<li>메서드나 속성 이름이 올바른지 확인하세요.</li>";
+                        help += "<li>필요한 라이브러리를 import 했는지 확인하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else if (/ValueError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>값 오류:</strong> 함수나 연산에 부적절한 값이 전달되었습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>함수에 전달된 인자의 값이 허용 범위 내인지 확인하세요.</li>";
+                        help += "<li>문자열을 숫자로 변환할 때는 유효한 형식인지 확인하세요.</li>";
+                        help += "<li>리스트나 배열의 차원이 올바른지 확인하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else if (/ZeroDivisionError: (.+)/.test(errorMessage)) {
+                        help += "<p><strong>0으로 나누기 오류:</strong> 0으로 나누려고 했습니다.</p>";
+                        help += "<ul>";
+                        help += "<li>나누는 값이 0이 아닌지 확인하세요.</li>";
+                        help += "<li>나누기 전에 조건문으로 0인지 확인하는 방어 코드를 추가하세요.</li>";
+                        help += "</ul>";
+                    }
+                    else {
+                        help += "<p>오류 메시지를 확인하고 코드를 검토해보세요.</p>";
+                        help += "<p><strong>오류 내용:</strong> " + errorMessage + "</p>";
+                    }
+                    
+                    help += "<h4>🔍 일반적인 디버깅 팁</h4>";
+                    help += "<ul>";
+                    help += "<li>코드를 작은 부분으로 나누어 테스트해보세요.</li>";
+                    help += "<li>print() 문을 사용하여 변수 값을 확인해보세요.</li>";
+                    help += "<li>복잡한 표현식은 여러 단계로 나누어 작성해보세요.</li>";
+                    help += "</ul>";
+                    
+                    return help;
+                }
+            })();
+            </script>
+            `;
+        }
+    </script>
 </body>
-
 </html>

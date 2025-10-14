@@ -692,6 +692,250 @@ class EnhancedVisualizationEngine:
         
         return dashboard
 
+# 메인 모듈에서 사용할 수 있는 시각화 엔진 인스턴스 생성
+visualizer = EnhancedVisualizationEngine()
+
+def create_statistics_visualization(data, title="통계 시각화", chart_type=ChartType.HISTOGRAM, 
+                                  learning_level=LearningLevel.BEGINNER):
+    """
+    통계 데이터 시각화 생성 함수
+    
+    Args:
+        data (dict): 시각화할 데이터
+        title (str): 차트 제목
+        chart_type (ChartType): 차트 유형
+        learning_level (LearningLevel): 학습 수준
+    
+    Returns:
+        dict: 시각화 결과 (차트 이미지, 해석 가이드 등)
+    """
+    config = VisualizationConfig(
+        chart_type=chart_type,
+        title=title,
+        x_label="값" if chart_type == ChartType.HISTOGRAM else "X축",
+        y_label="빈도" if chart_type == ChartType.HISTOGRAM else "Y축",
+        color_scheme='default',
+        show_statistics=True,
+        show_annotations=True,
+        interactive=True,
+        accessibility_mode=False,
+        learning_level=learning_level
+    )
+    
+    # 사용자 프로필 기본값
+    user_profile = {
+        'learning_level': learning_level.value,
+        'visual_preference': 'detailed'
+    }
+    
+    # 시각화 생성
+    return visualizer.create_adaptive_visualization(data, config, user_profile)
+
+def create_distribution_summary(values):
+    """
+    데이터 분포 요약 생성
+    
+    Args:
+        values (list): 숫자 데이터 리스트
+    
+    Returns:
+        str: 분포 요약 문자열
+    """
+    if not values:
+        return "데이터가 없습니다."
+    
+    values = np.array(values)
+    mean = np.mean(values)
+    median = np.median(values)
+    std = np.std(values)
+    min_val = np.min(values)
+    max_val = np.max(values)
+    q1 = np.percentile(values, 25)
+    q3 = np.percentile(values, 75)
+    
+    summary = f"""
+📊 데이터 분포 요약 (n={len(values)})
+----------------------------
+🔸 중심경향성:
+   • 평균: {mean:.2f}
+   • 중앙값: {median:.2f}
+   
+🔸 산포도:
+   • 표준편차: {std:.2f}
+   • 범위: {min_val:.2f} ~ {max_val:.2f}
+   • 사분위수 범위: {q1:.2f} ~ {q3:.2f}
+   
+🔸 분포 특성:
+   • 치우침: {"우측" if mean > median else "좌측" if mean < median else "없음"}
+   • 이상값 가능성: {"높음" if (max_val - q3) > 1.5*(q3-q1) or (q1 - min_val) > 1.5*(q3-q1) else "낮음"}
+"""
+    return summary
+
+def create_histogram_ascii(values, title="히스토그램", bins=10, width=50):
+    """
+    ASCII 아트 히스토그램 생성
+    
+    Args:
+        values (list): 숫자 데이터 리스트
+        title (str): 차트 제목
+        bins (int): 구간 개수
+        width (int): 차트 너비
+    
+    Returns:
+        str: ASCII 아트 히스토그램
+    """
+    if not values:
+        return "데이터가 없습니다."
+    
+    values = np.array(values)
+    hist, bin_edges = np.histogram(values, bins=bins)
+    max_count = max(hist)
+    
+    result = f"\n{title}\n"
+    result += "-" * width + "\n"
+    
+    for i, count in enumerate(hist):
+        bar_len = int(count / max_count * (width - 10))
+        bar = "█" * bar_len
+        result += f"{bin_edges[i]:6.2f} - {bin_edges[i+1]:6.2f} | {bar} {count}\n"
+    
+    result += "-" * width + "\n"
+    return result
+
+def create_bar_chart_ascii(categories, values, title="막대 차트", width=50):
+    """
+    ASCII 아트 막대 차트 생성
+    
+    Args:
+        categories (list): 카테고리 목록
+        values (list): 값 목록
+        title (str): 차트 제목
+        width (int): 차트 너비
+    
+    Returns:
+        str: ASCII 아트 막대 차트
+    """
+    if not categories or not values:
+        return "데이터가 없습니다."
+    
+    max_value = max(values)
+    max_cat_len = max(len(str(cat)) for cat in categories)
+    
+    result = f"\n{title}\n"
+    result += "-" * width + "\n"
+    
+    for cat, val in zip(categories, values):
+        bar_len = int(val / max_value * (width - max_cat_len - 15))
+        bar = "█" * bar_len
+        result += f"{str(cat):{max_cat_len}} | {bar} {val:.2f}\n"
+    
+    result += "-" * width + "\n"
+    return result
+
+def create_scatter_plot_ascii(x, y, title="산점도", width=50, height=20):
+    """
+    ASCII 아트 산점도 생성
+    
+    Args:
+        x (list): x 좌표 목록
+        y (list): y 좌표 목록
+        title (str): 차트 제목
+        width (int): 차트 너비
+        height (int): 차트 높이
+    
+    Returns:
+        str: ASCII 아트 산점도
+    """
+    if not x or not y or len(x) != len(y):
+        return "데이터가 없거나 x와 y의 길이가 다릅니다."
+    
+    x = np.array(x)
+    y = np.array(y)
+    
+    # 상관계수 계산
+    correlation = np.corrcoef(x, y)[0, 1]
+    
+    # 데이터 정규화
+    x_min, x_max = min(x), max(x)
+    y_min, y_max = min(y), max(y)
+    
+    # 차트 생성
+    chart = [[' ' for _ in range(width)] for _ in range(height)]
+    
+    for i in range(len(x)):
+        x_pos = int((x[i] - x_min) / (x_max - x_min) * (width - 1)) if x_max > x_min else 0
+        y_pos = int((y[i] - y_min) / (y_max - y_min) * (height - 1)) if y_max > y_min else 0
+        y_pos = height - 1 - y_pos  # y축 반전
+        
+        if 0 <= x_pos < width and 0 <= y_pos < height:
+            chart[y_pos][x_pos] = '●'
+    
+    result = f"\n{title} (상관계수: {correlation:.3f})\n"
+    result += "-" * width + "\n"
+    
+    for row in chart:
+        result += ''.join(row) + "\n"
+    
+    result += "-" * width + "\n"
+    result += f"x: {x_min:.2f} ~ {x_max:.2f}, y: {y_min:.2f} ~ {y_max:.2f}\n"
+    return result
+
+def create_correlation_heatmap(data_dict, title="상관계수 히트맵"):
+    """
+    상관계수 히트맵 생성
+    
+    Args:
+        data_dict (dict): 변수명을 키로, 값 목록을 값으로 하는 딕셔너리
+        title (str): 차트 제목
+    
+    Returns:
+        str: ASCII 아트 히트맵
+    """
+    if not data_dict:
+        return "데이터가 없습니다."
+    
+    # 변수명과 데이터 추출
+    variables = list(data_dict.keys())
+    data = [data_dict[var] for var in variables]
+    
+    # 모든 데이터의 길이가 같은지 확인
+    if len(set(len(d) for d in data)) != 1:
+        return "모든 변수의 데이터 길이가 같아야 합니다."
+    
+    # 상관계수 행렬 계산
+    n_vars = len(variables)
+    corr_matrix = np.zeros((n_vars, n_vars))
+    
+    for i in range(n_vars):
+        for j in range(n_vars):
+            corr_matrix[i, j] = np.corrcoef(data[i], data[j])[0, 1]
+    
+    # 히트맵 생성
+    result = f"\n{title}\n"
+    result += "-" * (n_vars * 8 + 10) + "\n"
+    
+    # 변수명 헤더
+    result += " " * 10
+    for var in variables:
+        result += f"{var:>7} "
+    result += "\n"
+    
+    # 상관계수 행렬
+    for i, var in enumerate(variables):
+        result += f"{var:<10}"
+        for j in range(n_vars):
+            # 상관계수에 따라 다른 문자 사용
+            corr = corr_matrix[i, j]
+            if i == j:
+                cell = "  1.00 "
+            else:
+                cell = f"{corr:6.2f} "
+            result += cell
+        result += "\n"
+    
+    result += "-" * (n_vars * 8 + 10) + "\n"
+    return result
+
 # 사용 예제
 if __name__ == "__main__":
     # 시각화 엔진 초기화

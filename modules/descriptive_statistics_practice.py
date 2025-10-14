@@ -1,579 +1,1096 @@
 """
-Descriptive Statistics Practice - Task 3.3 Implementation
+기술통계량 실습 과정
+- 데이터 준비 → 중심경향성 → 산포도 → 시각화 → 해석 단계 구현
+- 각 단계별 학습 목표와 성공 기준 정의
+- 단계별 가이드 및 피드백 제공
 """
 
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from verification_hint_system import VerificationHintSystem, VerificationResult, HintLevel
-from simple_demo import SimplePythonExecutor
-from typing import Dict, Any, List, Optional, Tuple
 import json
-import datetime
+import uuid
+import numpy as np
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
+from typing import Dict, List, Any, Optional, Union, Tuple
 
-
-class PracticeStep:
-    """실습 단계"""
-    
-    def __init__(self, step_id: str, title: str, description: str, 
-                 learning_objective: str, code_template: str = "",
-                 expected_output: str = "", expected_variables: List[str] = None):
-        self.step_id = step_id
-        self.title = title
-        self.description = description
-        self.learning_objective = learning_objective
-        self.code_template = code_template
-        self.expected_output = expected_output
-        self.expected_variables = expected_variables or []
-        self.attempts = 0
-        self.completed = False
-        self.start_time = None
-        self.completion_time = None
-        self.user_code = ""
-        self.execution_results = []
-    
-    def start(self):
-        """단계 시작"""
-        if not self.start_time:
-            self.start_time = datetime.datetime.now()
-    
-    def complete(self):
-        """단계 완료"""
-        self.completed = True
-        self.completion_time = datetime.datetime.now()
-    
-    def add_attempt(self, code: str, result: Dict[str, Any]):
-        """시도 추가"""
-        self.attempts += 1
-        self.user_code = code
-        self.execution_results.append({
-            'attempt': self.attempts,
-            'code': code,
-            'result': result,
-            'timestamp': datetime.datetime.now().isoformat()
-        })
-    
-    def get_duration(self) -> Optional[float]:
-        """소요 시간 계산 (분)"""
-        if self.start_time and self.completion_time:
-            return (self.completion_time - self.start_time).total_seconds() / 60
-        return None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """딕셔너리로 변환"""
-        return {
-            'step_id': self.step_id,
-            'title': self.title,
-            'description': self.description,
-            'learning_objective': self.learning_objective,
-            'code_template': self.code_template,
-            'expected_output': self.expected_output,
-            'expected_variables': self.expected_variables,
-            'attempts': self.attempts,
-            'completed': self.completed,
-            'start_time': self.start_time.isoformat() if self.start_time else None,
-            'completion_time': self.completion_time.isoformat() if self.completion_time else None,
-            'user_code': self.user_code,
-            'duration_minutes': self.get_duration()
-        }
-
-
-class PracticeSession:
-    """실습 세션"""
-    
-    def __init__(self, session_id: str, title: str):
-        self.session_id = session_id
-        self.title = title
-        self.steps = {}  # step_id -> PracticeStep
-        self.step_order = []
-        self.current_step_index = 0
-        self.start_time = None
-        self.completion_time = None
-        self.completed = False
-        self.user_notes = []
-        self.session_variables = {}
-    
-    def add_step(self, step: PracticeStep):
-        """단계 추가"""
-        self.steps[step.step_id] = step
-        self.step_order.append(step.step_id)
-    
-    def start_session(self):
-        """세션 시작"""
-        self.start_time = datetime.datetime.now()
-        if self.step_order:
-            first_step = self.steps[self.step_order[0]]
-            first_step.start()
-    
-    def get_current_step(self) -> Optional[PracticeStep]:
-        """현재 단계 가져오기"""
-        if 0 <= self.current_step_index < len(self.step_order):
-            step_id = self.step_order[self.current_step_index]
-            return self.steps[step_id]
-        return None
-    
-    def complete_current_step(self):
-        """현재 단계 완료"""
-        current_step = self.get_current_step()
-        if current_step:
-            current_step.complete()
-            self.current_step_index += 1
-            
-            # 다음 단계 시작
-            next_step = self.get_current_step()
-            if next_step:
-                next_step.start()
-            else:
-                # 모든 단계 완료
-                self.complete_session()
-    
-    def complete_session(self):
-        """세션 완료"""
-        self.completed = True
-        self.completion_time = datetime.datetime.now()
-    
-    def add_note(self, note: str):
-        """노트 추가"""
-        self.user_notes.append({
-            'note': note,
-            'timestamp': datetime.datetime.now().isoformat()
-        })
-    
-    def update_variables(self, variables: Dict[str, Any]):
-        """세션 변수 업데이트"""
-        self.session_variables.update(variables)
-    
-    def get_progress(self) -> Dict[str, Any]:
-        """진행률 계산"""
-        total_steps = len(self.step_order)
-        completed_steps = sum(1 for step in self.steps.values() if step.completed)
-        
-        return {
-            'total_steps': total_steps,
-            'completed_steps': completed_steps,
-            'current_step_index': self.current_step_index,
-            'progress_percentage': round(completed_steps / total_steps * 100, 1) if total_steps > 0 else 0,
-            'completed': self.completed
-        }
-    
-    def get_duration(self) -> Optional[float]:
-        """세션 소요 시간 (분)"""
-        if self.start_time:
-            end_time = self.completion_time or datetime.datetime.now()
-            return (end_time - self.start_time).total_seconds() / 60
-        return None
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """딕셔너리로 변환"""
-        return {
-            'session_id': self.session_id,
-            'title': self.title,
-            'steps': {step_id: step.to_dict() for step_id, step in self.steps.items()},
-            'step_order': self.step_order,
-            'current_step_index': self.current_step_index,
-            'start_time': self.start_time.isoformat() if self.start_time else None,
-            'completion_time': self.completion_time.isoformat() if self.completion_time else None,
-            'completed': self.completed,
-            'user_notes': self.user_notes,
-            'session_variables': self.session_variables,
-            'progress': self.get_progress(),
-            'duration_minutes': self.get_duration()
-        }
-
+from modules.session_management_system import session_manager
+from modules.verification_hint_system import verification_system
 
 class DescriptiveStatisticsPractice:
-    """기술통계량 실습 시스템"""
+    """
+    기술통계량 실습 과정
+    단계별로 기술통계량 분석을 학습할 수 있는 실습 과정을 제공합니다.
+    """
     
     def __init__(self):
-        self.verification_system = VerificationHintSystem()
-        self.code_executor = SimplePythonExecutor()
-        self.sessions = {}  # session_id -> PracticeSession
-        self._initialize_practice_steps()
-    
-    def _initialize_practice_steps(self):
-        """실습 단계 초기화"""
-        self.practice_steps = {
-            'step1': PracticeStep(
-                step_id="step1",
-                title="1단계: 데이터 준비",
-                description="분석할 데이터를 준비하고 기본 정보를 파악합니다.",
-                learning_objective="데이터를 리스트로 생성하고 기본 정보를 확인할 수 있다.",
-                code_template="""# 학생 성적 데이터 준비
-scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+        """초기화"""
+        self.concept_id = "descriptive_stats"
+        self.title = "기술통계량 분석 실습"
+        self.description = "데이터 준비부터 결과 해석까지 단계별로 기술통계량 분석을 학습합니다."
+        
+        # 단계 정의
+        self.steps = [
+            {
+                "step_id": "data_preparation",
+                "title": "데이터 준비",
+                "description": "분석할 데이터를 준비합니다.",
+                "learning_objectives": [
+                    "numpy를 사용하여 정규분포 데이터를 생성할 수 있다.",
+                    "데이터의 기본 정보를 확인할 수 있다."
+                ],
+                "success_criteria": [
+                    "numpy 라이브러리를 사용하여 정규분포 데이터를 생성한다.",
+                    "생성된 데이터의 개수와 일부를 출력한다."
+                ]
+            },
+            {
+                "step_id": "central_tendency",
+                "title": "중심경향성 분석",
+                "description": "데이터의 중심경향성(평균, 중앙값, 최빈값)을 계산하고 비교합니다.",
+                "learning_objectives": [
+                    "평균, 중앙값, 최빈값을 계산할 수 있다.",
+                    "중심경향성 측도들의 차이점을 이해할 수 있다.",
+                    "데이터의 치우침을 판단할 수 있다."
+                ],
+                "success_criteria": [
+                    "numpy와 scipy를 사용하여 평균, 중앙값, 최빈값을 계산한다.",
+                    "평균과 중앙값의 차이를 통해 데이터의 치우침을 해석한다."
+                ]
+            },
+            {
+                "step_id": "dispersion",
+                "title": "산포도 분석",
+                "description": "데이터의 산포도(범위, 분산, 표준편차, 사분위수 범위)를 계산하고 해석합니다.",
+                "learning_objectives": [
+                    "범위, 분산, 표준편차, 사분위수 범위를 계산할 수 있다.",
+                    "변동계수를 계산하여 상대적 변동성을 평가할 수 있다.",
+                    "이상치를 탐지할 수 있다."
+                ],
+                "success_criteria": [
+                    "numpy를 사용하여 다양한 산포도 측도를 계산한다.",
+                    "변동계수를 계산하여 데이터의 변동성을 해석한다.",
+                    "사분위수 범위를 사용하여 이상치를 탐지한다."
+                ]
+            },
+            {
+                "step_id": "visualization",
+                "title": "데이터 시각화",
+                "description": "히스토그램과 박스플롯을 사용하여 데이터 분포를 시각화합니다.",
+                "learning_objectives": [
+                    "matplotlib을 사용하여 히스토그램을 그릴 수 있다.",
+                    "matplotlib을 사용하여 박스플롯을 그릴 수 있다.",
+                    "시각화를 통해 데이터의 분포 특성을 파악할 수 있다."
+                ],
+                "success_criteria": [
+                    "히스토그램과 박스플롯을 그린다.",
+                    "그래프에 제목, 축 레이블, 범례를 추가한다.",
+                    "평균과 중앙값을 히스토그램에 표시한다."
+                ]
+            },
+            {
+                "step_id": "interpretation",
+                "title": "결과 해석",
+                "description": "지금까지 분석한 결과를 종합하여 데이터의 특성을 해석합니다.",
+                "learning_objectives": [
+                    "정규성 검정을 수행할 수 있다.",
+                    "기술통계량을 종합하여 데이터의 특성을 해석할 수 있다.",
+                    "실무적 관점에서 데이터의 의미를 해석할 수 있다."
+                ],
+                "success_criteria": [
+                    "scipy.stats를 사용하여 정규성 검정을 수행한다.",
+                    "기술통계량을 종합하여 데이터의 특성을 해석한다.",
+                    "실무적 관점에서 결과를 해석한다."
+                ]
+            }
+        ]
+        
+        # 코드 템플릿
+        self.code_templates = {
+            "data_preparation": """# 데이터 준비
+import numpy as np
 
-# 데이터 기본 정보 확인
-print(f"데이터: {scores}")
-print(f"데이터 개수: {len(scores)}")
-print("데이터 타입: list")
-""",
-                expected_output="데이터: [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]",
-                expected_variables=["scores"]
-            ),
-            'step2': PracticeStep(
-                step_id="step2",
-                title="2단계: 중심경향성 계산",
-                description="평균, 중앙값을 계산하여 데이터의 중심을 파악합니다.",
-                learning_objective="평균과 중앙값을 계산하고 그 의미를 이해할 수 있다.",
-                code_template="""# 데이터 준비 (이전 단계에서 계속)
-scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
+# 학생 시험 점수 데이터 생성 (평균 70, 표준편차 15인 정규분포)
+np.random.seed(42)  # 재현성을 위한 시드 설정
+scores = np.random.normal(loc=70, scale=15, size=50)
 
-# 평균 계산
-total = sum(scores)
-count = len(scores)
-mean_value = total / count
+# 데이터 확인
+print(f"생성된 데이터 개수: {len(scores)}")
+print("처음 10개 데이터:")
+print(scores[:10])
 
-print(f"총합: {total}")
-print(f"평균: {mean_value:.2f}")
+# 데이터 반환
+scores""",
+            "central_tendency": """# 중심경향성 분석
+import numpy as np
+from scipy import stats
 
-# 중앙값 계산 (수동 정렬)
-sorted_scores = scores[:]  # 복사본 생성
-for i in range(len(sorted_scores)):
-    for j in range(i + 1, len(sorted_scores)):
-        if sorted_scores[i] > sorted_scores[j]:
-            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
 
-if len(sorted_scores) % 2 == 1:
-    median_value = sorted_scores[len(sorted_scores) // 2]
+# 중심경향성 계산
+mean = np.mean(scores)
+median = np.median(scores)
+mode = stats.mode(scores)[0][0]  # scipy의 mode 함수 사용
+
+# 결과 출력
+print(f"평균: {mean:.2f}")
+print(f"중앙값: {median:.2f}")
+print(f"최빈값: {mode:.2f}")
+
+# 평균과 중앙값 비교
+if mean > median:
+    print("\\n평균이 중앙값보다 크므로, 데이터가 오른쪽으로 치우쳐 있을 가능성이 있습니다.")
+elif mean < median:
+    print("\\n평균이 중앙값보다 작으므로, 데이터가 왼쪽으로 치우쳐 있을 가능성이 있습니다.")
 else:
-    mid1 = sorted_scores[len(sorted_scores) // 2 - 1]
-    mid2 = sorted_scores[len(sorted_scores) // 2]
-    median_value = (mid1 + mid2) / 2
+    print("\\n평균과 중앙값이 같으므로, 데이터가 대칭적일 가능성이 높습니다.")
 
-print(f"중앙값: {median_value}")
-""",
-                expected_output="총합: 868",
-                expected_variables=["mean_value", "median_value"]
-            ),
-            'step3': PracticeStep(
-                step_id="step3",
-                title="3단계: 산포도 계산",
-                description="표준편차와 분산을 계산하여 데이터의 퍼짐 정도를 파악합니다.",
-                learning_objective="분산과 표준편차를 계산하고 그 의미를 이해할 수 있다.",
-                code_template="""# 데이터와 이전 계산 결과 준비
-scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
-mean_value = sum(scores) / len(scores)
+# 결과 반환
+{
+    'mean': mean,
+    'median': median,
+    'mode': mode
+}""",
+            "dispersion": """# 산포도 분석
+import numpy as np
 
-# 분산 계산 (단계별로)
-squared_diffs = []
-for x in scores:
-    diff = x - mean_value
-    squared_diff = diff * diff
-    squared_diffs.append(squared_diff)
+# 이전 단계에서 생성한 점수 데이터
+np.random.seed(42)
+scores = np.random.normal(loc=70, scale=15, size=50)
 
-variance = sum(squared_diffs) / len(scores)
-
-# 표준편차 계산
-std_dev = variance ** 0.5
-
-print(f"분산: {variance:.2f}")
-print(f"표준편차: {std_dev:.2f}")
-
-# 범위 계산
-data_range = max(scores) - min(scores)
-print(f"범위: {data_range}")
-""",
-                expected_output="분산:",
-                expected_variables=["variance", "std_dev", "data_range"]
-            ),
-            'step4': PracticeStep(
-                step_id="step4",
-                title="4단계: 결과 해석",
-                description="계산된 통계량들의 의미를 해석하고 결론을 도출합니다.",
-                learning_objective="기술통계량의 의미를 해석하고 데이터의 특성을 설명할 수 있다.",
-                code_template="""# 데이터와 이전 계산 결과 준비
-scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
-mean_value = sum(scores) / len(scores)
-
-# 수동 정렬
-sorted_scores = scores[:]
-for i in range(len(sorted_scores)):
-    for j in range(i + 1, len(sorted_scores)):
-        if sorted_scores[i] > sorted_scores[j]:
-            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
-
-median_value = (sorted_scores[4] + sorted_scores[5]) / 2
-
-# 분산 계산 (단계별로)
-squared_diffs = []
-for x in scores:
-    diff = x - mean_value
-    squared_diff = diff * diff
-    squared_diffs.append(squared_diff)
-
-variance = sum(squared_diffs) / len(scores)
-std_dev = variance ** 0.5
-data_range = max(scores) - min(scores)
-
-# 모든 통계량 요약
-print("=== 기술통계량 요약 ===")
-print(f"데이터 개수: {len(scores)}")
-print(f"평균: {mean_value:.2f}")
-print(f"중앙값: {median_value}")
-print(f"표준편차: {std_dev:.2f}")
-print(f"분산: {variance:.2f}")
-print(f"최솟값: {min(scores)}")
-print(f"최댓값: {max(scores)}")
-print(f"범위: {data_range}")
-
-print("\\n=== 해석 ===")
-print("이 학급의 평균 점수는 86.8점으로 양호한 수준입니다.")
-print("중앙값(88.5)이 평균보다 높아 약간 왼쪽으로 치우친 분포를 보입니다.")
-""",
-                expected_output="=== 기술통계량 요약 ===",
-                expected_variables=[]
-            ),
-            'step5': PracticeStep(
-                step_id="step5",
-                title="5단계: 시각화 및 종합 분석",
-                description="데이터를 시각화하고 종합적인 분석을 수행합니다.",
-                learning_objective="기술통계량과 시각화를 통해 데이터를 종합적으로 분석할 수 있다.",
-                code_template="""# 데이터와 이전 계산 결과 준비
-scores = [85, 90, 78, 92, 88, 76, 95, 89, 84, 91]
-
-# 수동 정렬
-sorted_scores = scores[:]
-for i in range(len(sorted_scores)):
-    for j in range(i + 1, len(sorted_scores)):
-        if sorted_scores[i] > sorted_scores[j]:
-            sorted_scores[i], sorted_scores[j] = sorted_scores[j], sorted_scores[i]
-
-# 히스토그램 시뮬레이션
-print("=== 히스토그램 시뮬레이션 ===")
-print("70-75: |")
-print("76-80: |██")
-print("81-85: |██")
-print("86-90: |████")
-print("91-95: |███")
-
-print("\\n=== 종합 분석 ===")
-print("1. 중심경향성: 평균 86.8점, 중앙값 88.5점")
-print("2. 산포도: 표준편차 6.1점으로 적당한 분산")
-print("3. 분포 형태: 약간 왼쪽으로 치우친 분포")
-
-# 사분위수 계산
-q1_index = len(sorted_scores) // 4
-q3_index = 3 * len(sorted_scores) // 4
-q1 = sorted_scores[q1_index]
-q3 = sorted_scores[q3_index]
+# 산포도 계산
+data_range = np.max(scores) - np.min(scores)
+variance = np.var(scores)
+std_dev = np.std(scores)
+q1, q3 = np.percentile(scores, [25, 75])
 iqr = q3 - q1
 
-print(f"\\n=== 사분위수 ===")
-print(f"1사분위수 (Q1): {q1}")
-print(f"3사분위수 (Q3): {q3}")
-print(f"사분위수 범위 (IQR): {iqr}")
-""",
-                expected_output="=== 히스토그램 시뮬레이션 ===",
-                expected_variables=["q1", "q3", "iqr"]
-            )
-        }
-    
-    def create_session(self, session_id: str, title: str = "기술통계량 실습") -> PracticeSession:
-        """새 실습 세션 생성"""
-        session = PracticeSession(session_id, title)
-        
-        # 모든 단계를 세션에 추가
-        for step_id in ['step1', 'step2', 'step3', 'step4', 'step5']:
-            step = self.practice_steps[step_id]
-            session.add_step(step)
-        
-        self.sessions[session_id] = session
-        return session
-    
-    def get_session(self, session_id: str) -> Optional[PracticeSession]:
-        """세션 가져오기"""
-        return self.sessions.get(session_id)
-    
-    def execute_step_code(self, session_id: str, code: str) -> Dict[str, Any]:
-        """단계 코드 실행"""
-        session = self.get_session(session_id)
-        if not session:
-            return {"error": "세션을 찾을 수 없습니다."}
-        
-        current_step = session.get_current_step()
-        if not current_step:
-            return {"error": "현재 단계를 찾을 수 없습니다."}
-        
-        # 코드 실행
-        execution_result = self.code_executor.execute(code)
-        
-        # 결과 검증
-        verification_result = self._verify_step_completion(current_step, code, execution_result)
-        
-        # 시도 기록
-        current_step.add_attempt(code, {
-            'execution': execution_result,
-            'verification': verification_result
-        })
-        
-        # 단계 완료 확인
-        if verification_result.get('success', False):
-            session.complete_current_step()
-        
-        return {
-            'execution': execution_result,
-            'verification': verification_result,
-            'step_completed': verification_result.get('success', False),
-            'session_progress': session.get_progress()
-        }
-    
-    def _verify_step_completion(self, step: PracticeStep, code: str, execution_result: Dict[str, Any]) -> Dict[str, Any]:
-        """단계 완료 검증"""
-        if not execution_result.get('success', True):
-            return {
-                'success': False,
-                'message': f'코드 실행 중 오류가 발생했습니다: {execution_result.get("error", "알 수 없는 오류")}',
-                'hint': '오류 메시지를 확인하고 코드를 수정해보세요.'
-            }
-        
-        # 변수 존재 확인
-        variables = execution_result.get('variables', {})
-        missing_vars = [var for var in step.expected_variables if var not in variables]
-        
-        if missing_vars:
-            return {
-                'success': False,
-                'message': f'필요한 변수가 누락되었습니다: {", ".join(missing_vars)}',
-                'hint': f'다음 변수들을 정의해주세요: {", ".join(missing_vars)}'
-            }
-        
-        # 출력 확인 (부분 일치)
-        output = execution_result.get('output', '')
-        if step.expected_output and step.expected_output not in output:
-            return {
-                'success': False,
-                'message': '예상된 출력과 다릅니다.',
-                'hint': f'예상 출력에 다음이 포함되어야 합니다: {step.expected_output[:50]}...'
-            }
-        
-        return {
-            'success': True,
-            'message': '단계를 성공적으로 완료했습니다!',
-            'hint': '다음 단계로 진행하세요.'
-        }
-    
-    def get_step_hint(self, session_id: str, hint_level: str = 'basic') -> Dict[str, Any]:
-        """단계별 힌트 제공"""
-        session = self.get_session(session_id)
-        if not session:
-            return {"error": "세션을 찾을 수 없습니다."}
-        
-        current_step = session.get_current_step()
-        if not current_step:
-            return {"error": "현재 단계를 찾을 수 없습니다."}
-        
-        hints = {
-            'step1': {
-                'basic': '리스트를 생성하고 len() 함수를 사용해보세요.',
-                'detailed': 'scores = [85, 90, 78, ...] 형태로 리스트를 만들고, print()와 len()을 사용하세요.',
-                'solution': current_step.code_template
-            },
-            'step2': {
-                'basic': 'sum() 함수와 정렬을 활용해보세요.',
-                'detailed': '평균은 sum(scores)/len(scores), 중앙값은 정렬 후 가운데 값을 찾으세요.',
-                'solution': current_step.code_template
-            },
-            'step3': {
-                'basic': '분산은 편차의 제곱의 평균입니다.',
-                'detailed': 'variance = sum((x - mean_value) ** 2 for x in scores) / len(scores)',
-                'solution': current_step.code_template
-            },
-            'step4': {
-                'basic': '계산된 값들을 정리하고 의미를 해석해보세요.',
-                'detailed': '각 통계량의 값을 출력하고 데이터의 특성을 설명하세요.',
-                'solution': current_step.code_template
-            },
-            'step5': {
-                'basic': '사분위수를 계산하고 종합적인 분석을 해보세요.',
-                'detailed': 'Q1, Q3를 구하고 IQR을 계산한 후 전체적인 분석을 제시하세요.',
-                'solution': current_step.code_template
-            }
-        }
-        
-        step_hints = hints.get(current_step.step_id, {})
-        return {
-            'hint': step_hints.get(hint_level, '힌트를 찾을 수 없습니다.'),
-            'step_id': current_step.step_id,
-            'step_title': current_step.title
-        }
-    
-    def get_session_summary(self, session_id: str) -> Dict[str, Any]:
-        """세션 요약 정보"""
-        session = self.get_session(session_id)
-        if not session:
-            return {"error": "세션을 찾을 수 없습니다."}
-        
-        return {
-            'session_info': session.to_dict(),
-            'current_step': session.get_current_step().to_dict() if session.get_current_step() else None,
-            'progress': session.get_progress(),
-            'total_attempts': sum(step.attempts for step in session.steps.values()),
-            'completed_steps': [step.step_id for step in session.steps.values() if step.completed]
-        }
+# 결과 출력
+print(f"범위: {data_range:.2f}")
+print(f"분산: {variance:.2f}")
+print(f"표준편차: {std_dev:.2f}")
+print(f"1사분위수(Q1): {q1:.2f}")
+print(f"3사분위수(Q3): {q3:.2f}")
+print(f"사분위수 범위(IQR): {iqr:.2f}")
 
+# 변동계수 계산 (표준편차/평균)
+cv = std_dev / np.mean(scores)
+print(f"\\n변동계수(CV): {cv:.4f}")
 
-def demo_descriptive_statistics_practice():
-    """기술통계량 실습 시스템 데모"""
-    print("=== 기술통계량 실습 시스템 데모 ===\n")
+if cv < 0.1:
+    print("변동계수가 0.1보다 작으므로, 데이터의 변동성이 낮습니다.")
+elif cv > 0.3:
+    print("변동계수가 0.3보다 크므로, 데이터의 변동성이 높습니다.")
+else:
+    print("변동계수가 중간 정도로, 데이터가 적절한 변동성을 가지고 있습니다.")
+
+# 이상치 탐지
+lower_bound = q1 - 1.5 * iqr
+upper_bound = q3 + 1.5 * iqr
+outliers = scores[(scores < lower_bound) | (scores > upper_bound)]
+
+print(f"\\n이상치 경계: {lower_bound:.2f} ~ {upper_bound:.2f}")
+print(f"이상치 개수: {len(outliers)}")
+if len(outliers) > 0:
+    print(f"이상치: {outliers}")
+
+# 결과 반환
+{
+    'range': data_range,
+    'variance': variance,
+    'std_dev': std_dev,
+    'iqr': iqr,
+    'cv': cv,
+    'outliers': outliers
+}"""
+        }
     
-    # 실습 시스템 초기화
-    practice_system = DescriptiveStatisticsPractice()
-    
-    # 새 세션 생성
-    session_id = "demo_session_001"
-    session = practice_system.create_session(session_id, "기술통계량 실습 데모")
-    session.start_session()
-    
-    print(f"세션 시작: {session.title}")
-    print(f"총 단계 수: {len(session.step_order)}")
-    print()
-    
-    # 각 단계별 데모
-    for i, step_id in enumerate(session.step_order, 1):
-        current_step = session.get_current_step()
-        if not current_step:
-            break
+    def start_practice(self, user_id: str = "anonymous") -> Dict[str, Any]:
+        """
+        실습 시작
+        
+        Args:
+            user_id (str): 사용자 ID (익명 가능)
             
-        print(f"=== {current_step.title} ===")
-        print(f"설명: {current_step.description}")
-        print(f"학습 목표: {current_step.learning_objective}")
-        print()
+        Returns:
+            dict: 세션 정보
+        """
+        # 세션 생성
+        session = session_manager.create_session(self.concept_id, user_id)
         
-        # 템플릿 코드 실행
-        print("템플릿 코드:")
-        print("```python")
-        print(current_step.code_template.strip())
-        print("```")
-        print()
+        # 첫 단계 정보 가져오기
+        current_step = session_manager.get_current_step(session["session_id"])
         
-        # 코드 실행 및 검증
-        result = practice_system.execute_step_code(session_id, current_step.code_template)
+        # 코드 템플릿 추가
+        if current_step and current_step["step_id"] in self.code_templates:
+            current_step["code_template"] = self.code_templates[current_step["step_id"]]
         
-        if result['execution'].get('output'):
-            print("실행 결과:")
-            print(result['execution']['output'])
-            print()
+        return {
+            "success": True,
+            "session_id": session["session_id"],
+            "title": self.title,
+            "description": self.description,
+            "current_step": current_step,
+            "total_steps": len(self.steps),
+            "progress": session["progress"]
+        }    
+def continue_practice(self, session_id: str) -> Dict[str, Any]:
+        """
+        실습 계속하기
         
-        if result['verification']['success']:
-            print("✅ 단계 완료!")
-        else:
-            print("❌ 단계 미완료:", result['verification']['message'])
+        Args:
+            session_id (str): 세션 ID
+            
+        Returns:
+            dict: 세션 정보
+        """
+        # 세션 정보 가져오기
+        session = session_manager.get_session(session_id)
+        if not session:
+            return {
+                "success": False,
+                "error": "세션을 찾을 수 없습니다."
+            }
         
-        print(f"진행률: {result['session_progress']['progress_percentage']}%")
-        print("-" * 50)
-        print()
+        # 현재 단계 정보 가져오기
+        current_step = session_manager.get_current_step(session_id)
+        
+        # 코드 템플릿 추가
+        if current_step and current_step["step_id"] in self.code_templates:
+            current_step["code_template"] = self.code_templates[current_step["step_id"]]
+        
+        return {
+            "success": True,
+            "session_id": session_id,
+            "title": self.title,
+            "description": self.description,
+            "current_step": current_step,
+            "total_steps": len(self.steps),
+            "progress": session["progress"]
+        }
     
-    # 세션 요약
-    summary = practice_system.get_session_summary(session_id)
-    print("=== 세션 완료 요약 ===")
-    print(f"총 소요 시간: {summary['session_info']['duration_minutes']:.1f}분")
-    print(f"총 시도 횟수: {summary['total_attempts']}")
-    print(f"완료된 단계: {len(summary['completed_steps'])}/{summary['progress']['total_steps']}")
-    print(f"완료율: {summary['progress']['progress_percentage']}%")
+    def submit_step(self, session_id: str, code: str, output: str) -> Dict[str, Any]:
+        """
+        단계 제출 및 검증
+        
+        Args:
+            session_id (str): 세션 ID
+            code (str): 제출한 코드
+            output (str): 코드 실행 결과
+            
+        Returns:
+            dict: 검증 결과
+        """
+        # 세션 정보 가져오기
+        session = session_manager.get_session(session_id)
+        if not session:
+            return {
+                "success": False,
+                "error": "세션을 찾을 수 없습니다."
+            }
+        
+        # 현재 단계 정보 가져오기
+        current_step = session_manager.get_current_step(session_id)
+        if not current_step:
+            return {
+                "success": False,
+                "error": "현재 단계를 찾을 수 없습니다."
+            }
+        
+        # 단계 검증
+        verification_result = verification_system.verify_step(
+            self.concept_id, current_step["step_id"], code, output
+        )
+        
+        # 피드백 생성
+        feedback = verification_system.generate_feedback(verification_result)
+        verification_result["feedback"] = feedback
+        
+        # 성공 시 다음 단계로 이동
+        if verification_result["success"]:
+            session_result = session_manager.submit_step(session_id, code, output)
+            
+            # 다음 단계 정보 가져오기
+            next_step = session_manager.get_current_step(session_id)
+            if next_step and next_step["step_id"] in self.code_templates:
+                next_step["code_template"] = self.code_templates[next_step["step_id"]]
+            
+            verification_result["next_step"] = next_step
+            
+            # 모든 단계 완료 확인
+            session = session_manager.get_session(session_id)
+            verification_result["progress"] = session["progress"]
+            verification_result["completed"] = session["status"] == "completed"
+        
+        return verification_result
     
-    return practice_system, session
+    def get_hint(self, session_id: str) -> Dict[str, Any]:
+        """
+        힌트 제공
+        
+        Args:
+            session_id (str): 세션 ID
+            
+        Returns:
+            dict: 힌트 정보
+        """
+        # 세션 정보 가져오기
+        session = session_manager.get_session(session_id)
+        if not session:
+            return {
+                "success": False,
+                "error": "세션을 찾을 수 없습니다."
+            }
+        
+        # 현재 단계 정보 가져오기
+        current_step = session_manager.get_current_step(session_id)
+        if not current_step:
+            return {
+                "success": False,
+                "error": "현재 단계를 찾을 수 없습니다."
+            }
+        
+        # 힌트 제공
+        hint_result = verification_system.provide_hints(self.concept_id, current_step["step_id"])
+        
+        # 힌트 사용 기록
+        session_manager.get_hint(session_id)
+        
+        return {
+            "success": True,
+            "step_id": current_step["step_id"],
+            "title": current_step["title"],
+            "hints": hint_result["hints"],
+            "code_suggestions": hint_result.get("code_suggestions", []),
+            "resources": hint_result.get("resources", [])
+        }
+    
+    def skip_step(self, session_id: str) -> Dict[str, Any]:
+        """
+        단계 건너뛰기
+        
+        Args:
+            session_id (str): 세션 ID
+            
+        Returns:
+            dict: 결과
+        """
+        # 단계 건너뛰기
+        result = session_manager.skip_step(session_id)
+        
+        # 다음 단계 정보 가져오기
+        if result["success"] and "next_step" in result:
+            next_step = result["next_step"]
+            if next_step and next_step["step_id"] in self.code_templates:
+                next_step["code_template"] = self.code_templates[next_step["step_id"]]
+        
+        return result
+    
+    def reset_step(self, session_id: str) -> Dict[str, Any]:
+        """
+        단계 초기화
+        
+        Args:
+            session_id (str): 세션 ID
+            
+        Returns:
+            dict: 결과
+        """
+        # 단계 초기화
+        result = session_manager.reset_step(session_id)
+        
+        # 현재 단계 정보 가져오기
+        if result["success"] and "current_step" in result:
+            current_step = result["current_step"]
+            if current_step and current_step["step_id"] in self.code_templates:
+                current_step["code_template"] = self.code_templates[current_step["step_id"]]
+        
+        return result    def get
+_session_summary(self, session_id: str) -> Dict[str, Any]:
+        """
+        세션 요약 정보 조회
+        
+        Args:
+            session_id (str): 세션 ID
+            
+        Returns:
+            dict: 세션 요약 정보
+        """
+        return session_manager.get_session_summary(session_id)
+    
+    def export_session(self, session_id: str, format: str = "json") -> Dict[str, Any]:
+        """
+        세션 데이터 내보내기
+        
+        Args:
+            session_id (str): 세션 ID
+            format (str): 내보내기 형식 (json, html, csv)
+            
+        Returns:
+            dict: 내보내기 결과
+        """
+        return session_manager.export_session(session_id, format)
+    
+    def get_learning_objectives(self, step_id: str) -> List[str]:
+        """
+        단계별 학습 목표 조회
+        
+        Args:
+            step_id (str): 단계 ID
+            
+        Returns:
+            list: 학습 목표 목록
+        """
+        for step in self.steps:
+            if step["step_id"] == step_id:
+                return step.get("learning_objectives", [])
+        
+        return []
+    
+    def get_success_criteria(self, step_id: str) -> List[str]:
+        """
+        단계별 성공 기준 조회
+        
+        Args:
+            step_id (str): 단계 ID
+            
+        Returns:
+            list: 성공 기준 목록
+        """
+        for step in self.steps:
+            if step["step_id"] == step_id:
+                return step.get("success_criteria", [])
+        
+        return []
+    
+    def generate_practice_html(self, session_id: str = None) -> str:
+        """
+        실습 HTML 생성
+        
+        Args:
+            session_id (str, optional): 세션 ID
+            
+        Returns:
+            str: HTML 문자열
+        """
+        # 기본 HTML 템플릿
+        html = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기술통계량 분석 실습</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding-top: 56px;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 0.5rem;
+            border-bottom: 3px solid #ddd;
+            position: relative;
+        }
+        
+        .step.active {
+            border-color: #3498db;
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .step.completed {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+        
+        .code-editor {
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .code-toolbar {
+            background-color: #f5f5f5;
+            padding: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .code-output {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .feedback {
+            background-color: #f0f8ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .hint-container {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .objectives-container {
+            background-color: #e8f4f8;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">📊 기술통계량 분석 실습</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-session">결과 내보내기</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">기술통계량 분석 실습</h1>
+        <p class="lead">데이터 준비부터 결과 해석까지 단계별로 기술통계량 분석을 학습합니다.</p>
+        
+        <!-- 단계 표시기 -->
+        <div class="step-indicator mb-4">
+            <div class="step" id="step-1">1. 데이터 준비</div>
+            <div class="step" id="step-2">2. 중심경향성</div>
+            <div class="step" id="step-3">3. 산포도</div>
+            <div class="step" id="step-4">4. 시각화</div>
+            <div class="step" id="step-5">5. 해석</div>
+        </div>
+        
+        <!-- 현재 단계 -->
+        <div id="current-step-container">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 id="step-title">단계 제목</h2>
+                </div>
+                <div class="card-body">
+                    <p id="step-description">단계 설명</p>
+                    
+                    <!-- 학습 목표 및 성공 기준 -->
+                    <div class="objectives-container mb-4">
+                        <h4>학습 목표</h4>
+                        <ul id="learning-objectives">
+                            <!-- 학습 목표 목록 -->
+                        </ul>
+                        
+                        <h4>성공 기준</h4>
+                        <ul id="success-criteria">
+                            <!-- 성공 기준 목록 -->
+                        </ul>
+                    </div>
+                    
+                    <!-- 코드 에디터 -->
+                    <div class="code-editor mb-4">
+                        <div class="code-toolbar">
+                            <button class="btn btn-primary" id="run-code">▶️ 실행</button>
+                            <button class="btn btn-secondary" id="reset-code">🔄 초기화</button>
+                            <button class="btn btn-warning" id="get-hint">💡 힌트</button>
+                            <button class="btn btn-danger" id="skip-step">⏭️ 건너뛰기</button>
+                        </div>
+                        <textarea id="code-editor" class="form-control" rows="15"></textarea>
+                    </div>
+                    
+                    <!-- 코드 출력 -->
+                    <h4>실행 결과</h4>
+                    <div class="code-output" id="code-output">
+                        <!-- 코드 실행 결과 -->
+                    </div>
+                    
+                    <!-- 피드백 -->
+                    <div class="feedback mt-4" id="feedback-container" style="display: none;">
+                        <h4>피드백</h4>
+                        <div id="feedback-content"></div>
+                        
+                        <div class="mt-3" id="next-step-container" style="display: none;">
+                            <button class="btn btn-success" id="next-step">다음 단계로</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 힌트 -->
+                    <div class="hint-container mt-4" id="hint-container" style="display: none;">
+                        <h4>힌트</h4>
+                        <div id="hint-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 완료 메시지 -->
+        <div id="completion-container" style="display: none;">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2>🎉 축하합니다!</h2>
+                    <p class="lead">기술통계량 분석 실습을 모두 완료했습니다.</p>
+                    <button class="btn btn-primary" id="export-result">결과 내보내기</button>
+                    <button class="btn btn-success" id="restart-practice">다시 시작하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 실습 세션 관리
+        const practiceSession = {
+            sessionId: null,
+            currentStep: null,
+            totalSteps: 5,
+            progress: 0
+        };
+        
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            // 세션 ID가 있으면 계속하기, 없으면 새로 시작
+            const sessionId = localStorage.getItem('practiceSessionId');
+            if (sessionId) {
+                continuePractice(sessionId);
+            } else {
+                startPractice();
+            }
+            
+            // 이벤트 리스너 등록
+            document.getElementById('run-code').addEventListener('click', runCode);
+            document.getElementById('reset-code').addEventListener('click', resetCode);
+            document.getElementById('get-hint').addEventListener('click', getHint);
+            document.getElementById('skip-step').addEventListener('click', skipStep);
+            document.getElementById('export-session').addEventListener('click', exportSession);
+            document.getElementById('export-result').addEventListener('click', exportSession);
+            document.getElementById('restart-practice').addEventListener('click', restartPractice);
+        });
+        
+        // 실습 시작
+        async function startPractice() {
+            try {
+                const response = await fetch('/api/practice/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    practiceSession.sessionId = data.session_id;
+                    practiceSession.totalSteps = data.total_steps;
+                    practiceSession.progress = data.progress;
+                    
+                    // 세션 ID 저장
+                    localStorage.setItem('practiceSessionId', data.session_id);
+                    
+                    // 현재 단계 표시
+                    updateCurrentStep(data.current_step);
+                    updateStepIndicator();
+                } else {
+                    showError(data.error || '실습을 시작하는 데 문제가 발생했습니다.');
+                }
+            } catch (error) {
+                showError('서버 연결에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 실습 계속하기
+        async function continuePractice(sessionId) {
+            try {
+                const response = await fetch(`/api/practice/continue/${sessionId}`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    practiceSession.sessionId = data.session_id;
+                    practiceSession.totalSteps = data.total_steps;
+                    practiceSession.progress = data.progress;
+                    
+                    // 현재 단계 표시
+                    updateCurrentStep(data.current_step);
+                    updateStepIndicator();
+                    
+                    // 모든 단계 완료 확인
+                    if (!data.current_step) {
+                        showCompletionMessage();
+                    }
+                } else {
+                    showError(data.error || '실습을 계속하는 데 문제가 발생했습니다.');
+                    // 세션이 만료되었을 수 있으므로 새로 시작
+                    localStorage.removeItem('practiceSessionId');
+                    startPractice();
+                }
+            } catch (error) {
+                showError('서버 연결에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 코드 실행
+        async function runCode() {
+            const code = document.getElementById('code-editor').value;
+            if (!code.trim()) {
+                showError('실행할 코드를 입력하세요.');
+                return;
+            }
+            
+            try {
+                // 코드 실행 (실제로는 서버에 요청)
+                const output = await executeCode(code);
+                
+                // 결과 표시
+                document.getElementById('code-output').textContent = output;
+                
+                // 단계 제출
+                submitStep(code, output);
+            } catch (error) {
+                showError('코드 실행에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 코드 실행 (서버에 요청)
+        async function executeCode(code) {
+            // 실제로는 서버에 요청하여 코드 실행
+            // 여기서는 간단히 시뮬레이션
+            return `코드 실행 결과:\n${code}\n\n실행 완료`;
+        }
+        
+        // 단계 제출
+        async function submitStep(code, output) {
+            try {
+                const response = await fetch(`/api/practice/submit/${practiceSession.sessionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        output: output
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 피드백 표시
+                document.getElementById('feedback-container').style.display = 'block';
+                document.getElementById('feedback-content').innerHTML = data.feedback || '';
+                
+                // 성공 시 다음 단계 버튼 표시
+                if (data.success) {
+                    document.getElementById('next-step-container').style.display = 'block';
+                    document.getElementById('next-step').addEventListener('click', function() {
+                        // 다음 단계로 이동
+                        if (data.next_step) {
+                            updateCurrentStep(data.next_step);
+                        } else {
+                            showCompletionMessage();
+                        }
+                        
+                        // 진행 상황 업데이트
+                        practiceSession.progress = data.progress;
+                        updateStepIndicator();
+                        
+                        // 피드백 숨기기
+                        document.getElementById('feedback-container').style.display = 'none';
+                    });
+                } else {
+                    document.getElementById('next-step-container').style.display = 'none';
+                }
+            } catch (error) {
+                showError('단계 제출에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 코드 초기화
+        function resetCode() {
+            if (practiceSession.currentStep && practiceSession.currentStep.code_template) {
+                document.getElementById('code-editor').value = practiceSession.currentStep.code_template;
+            } else {
+                document.getElementById('code-editor').value = '';
+            }
+            
+            // 피드백 숨기기
+            document.getElementById('feedback-container').style.display = 'none';
+            document.getElementById('hint-container').style.display = 'none';
+        }
+        
+        // 힌트 가져오기
+        async function getHint() {
+            try {
+                const response = await fetch(`/api/practice/hint/${practiceSession.sessionId}`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // 힌트 표시
+                    document.getElementById('hint-container').style.display = 'block';
+                    
+                    let hintContent = '<ul>';
+                    data.hints.forEach(hint => {
+                        hintContent += `<li>${hint}</li>`;
+                    });
+                    hintContent += '</ul>';
+                    
+                    // 코드 제안이 있으면 추가
+                    if (data.code_suggestions && data.code_suggestions.length > 0) {
+                        hintContent += '<h5>코드 제안:</h5>';
+                        hintContent += '<pre>';
+                        data.code_suggestions.forEach(suggestion => {
+                            hintContent += suggestion + '\n';
+                        });
+                        hintContent += '</pre>';
+                    }
+                    
+                    // 참고 자료가 있으면 추가
+                    if (data.resources && data.resources.length > 0) {
+                        hintContent += '<h5>참고 자료:</h5>';
+                        hintContent += '<ul>';
+                        data.resources.forEach(resource => {
+                            hintContent += `<li><a href="${resource.url}" target="_blank">${resource.title}</a></li>`;
+                        });
+                        hintContent += '</ul>';
+                    }
+                    
+                    document.getElementById('hint-content').innerHTML = hintContent;
+                } else {
+                    showError(data.error || '힌트를 가져오는 데 문제가 발생했습니다.');
+                }
+            } catch (error) {
+                showError('서버 연결에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 단계 건너뛰기
+        async function skipStep() {
+            if (!confirm('정말 이 단계를 건너뛰시겠습니까?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/practice/skip/${practiceSession.sessionId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // 다음 단계로 이동
+                    if (data.next_step) {
+                        updateCurrentStep(data.next_step);
+                    } else {
+                        showCompletionMessage();
+                    }
+                    
+                    // 진행 상황 업데이트
+                    practiceSession.progress = data.progress;
+                    updateStepIndicator();
+                    
+                    // 피드백 숨기기
+                    document.getElementById('feedback-container').style.display = 'none';
+                    document.getElementById('hint-container').style.display = 'none';
+                } else {
+                    showError(data.error || '단계를 건너뛰는 데 문제가 발생했습니다.');
+                }
+            } catch (error) {
+                showError('서버 연결에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 세션 내보내기
+        async function exportSession() {
+            try {
+                const response = await fetch(`/api/practice/export/${practiceSession.sessionId}?format=html`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    // 파일 다운로드
+                    const a = document.createElement('a');
+                    a.href = `/exports/${data.filename}`;
+                    a.download = data.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    showError(data.error || '세션을 내보내는 데 문제가 발생했습니다.');
+                }
+            } catch (error) {
+                showError('서버 연결에 실패했습니다.');
+                console.error(error);
+            }
+        }
+        
+        // 실습 다시 시작
+        function restartPractice() {
+            if (confirm('정말 처음부터 다시 시작하시겠습니까?')) {
+                localStorage.removeItem('practiceSessionId');
+                startPractice();
+                document.getElementById('completion-container').style.display = 'none';
+                document.getElementById('current-step-container').style.display = 'block';
+            }
+        }
+        
+        // 현재 단계 업데이트
+        function updateCurrentStep(step) {
+            if (!step) {
+                showCompletionMessage();
+                return;
+            }
+            
+            practiceSession.currentStep = step;
+            
+            // 단계 정보 업데이트
+            document.getElementById('step-title').textContent = step.title;
+            document.getElementById('step-description').textContent = step.description;
+            
+            // 코드 에디터 업데이트
+            if (step.code_template) {
+                document.getElementById('code-editor').value = step.code_template;
+            } else {
+                document.getElementById('code-editor').value = '';
+            }
+            
+            // 코드 출력 초기화
+            document.getElementById('code-output').textContent = '';
+            
+            // 피드백 숨기기
+            document.getElementById('feedback-container').style.display = 'none';
+            document.getElementById('hint-container').style.display = 'none';
+            
+            // 학습 목표 및 성공 기준 업데이트
+            updateLearningObjectives(step.step_id);
+            updateSuccessCriteria(step.step_id);
+            
+            // 단계 표시기 업데이트
+            updateStepIndicator();
+        }
+        
+        // 학습 목표 업데이트
+        async function updateLearningObjectives(stepId) {
+            try {
+                const response = await fetch(`/api/practice/objectives/${stepId}`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    const objectivesList = document.getElementById('learning-objectives');
+                    objectivesList.innerHTML = '';
+                    
+                    data.objectives.forEach(objective => {
+                        const li = document.createElement('li');
+                        li.textContent = objective;
+                        objectivesList.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                console.error('학습 목표를 가져오는 데 실패했습니다:', error);
+            }
+        }
+        
+        // 성공 기준 업데이트
+        async function updateSuccessCriteria(stepId) {
+            try {
+                const response = await fetch(`/api/practice/criteria/${stepId}`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    const criteriaList = document.getElementById('success-criteria');
+                    criteriaList.innerHTML = '';
+                    
+                    data.criteria.forEach(criterion => {
+                        const li = document.createElement('li');
+                        li.textContent = criterion;
+                        criteriaList.appendChild(li);
+                    });
+                }
+            } catch (error) {
+                console.error('성공 기준을 가져오는 데 실패했습니다:', error);
+            }
+        }
+        
+        // 단계 표시기 업데이트
+        function updateStepIndicator() {
+            // 현재 단계 인덱스 (0부터 시작)
+            const currentStepIndex = practiceSession.currentStep ? 
+                ['data_preparation', 'central_tendency', 'dispersion', 'visualization', 'interpretation']
+                .indexOf(practiceSession.currentStep.step_id) : -1;
+            
+            // 모든 단계 요소
+            const stepElements = document.querySelectorAll('.step');
+            
+            // 각 단계 상태 업데이트
+            stepElements.forEach((element, index) => {
+                element.classList.remove('active', 'completed');
+                
+                if (index < currentStepIndex) {
+                    element.classList.add('completed');
+                } else if (index === currentStepIndex) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // 완료 메시지 표시
+        function showCompletionMessage() {
+            document.getElementById('current-step-container').style.display = 'none';
+            document.getElementById('completion-container').style.display = 'block';
+        }
+        
+        // 오류 메시지 표시
+        function showError(message) {
+            alert(message);
+        }
+    </script>
+</body>
+</html>
+"""
+        
+        return html
 
 
-if __name__ == "__main__":
-    # 기본 데모 실행
-    demo_descriptive_statistics_practice()
+# 기술통계량 실습 인스턴스 생성
+descriptive_stats_practice = DescriptiveStatisticsPractice()
