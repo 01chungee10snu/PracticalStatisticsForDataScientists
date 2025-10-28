@@ -31,6 +31,12 @@ Bruce, P., Bruce, A., & Gedeck, P. (2020). Practical statistics for data scienti
 
    * 예: 신뢰구간(confidence interval), 가설검정(hypothesis testing)
 
+### 기술통계와 추론통계의 관계 시각화
+
+![Descriptive vs Inferential Statistics](https://upload.wikimedia.org/wikipedia/commons/0/0f/Empirical_Rule.png)
+
+> 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Empirical_Rule.PNG) - 정규분포에서의 경험적 규칙 (68-95-99.7 규칙): 기술통계(평균, 표준편차)가 추론통계(신뢰구간, 확률)로 연결되는 예시
+
 > 💬 **용어 주석**
 >
 > * **모집단(Population)**: 관심 있는 전체 집단
@@ -246,7 +252,13 @@ Bruce, P., Bruce, A., & Gedeck, P. (2020). Practical statistics for data scienti
 >
 > **실생활 예시 - 의료 진단** (왜 16%인지 단계별 계산):
 >
-> **📋 상황 설정**:
+> ### 베이즈 정리 시각화
+>
+> ![Bayes Rule](https://github.com/rasbt/algorithms_in_ipython_notebooks/raw/master/ipython_nbs/statistics/bayes_rule.gif)
+>
+> > 출처: [GitHub - Sebastian Raschka](https://github.com/rasbt/algorithms_in_ipython_notebooks) - 베이즈 정리의 직관적 이해를 돕는 시각화
+>
+> 📋 **상황 설정**:
 > - 어떤 희귀병의 **유병률**: 인구의 1%
 > - 검사의 **정확도**: 95%
 >   - 병이 있으면 95% 확률로 양성 (민감도)
@@ -690,6 +702,12 @@ $$
 > * $Var(X)$: 분산 (variance)
 > * $\sigma$: 표준편차 (standard deviation)
 
+### 분산과 표준편차 시각화
+
+![Variance Visualization](https://raw.githubusercontent.com/EvaMaeRey/statistics/master/figures/variance_lines.gif)
+
+> 출처: [GitHub - Gina Reynolds](https://github.com/EvaMaeRey/statistics) - 편차 제곱의 합으로 분산을 이해하는 시각화
+
 ---
 
 ### (3) 예시
@@ -1045,6 +1063,12 @@ $$
   > * **통계량**: 표본으로부터 계산된 수치(예: $\bar{X}, s^2$).
   > * **모수(parameter)**: 모집단의 특성(예: $\mu, \sigma^2$).
   > * **표본평균**: $\bar{X}=\frac{1}{n}\sum_{i=1}^n X_i$ (각 $X_i$는 표본 관측값).
+
+### 표본분포의 시각화 (샘플링 과정)
+
+![Sampling Distribution Animation](https://www.crumplab.com/statistics/gifs/samplingdist.gif)
+
+> 출처: [Crumplab Statistics](https://www.crumplab.com/statistics/gifs.html) - 모집단에서 반복적으로 표본을 추출하여 표본평균의 분포가 형성되는 과정을 보여주는 애니메이션
 
 ### (2) 표본평균의 기대값·분산 (정규성 가정 없이도 성립)
 
@@ -1500,6 +1524,12 @@ $$
   $$
   (여기서 $S_p$는 풀드 표준편차)
 
+### t-검정의 귀무분포 시각화
+
+![t-test Null Distribution](https://www.crumplab.com/statistics/gifs/ttest.gif)
+
+> 출처: [Crumplab Statistics](https://www.crumplab.com/statistics/gifs.html) - 두 집단에서 반복 샘플링하여 t-통계량의 분포를 시뮬레이션하는 과정
+
 * **t-분포 vs 정규분포 비교**:
 
   ![t vs normal comparison](https://upload.wikimedia.org/wikipedia/commons/4/41/Student_t_pdf.svg)
@@ -1534,6 +1564,19 @@ $$
 
 > 💬 **F분포 참고**: 분포 형태는 [앞서 제시된 F PDF 이미지](https://upload.wikimedia.org/wikipedia/commons/7/74/F-distribution_pdf.svg) 참조. 두 개의 자유도(d₁, d₂)에 따라 형태가 달라짐.
 
+### 랜덤화 검정 (Randomization Test) 시각화
+
+![Randomization Test](https://www.crumplab.com/statistics/gifs/randomization.gif)
+
+> 출처: [Crumplab Statistics](https://www.crumplab.com/statistics/gifs.html) - 귀무가설 하에서 데이터를 무작위로 섞어 귀무분포를 생성하는 랜덤화 검정의 원리
+
+> 💬 **랜덤화 검정의 의미**
+>
+> * 모수적 가정(정규분포 등) 없이 귀무분포를 직접 생성
+> * 데이터를 무작위로 재배치(permutation)하여 검정통계량 계산 반복
+> * 관측된 통계량이 이 분포에서 얼마나 극단적인지 평가
+> * 작은 표본이나 분포 가정 위배 시 유용한 비모수적 대안
+
 ---
 
 ## 4️⃣ 검정력(Power)과 표본크기 (Type I/Type II 오류와 효과크기의 관계)
@@ -1556,6 +1599,12 @@ $$
 ![Type I and Type II errors](https://upload.wikimedia.org/wikipedia/commons/a/aa/Type_I_and_II_errors.jpg)
 
 > 출처: [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Type_I_and_II_errors.jpg) - 귀무가설(H₀)과 대립가설(H₁) 분포에서 α(1종 오류)와 β(2종 오류), 그리고 검정력(1-β) 표시
+
+### 표본크기에 따른 검정력 변화 (애니메이션)
+
+![Sample Size Effect on Power](https://paulvanderlaken.files.wordpress.com/2019/06/sample-size-power-gif.gif)
+
+> 출처: [Paul van der Laken](https://paulvanderlaken.com/2019/06/12/gif-visualizations-of-type-1-and-type-2-error-in-relation-to-sample-size/) - 표본크기가 증가함에 따라 1종 오류(α)는 일정하게 유지되고 2종 오류(β)는 감소하며 검정력(1-β)이 증가하는 과정
 
 ### (3) 검정력 곡선의 이해
 
